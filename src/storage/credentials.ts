@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 const KEYS = {
   TOKEN: 'kn_token',
@@ -9,6 +10,30 @@ const KEYS = {
   AUTO_LOGIN: 'kn_auto_login',
 } as const;
 
+// expo-secure-store is native-only; fall back to localStorage on web
+async function setItem(key: string, value: string) {
+  if (Platform.OS === 'web') {
+    localStorage.setItem(key, value);
+  } else {
+    await SecureStore.setItemAsync(key, value);
+  }
+}
+
+async function getItem(key: string): Promise<string | null> {
+  if (Platform.OS === 'web') {
+    return localStorage.getItem(key);
+  }
+  return SecureStore.getItemAsync(key);
+}
+
+async function deleteItem(key: string) {
+  if (Platform.OS === 'web') {
+    localStorage.removeItem(key);
+  } else {
+    await SecureStore.deleteItemAsync(key);
+  }
+}
+
 export async function saveCredentials(data: {
   token: string;
   clubId: number;
@@ -18,17 +43,17 @@ export async function saveCredentials(data: {
   autoLogin: boolean;
 }) {
   await Promise.all([
-    SecureStore.setItemAsync(KEYS.TOKEN, data.token),
-    SecureStore.setItemAsync(KEYS.CLUB_ID, String(data.clubId)),
-    SecureStore.setItemAsync(KEYS.CLUB_NAME, data.clubName),
-    SecureStore.setItemAsync(KEYS.NICKNAME, data.nickname),
-    SecureStore.setItemAsync(KEYS.PASSWORD, data.password),
-    SecureStore.setItemAsync(KEYS.AUTO_LOGIN, data.autoLogin ? '1' : '0'),
+    setItem(KEYS.TOKEN, data.token),
+    setItem(KEYS.CLUB_ID, String(data.clubId)),
+    setItem(KEYS.CLUB_NAME, data.clubName),
+    setItem(KEYS.NICKNAME, data.nickname),
+    setItem(KEYS.PASSWORD, data.password),
+    setItem(KEYS.AUTO_LOGIN, data.autoLogin ? '1' : '0'),
   ]);
 }
 
 export async function getStoredToken(): Promise<string | null> {
-  return SecureStore.getItemAsync(KEYS.TOKEN);
+  return getItem(KEYS.TOKEN);
 }
 
 export async function getStoredCredentials(): Promise<{
@@ -40,12 +65,12 @@ export async function getStoredCredentials(): Promise<{
   autoLogin: boolean;
 }> {
   const [token, clubIdStr, clubName, nickname, password, autoLoginStr] = await Promise.all([
-    SecureStore.getItemAsync(KEYS.TOKEN),
-    SecureStore.getItemAsync(KEYS.CLUB_ID),
-    SecureStore.getItemAsync(KEYS.CLUB_NAME),
-    SecureStore.getItemAsync(KEYS.NICKNAME),
-    SecureStore.getItemAsync(KEYS.PASSWORD),
-    SecureStore.getItemAsync(KEYS.AUTO_LOGIN),
+    getItem(KEYS.TOKEN),
+    getItem(KEYS.CLUB_ID),
+    getItem(KEYS.CLUB_NAME),
+    getItem(KEYS.NICKNAME),
+    getItem(KEYS.PASSWORD),
+    getItem(KEYS.AUTO_LOGIN),
   ]);
   return {
     token,
@@ -58,5 +83,5 @@ export async function getStoredCredentials(): Promise<{
 }
 
 export async function clearCredentials() {
-  await Promise.all(Object.values(KEYS).map((k) => SecureStore.deleteItemAsync(k)));
+  await Promise.all(Object.values(KEYS).map((k) => deleteItem(k)));
 }
