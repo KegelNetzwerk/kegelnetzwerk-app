@@ -10,17 +10,19 @@ import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
+import { CalendarDays, Newspaper, CheckSquare, Bell } from 'lucide-react-native';
 import {
   getNotificationState,
   setNotificationEnabled,
   type NotificationState,
 } from '../../src/storage/notificationState';
 
-const TYPE_ICONS: Record<string, string> = {
-  event: '📅',
-  news: '📰',
-  vote: '🗳️',
-};
+function TypeIcon({ type, size = 18, color = '#005982' }: { type: string; size?: number; color?: string }) {
+  if (type === 'events' || type === 'event') return <CalendarDays size={size} color={color} />;
+  if (type === 'news') return <Newspaper size={size} color={color} />;
+  if (type === 'votes' || type === 'vote') return <CheckSquare size={size} color={color} />;
+  return <Bell size={size} color={color} />;
+}
 
 export default function NotificationsScreen() {
   const { t } = useTranslation();
@@ -74,8 +76,8 @@ export default function NotificationsScreen() {
                 idx < typeKeys.length - 1 ? 'border-b border-gray-100' : ''
               }`}
             >
-              <View className="flex-row items-center gap-2 flex-1 mr-4">
-                <Text className="text-lg">{TYPE_ICONS[type.replace('s', '')] ?? '🔔'}</Text>
+              <View className="flex-row items-center gap-3 flex-1 mr-4">
+                <TypeIcon type={type} size={20} color="#005982" />
                 <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-gray-700">
                   {t(`notifications.types.${type}`)}
                 </Text>
@@ -111,7 +113,9 @@ export default function NotificationsScreen() {
                 className={`px-4 py-3 ${idx < state.recentLog.length - 1 ? 'border-b border-gray-100' : ''}`}
               >
                 <View className="flex-row items-start gap-2">
-                  <Text className="text-base mt-0.5">{TYPE_ICONS[entry.type] ?? '🔔'}</Text>
+                  <View style={{ marginTop: 2 }}>
+                    <TypeIcon type={entry.type} size={16} color="#6b7280" />
+                  </View>
                   <View className="flex-1">
                     <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-gray-800 text-sm">
                       {entry.title}

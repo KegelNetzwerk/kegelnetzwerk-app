@@ -9,6 +9,7 @@ import {
 import { router, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { BarChart2, ClipboardList, X } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import PartButton from '../../src/components/PartButton';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
@@ -114,27 +115,30 @@ export default function WorkingScreen() {
       {/* Bottom bar */}
       <View className="flex-row border-t border-gray-200 bg-white">
         <TouchableOpacity
-          className="flex-1 py-3 items-center"
+          className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/overview')}
         >
+          <BarChart2 size={18} color="#4b5563" />
           <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-600">
-            📊 {t('working.overview')}
+            {t('working.overview')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 py-3 items-center"
+          className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/log')}
         >
+          <ClipboardList size={18} color="#4b5563" />
           <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-600">
-            📋 {t('working.log')}
+            {t('working.log')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 py-3 items-center"
+          className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/main')}
         >
+          <X size={18} color="#a91a1a" />
           <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-accent">
-            ✕ {t('working.end')}
+            {t('working.end')}
           </Text>
         </TouchableOpacity>
       </View>

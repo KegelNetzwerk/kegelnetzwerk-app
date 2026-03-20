@@ -9,6 +9,7 @@ import {
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Target, Banknote } from 'lucide-react-native';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
 import type { ResultEntry } from '../../src/models/Result';
@@ -75,13 +76,17 @@ export default function OverviewScreen() {
           <TouchableOpacity
             key={f}
             onPress={() => setFilter(f)}
-            className={`mr-4 pb-2 border-b-2 ${filter === f ? 'border-primary' : 'border-transparent'}`}
+            className={`mr-4 pb-2 border-b-2 flex-row items-center gap-1.5 ${filter === f ? 'border-primary' : 'border-transparent'}`}
           >
+            {f === 'score'
+              ? <Target size={14} color={filter === f ? '#005982' : '#6b7280'} />
+              : <Banknote size={14} color={filter === f ? '#005982' : '#6b7280'} />
+            }
             <Text
               style={{ fontFamily: filter === f ? 'DMSans_600SemiBold' : 'DMSans_400Regular' }}
               className={filter === f ? 'text-primary' : 'text-gray-500'}
             >
-              {f === 'score' ? `🎯 ${t('overview.score')}` : `💶 ${t('overview.money')}`}
+              {f === 'score' ? t('overview.score') : t('overview.money')}
             </Text>
           </TouchableOpacity>
         ))}

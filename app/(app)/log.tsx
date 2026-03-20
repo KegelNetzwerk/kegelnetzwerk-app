@@ -11,6 +11,7 @@ import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
+import { Trash2 } from 'lucide-react-native';
 import { getResults, removeResult } from '../../src/storage/resultPackage';
 import { dequeue } from '../../src/storage/syncQueue';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
@@ -120,7 +121,7 @@ export default function LogScreen() {
                     {entry.value}
                   </Text>
                   <TouchableOpacity onPress={() => handleDelete(entry)}>
-                    <Text className="text-accent text-lg">🗑</Text>
+                    <Trash2 size={18} color="#a91a1a" />
                   </TouchableOpacity>
                 </View>
               </View>

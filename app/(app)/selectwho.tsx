@@ -10,6 +10,7 @@ import {
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeft } from 'lucide-react-native';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalData } from '../../src/hooks/useLocalData';
@@ -209,11 +210,12 @@ export default function SelectWhoScreen() {
       {/* Back button */}
       <View className="p-4 bg-white border-t border-gray-200">
         <TouchableOpacity
-          className="bg-gray-100 rounded-lg py-3 items-center"
+          className="bg-gray-100 rounded-lg py-3 flex-row items-center justify-center gap-2"
           onPress={() => router.back()}
         >
+          <ArrowLeft size={16} color="#4b5563" />
           <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-gray-600">
-            ← {t('selectwho.back')} {params.gameName}
+            {t('selectwho.back')} {params.gameName}
           </Text>
         </TouchableOpacity>
       </View>

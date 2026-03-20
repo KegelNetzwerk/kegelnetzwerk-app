@@ -9,6 +9,7 @@ import {
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Camera, LogOut, Trash2, ChevronRight } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/hooks/useAuth';
 import { uploadPhoto } from '../../src/api/photo';
@@ -93,20 +94,26 @@ export default function SettingsScreen() {
             onPress={handlePhotoUpload}
             disabled={uploading}
           >
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-gray-700">
-              {uploading ? t('settings.uploading') : `📷 ${t('settings.changePhoto')}`}
-            </Text>
-            <Text className="text-gray-400">›</Text>
+            <View className="flex-row items-center gap-3">
+              <Camera size={18} color="#374151" />
+              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-gray-700">
+                {uploading ? t('settings.uploading') : t('settings.changePhoto')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color="#9ca3af" />
           </TouchableOpacity>
 
           <TouchableOpacity
             className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
             onPress={signOut}
           >
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
-              {t('settings.logout')}
-            </Text>
-            <Text className="text-gray-400">›</Text>
+            <View className="flex-row items-center gap-3">
+              <LogOut size={18} color="#a91a1a" />
+              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
+                {t('settings.logout')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color="#9ca3af" />
           </TouchableOpacity>
         </View>
 
@@ -122,10 +129,13 @@ export default function SettingsScreen() {
             className="px-4 py-3 flex-row items-center justify-between"
             onPress={handleClearSession}
           >
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
-              🗑 {t('settings.clearSession')}
-            </Text>
-            <Text className="text-gray-400">›</Text>
+            <View className="flex-row items-center gap-3">
+              <Trash2 size={18} color="#a91a1a" />
+              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
+                {t('settings.clearSession')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color="#9ca3af" />
           </TouchableOpacity>
         </View>
 
