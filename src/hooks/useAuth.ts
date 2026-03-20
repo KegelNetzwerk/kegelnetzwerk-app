@@ -19,6 +19,7 @@ export interface AuthUser {
   role: string;
   clubId: number;
   clubName: string;
+  clubPic: string | null;
   colors: ClubColors;
 }
 

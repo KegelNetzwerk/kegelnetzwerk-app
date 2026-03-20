@@ -35,6 +35,10 @@ function colorsFromFarbe(farbe1?: string, farbe2?: string, farbe3?: string) {
   };
 }
 
+function normalizePic(pic: string | null | undefined): string | null {
+  return pic && pic !== 'none' ? pic : null;
+}
+
 export default function RootLayout() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [ready, setReady] = useState(false);
@@ -59,6 +63,7 @@ export default function RootLayout() {
             token: res.token,
             clubId: res.clubId,
             clubName: creds.clubName,
+            clubPic: normalizePic(creds.clubPic),
             nickname: creds.nickname,
             password: creds.password,
             autoLogin: true,
@@ -71,6 +76,7 @@ export default function RootLayout() {
             role: res.role,
             clubId: res.clubId,
             clubName: creds.clubName,
+            clubPic: normalizePic(creds.clubPic),
             colors,
           });
           const granted = await requestNotificationPermissions();
@@ -96,6 +102,7 @@ export default function RootLayout() {
       token: authUser.token,
       clubId: authUser.clubId,
       clubName: authUser.clubName,
+      clubPic: authUser.clubPic,
       nickname: authUser.nickname,
       password,
       autoLogin,

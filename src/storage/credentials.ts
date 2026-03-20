@@ -6,6 +6,7 @@ const KEYS = {
   TOKEN: 'kn_token',
   CLUB_ID: 'kn_club_id',
   CLUB_NAME: 'kn_club_name',
+  CLUB_PIC: 'kn_club_pic',
   NICKNAME: 'kn_nickname',
   PASSWORD: 'kn_password',
   AUTO_LOGIN: 'kn_auto_login',
@@ -40,6 +41,7 @@ export async function saveCredentials(data: {
   token: string;
   clubId: number;
   clubName: string;
+  clubPic: string | null;
   nickname: string;
   password: string;
   autoLogin: boolean;
@@ -49,6 +51,7 @@ export async function saveCredentials(data: {
     setItem(KEYS.TOKEN, data.token),
     setItem(KEYS.CLUB_ID, String(data.clubId)),
     setItem(KEYS.CLUB_NAME, data.clubName),
+    data.clubPic ? setItem(KEYS.CLUB_PIC, data.clubPic) : deleteItem(KEYS.CLUB_PIC),
     setItem(KEYS.NICKNAME, data.nickname),
     setItem(KEYS.PASSWORD, data.password),
     setItem(KEYS.AUTO_LOGIN, data.autoLogin ? '1' : '0'),
@@ -64,16 +67,18 @@ export async function getStoredCredentials(): Promise<{
   token: string | null;
   clubId: number | null;
   clubName: string | null;
+  clubPic: string | null;
   nickname: string | null;
   password: string | null;
   autoLogin: boolean;
   colors: ClubColors;
 }> {
-  const [token, clubIdStr, clubName, nickname, password, autoLoginStr, colorsStr] =
+  const [token, clubIdStr, clubName, clubPic, nickname, password, autoLoginStr, colorsStr] =
     await Promise.all([
       getItem(KEYS.TOKEN),
       getItem(KEYS.CLUB_ID),
       getItem(KEYS.CLUB_NAME),
+      getItem(KEYS.CLUB_PIC),
       getItem(KEYS.NICKNAME),
       getItem(KEYS.PASSWORD),
       getItem(KEYS.AUTO_LOGIN),
@@ -93,6 +98,7 @@ export async function getStoredCredentials(): Promise<{
     token,
     clubId: clubIdStr ? parseInt(clubIdStr, 10) : null,
     clubName,
+    clubPic,
     nickname,
     password,
     autoLogin: autoLoginStr === '1',

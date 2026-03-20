@@ -64,6 +64,7 @@ export default function LoginScreen() {
         role: res.role,
         clubId: res.clubId,
         clubName: selectedClub.name,
+        clubPic: selectedClub.pic && selectedClub.pic !== 'none' ? selectedClub.pic : null,
         colors,
       };
       await signIn(authUser, password, autoLogin);
