@@ -1,6 +1,6 @@
 # KegelNetzwerk App
 
-Cross-platform mobile app (Android, iOS, Web) for German bowling clubs — companion to the [KegelNetzwerk webservice](../kegelnetzwerk2).
+Cross-platform mobile app (Android, iOS, Web) for German bowling clubs — companion to the [KegelNetzwerk webservice](https://github.com/KegelNetzwerk/kegelnetzwerk-web).
 
 ## Purpose
 
