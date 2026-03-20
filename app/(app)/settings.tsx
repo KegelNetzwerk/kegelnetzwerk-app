@@ -6,8 +6,9 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { router, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/hooks/useAuth';
 import { uploadPhoto } from '../../src/api/photo';
@@ -16,10 +17,11 @@ import { clearQueue } from '../../src/storage/syncQueue';
 import { BASE_URL } from '../../constants/api';
 
 export default function SettingsScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   useLayoutEffect(() => {
-    navigation.setOptions({ title: 'Einstellungen', headerShown: true });
-  }, [navigation]);
+    navigation.setOptions({ title: t('settings.title'), headerShown: true });
+  }, [navigation, t]);
 
   const { user, signOut } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -27,7 +29,7 @@ export default function SettingsScreen() {
   async function handlePhotoUpload() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Berechtigung fehlt', 'Bitte erlaube den Zugriff auf die Medienbibliothek.');
+      Alert.alert(t('settings.permissionMissing'), t('settings.permissionMessage'));
       return;
     }
 
@@ -43,31 +45,27 @@ export default function SettingsScreen() {
     setUploading(true);
     try {
       await uploadPhoto(result.assets[0].uri);
-      Alert.alert('Erfolg', 'Profilbild wurde aktualisiert.');
+      Alert.alert(t('common.success'), t('settings.photoUpdated'));
     } catch {
-      Alert.alert('Fehler', 'Foto konnte nicht hochgeladen werden.');
+      Alert.alert(t('common.error'), t('settings.photoError'));
     } finally {
       setUploading(false);
     }
   }
 
   async function handleClearSession() {
-    Alert.alert('Sitzung löschen?', 'Alle lokalen Ergebnisse dieser Sitzung werden gelöscht.', [
-      { text: 'Abbrechen', style: 'cancel' },
+    Alert.alert(t('settings.clearSessionTitle'), t('settings.clearSessionMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Löschen',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await clearResults();
           await clearQueue();
-          Alert.alert('Erledigt', 'Sitzungsdaten wurden gelöscht.');
+          Alert.alert(t('common.success'), t('settings.clearSessionDone'));
         },
       },
     ]);
-  }
-
-  async function handleSignOut() {
-    await signOut();
   }
 
   return (
@@ -75,12 +73,19 @@ export default function SettingsScreen() {
       <View className="p-4 gap-4">
         {/* Account */}
         <View className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <Text className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-            Konto
+          <Text
+            style={{ fontFamily: 'DMSans_600SemiBold' }}
+            className="px-4 pt-4 pb-2 text-xs text-gray-400 uppercase tracking-wide"
+          >
+            {t('settings.account')}
           </Text>
           <View className="px-4 pb-3">
-            <Text className="text-base font-semibold text-gray-800">{user?.nickname}</Text>
-            <Text className="text-sm text-gray-500">{user?.clubName}</Text>
+            <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-base text-gray-800">
+              {user?.nickname}
+            </Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+              {user?.clubName}
+            </Text>
           </View>
 
           <TouchableOpacity
@@ -88,42 +93,54 @@ export default function SettingsScreen() {
             onPress={handlePhotoUpload}
             disabled={uploading}
           >
-            <Text className="text-base text-gray-700">
-              {uploading ? 'Lädt hoch...' : '📷 Profilbild ändern'}
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-gray-700">
+              {uploading ? t('settings.uploading') : `📷 ${t('settings.changePhoto')}`}
             </Text>
             <Text className="text-gray-400">›</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
-            onPress={handleSignOut}
+            onPress={signOut}
           >
-            <Text className="text-base text-red-500">Abmelden</Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
+              {t('settings.logout')}
+            </Text>
             <Text className="text-gray-400">›</Text>
           </TouchableOpacity>
         </View>
 
         {/* Session */}
         <View className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <Text className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-            Sitzung
+          <Text
+            style={{ fontFamily: 'DMSans_600SemiBold' }}
+            className="px-4 pt-4 pb-2 text-xs text-gray-400 uppercase tracking-wide"
+          >
+            {t('settings.session')}
           </Text>
           <TouchableOpacity
             className="px-4 py-3 flex-row items-center justify-between"
             onPress={handleClearSession}
           >
-            <Text className="text-base text-red-500">🗑 Sitzungsdaten löschen</Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
+              🗑 {t('settings.clearSession')}
+            </Text>
             <Text className="text-gray-400">›</Text>
           </TouchableOpacity>
         </View>
 
         {/* Info */}
         <View className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <Text className="px-4 pt-4 pb-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-            Info
+          <Text
+            style={{ fontFamily: 'DMSans_600SemiBold' }}
+            className="px-4 pt-4 pb-2 text-xs text-gray-400 uppercase tracking-wide"
+          >
+            {t('settings.info')}
           </Text>
           <View className="px-4 py-3 border-t border-gray-100">
-            <Text className="text-sm text-gray-500">Server: {BASE_URL}</Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+              {t('settings.server')}: {BASE_URL}
+            </Text>
           </View>
         </View>
       </View>

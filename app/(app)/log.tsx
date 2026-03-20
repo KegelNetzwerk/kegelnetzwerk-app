@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { getResults, removeResult } from '../../src/storage/resultPackage';
 import { dequeue } from '../../src/storage/syncQueue';
@@ -24,10 +25,11 @@ interface DisplayEntry extends ResultEntry {
 }
 
 export default function LogScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   useLayoutEffect(() => {
-    navigation.setOptions({ title: 'Protokoll', headerShown: true });
-  }, [navigation]);
+    navigation.setOptions({ title: t('log.title'), headerShown: true });
+  }, [navigation, t]);
 
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -48,14 +50,14 @@ export default function LogScreen() {
           ...r,
           memberLabel: r.memberId
             ? (members.find((m) => m.id === r.memberId)?.nickname ?? `#${r.memberId}`)
-            : (r.guestName ?? 'Gast'),
+            : (r.guestName ?? t('log.guest')),
           gameLabel: game?.name ?? `Spiel ${r.gameId}`,
           partLabel: part?.name ?? `Teil ${r.partId}`,
         };
       });
 
     setEntries(display);
-  }, []);
+  }, [t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -66,10 +68,10 @@ export default function LogScreen() {
   }, [load]);
 
   async function handleDelete(entry: DisplayEntry) {
-    Alert.alert('Eintrag löschen?', `${entry.memberLabel} – ${entry.partLabel}`, [
-      { text: 'Abbrechen', style: 'cancel' },
+    Alert.alert(t('log.deleteTitle'), `${entry.memberLabel} – ${entry.partLabel}`, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Löschen',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await removeResult(entry.id);
@@ -88,7 +90,9 @@ export default function LogScreen() {
       >
         {entries.length === 0 ? (
           <View className="items-center justify-center p-8">
-            <Text className="text-gray-400">Keine Einträge</Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-400">
+              {t('log.empty')}
+            </Text>
           </View>
         ) : (
           <View className="gap-2">
@@ -98,21 +102,25 @@ export default function LogScreen() {
                 className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm"
               >
                 <View className="flex-1 mr-3">
-                  <Text className="font-semibold text-gray-800">{entry.memberLabel}</Text>
-                  <Text className="text-sm text-gray-500">
+                  <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-gray-800">
+                    {entry.memberLabel}
+                  </Text>
+                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
                     {entry.gameLabel} › {entry.partLabel}
                   </Text>
-                  <Text className="text-xs text-gray-400 mt-0.5">
+                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-0.5">
                     {format(new Date(entry.timestamp), 'HH:mm')}
                     {!entry.synced && (
-                      <Text className="text-orange-500"> · ausstehend</Text>
+                      <Text className="text-orange-500"> · {t('log.pending')}</Text>
                     )}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
-                  <Text className="text-lg font-bold text-primary">{entry.value}</Text>
+                  <Text style={{ fontFamily: 'DMSans_700Bold' }} className="text-lg text-primary">
+                    {entry.value}
+                  </Text>
                   <TouchableOpacity onPress={() => handleDelete(entry)}>
-                    <Text className="text-red-400 text-lg">🗑</Text>
+                    <Text className="text-accent text-lg">🗑</Text>
                   </TouchableOpacity>
                 </View>
               </View>

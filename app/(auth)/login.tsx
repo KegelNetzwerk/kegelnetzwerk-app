@@ -1,4 +1,3 @@
-'use client';
 import { useState, useEffect } from 'react';
 import {
   View,
@@ -8,8 +7,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
-  Image,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { fetchClubs, login, type Club } from '../../src/api/auth';
 import { useAuth } from '../../src/hooks/useAuth';
 import {
@@ -19,6 +19,7 @@ import {
 import { registerBackgroundFetch } from '../../src/notifications/backgroundTask';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const { signIn } = useAuth();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
@@ -35,16 +36,16 @@ export default function LoginScreen() {
         setClubs(data);
         if (data.length === 1) setSelectedClub(data[0]);
       })
-      .catch(() => setError('Clubs konnten nicht geladen werden'));
+      .catch(() => setError(t('auth.login.error.clubsNotLoaded')));
   }, []);
 
   async function handleLogin() {
     if (!selectedClub) {
-      setError('Bitte einen Verein auswählen');
+      setError(t('auth.login.error.selectClub'));
       return;
     }
     if (!nickname.trim() || !password) {
-      setError('Benutzername und Passwort erforderlich');
+      setError(t('auth.login.error.requiredFields'));
       return;
     }
     setLoading(true);
@@ -61,102 +62,140 @@ export default function LoginScreen() {
       };
       await signIn(authUser, password, autoLogin);
 
-      // Notification permission + setup
       const granted = await requestNotificationPermissions();
       if (granted) {
         await registerPushTokenWithServer();
         await registerBackgroundFetch();
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Anmeldung fehlgeschlagen');
+      setError(e instanceof Error ? e.message : t('auth.login.error.failed'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="p-6 pt-16">
-      <View className="items-center mb-8">
-        <Text className="text-3xl font-bold text-primary mt-4">KegelNetzwerk</Text>
-        <Text className="text-gray-500 mt-1">Vereinsverwaltung</Text>
-      </View>
-
-      {/* Club picker */}
-      <View className="mb-4">
-        <Text className="text-sm font-medium text-gray-700 mb-1">Verein</Text>
-        <TouchableOpacity
-          className="border border-gray-300 rounded-lg p-3 flex-row items-center justify-between"
-          onPress={() => setShowClubPicker(!showClubPicker)}
-        >
-          <Text className={selectedClub ? 'text-gray-900' : 'text-gray-400'}>
-            {selectedClub ? selectedClub.name : 'Verein auswählen...'}
-          </Text>
-          <Text className="text-gray-400">▼</Text>
-        </TouchableOpacity>
-        {showClubPicker && (
-          <View className="border border-gray-300 rounded-lg mt-1 bg-white shadow-sm">
-            {clubs.map((club) => (
-              <TouchableOpacity
-                key={club.id}
-                className="p-3 border-b border-gray-100 last:border-0"
-                onPress={() => {
-                  setSelectedClub(club);
-                  setShowClubPicker(false);
-                }}
-              >
-                <Text className="text-gray-900">{club.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
-
-      {/* Nickname */}
-      <View className="mb-4">
-        <Text className="text-sm font-medium text-gray-700 mb-1">Spitzname</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 text-gray-900"
-          value={nickname}
-          onChangeText={setNickname}
-          autoCapitalize="none"
-          autoCorrect={false}
-          placeholder="Dein Spitzname"
-        />
-      </View>
-
-      {/* Password */}
-      <View className="mb-4">
-        <Text className="text-sm font-medium text-gray-700 mb-1">Passwort</Text>
-        <TextInput
-          className="border border-gray-300 rounded-lg p-3 text-gray-900"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholder="••••••••"
-        />
-      </View>
-
-      {/* Auto-login */}
-      <View className="flex-row items-center justify-between mb-6">
-        <Text className="text-sm text-gray-700">Automatisch einloggen</Text>
-        <Switch value={autoLogin} onValueChange={setAutoLogin} trackColor={{ true: '#005982' }} />
-      </View>
-
-      {error ? (
-        <Text className="text-red-500 text-sm mb-4 text-center">{error}</Text>
-      ) : null}
-
-      <TouchableOpacity
-        className="bg-primary rounded-lg p-4 items-center"
-        onPress={handleLogin}
-        disabled={loading}
+    <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow">
+      {/* Header gradient */}
+      <LinearGradient
+        colors={['#005982', '#3089ac']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ paddingTop: 64, paddingBottom: 40, alignItems: 'center' }}
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text className="text-white font-semibold text-base">Anmelden</Text>
-        )}
-      </TouchableOpacity>
+        <Text
+          style={{ fontFamily: 'DMSans_700Bold', fontSize: 28, color: '#fff', letterSpacing: 0.5 }}
+        >
+          KegelNetzwerk
+        </Text>
+        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
+          {t('auth.login.subtitle')}
+        </Text>
+      </LinearGradient>
+
+      <View className="p-6 flex-1">
+        {/* Club picker */}
+        <View className="mb-4">
+          <Text
+            style={{ fontFamily: 'DMSans_500Medium' }}
+            className="text-sm text-gray-700 mb-1"
+          >
+            {t('auth.login.clubLabel')}
+          </Text>
+          <TouchableOpacity
+            className="border border-gray-300 rounded-lg p-3 flex-row items-center justify-between bg-white"
+            onPress={() => setShowClubPicker(!showClubPicker)}
+          >
+            <Text
+              style={{ fontFamily: 'DMSans_400Regular' }}
+              className={selectedClub ? 'text-gray-900' : 'text-gray-400'}
+            >
+              {selectedClub ? selectedClub.name : t('auth.login.clubPlaceholder')}
+            </Text>
+            <Text className="text-gray-400">▼</Text>
+          </TouchableOpacity>
+          {showClubPicker && (
+            <View className="border border-gray-300 rounded-lg mt-1 bg-white shadow-sm">
+              {clubs.map((club) => (
+                <TouchableOpacity
+                  key={club.id}
+                  className="p-3 border-b border-gray-100"
+                  onPress={() => {
+                    setSelectedClub(club);
+                    setShowClubPicker(false);
+                  }}
+                >
+                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-900">
+                    {club.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Nickname */}
+        <View className="mb-4">
+          <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-sm text-gray-700 mb-1">
+            {t('auth.login.nickname')}
+          </Text>
+          <TextInput
+            style={{ fontFamily: 'DMSans_400Regular' }}
+            className="border border-gray-300 rounded-lg p-3 text-gray-900 bg-white"
+            value={nickname}
+            onChangeText={setNickname}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder={t('auth.login.nicknamePlaceholder')}
+          />
+        </View>
+
+        {/* Password */}
+        <View className="mb-4">
+          <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-sm text-gray-700 mb-1">
+            {t('auth.login.password')}
+          </Text>
+          <TextInput
+            style={{ fontFamily: 'DMSans_400Regular' }}
+            className="border border-gray-300 rounded-lg p-3 text-gray-900 bg-white"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholder={t('auth.login.passwordPlaceholder')}
+          />
+        </View>
+
+        {/* Auto-login */}
+        <View className="flex-row items-center justify-between mb-6">
+          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-700">
+            {t('auth.login.autoLogin')}
+          </Text>
+          <Switch value={autoLogin} onValueChange={setAutoLogin} trackColor={{ true: '#005982' }} />
+        </View>
+
+        {error ? (
+          <Text
+            style={{ fontFamily: 'DMSans_400Regular' }}
+            className="text-accent text-sm mb-4 text-center"
+          >
+            {error}
+          </Text>
+        ) : null}
+
+        <TouchableOpacity
+          className="bg-primary rounded-lg p-4 items-center"
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-white text-base">
+              {t('auth.login.submit')}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }

@@ -1,9 +1,16 @@
 import 'react-native-get-random-values';
 import '../global.css';
-import { Platform } from 'react-native';
+import '../src/i18n';
 import { useEffect, useState, useCallback } from 'react';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  useFonts,
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+  DMSans_700Bold,
+} from '@expo-google-fonts/dm-sans';
 import { AuthContext, type AuthUser } from '../src/hooks/useAuth';
 import {
   getStoredCredentials,
@@ -23,6 +30,13 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [ready, setReady] = useState(false);
+
+  const [fontsLoaded] = useFonts({
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
+  });
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -85,7 +99,7 @@ export default function RootLayout() {
     setUser(null);
   }, []);
 
-  if (!ready) return null;
+  if (!ready || !fontsLoaded) return null;
 
   return (
     <QueryClientProvider client={queryClient}>

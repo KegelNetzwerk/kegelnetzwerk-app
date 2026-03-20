@@ -8,18 +8,20 @@ import {
 } from 'react-native';
 import { router, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import PartButton from '../../src/components/PartButton';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
-const BUTTON_MARGIN = 8; // 2 * 4px margin per side
+const BUTTON_MARGIN = 8;
 const COLUMNS = 3;
 
 export default function WorkingScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   useLayoutEffect(() => {
-    navigation.setOptions({ title: 'Ergebnisse eingeben', headerShown: true });
-  }, [navigation]);
+    navigation.setOptions({ title: t('working.title'), headerShown: true });
+  }, [navigation, t]);
 
   const { games, loading } = useLocalData();
   const { width } = useWindowDimensions();
@@ -49,7 +51,9 @@ export default function WorkingScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text className="text-gray-500">Lade Spiele...</Text>
+        <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-500">
+          {t('working.loading')}
+        </Text>
       </View>
     );
   }
@@ -57,8 +61,8 @@ export default function WorkingScreen() {
   if (games.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-gray-500 text-center">
-          Keine Spiele verfügbar. Bitte zuerst Spiele im Webservice anlegen.
+        <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-500 text-center">
+          {t('working.noGames')}
         </Text>
       </View>
     );
@@ -78,15 +82,12 @@ export default function WorkingScreen() {
             key={game.id}
             onPress={() => setSelectedGameIndex(idx)}
             className={`px-4 py-2 rounded-full ${
-              idx === selectedGameIndex
-                ? 'bg-primary'
-                : 'bg-gray-100'
+              idx === selectedGameIndex ? 'bg-primary' : 'bg-gray-100'
             }`}
           >
             <Text
-              className={`font-medium text-sm ${
-                idx === selectedGameIndex ? 'text-white' : 'text-gray-700'
-              }`}
+              style={{ fontFamily: 'DMSans_500Medium' }}
+              className={`text-sm ${idx === selectedGameIndex ? 'text-white' : 'text-gray-700'}`}
             >
               {game.name}
             </Text>
@@ -116,19 +117,25 @@ export default function WorkingScreen() {
           className="flex-1 py-3 items-center"
           onPress={() => router.push('/(app)/overview')}
         >
-          <Text className="text-xs text-gray-600">📊 Übersicht</Text>
+          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-600">
+            📊 {t('working.overview')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="flex-1 py-3 items-center"
           onPress={() => router.push('/(app)/log')}
         >
-          <Text className="text-xs text-gray-600">📋 Protokoll</Text>
+          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-600">
+            📋 {t('working.log')}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="flex-1 py-3 items-center"
           onPress={() => router.push('/(app)/main')}
         >
-          <Text className="text-xs text-red-600">✕ Beenden</Text>
+          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-accent">
+            ✕ {t('working.end')}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

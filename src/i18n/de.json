@@ -1,0 +1,112 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "back": "Zurück",
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "close": "Schließen",
+    "add": "Hinzufügen",
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten."
+  },
+  "auth": {
+    "login": {
+      "title": "Anmelden",
+      "clubLabel": "Verein",
+      "clubPlaceholder": "Verein auswählen...",
+      "nickname": "Spitzname",
+      "nicknamePlaceholder": "Dein Spitzname",
+      "password": "Passwort",
+      "passwordPlaceholder": "••••••••",
+      "autoLogin": "Automatisch einloggen",
+      "submit": "Anmelden",
+      "subtitle": "Vereinsverwaltung",
+      "error": {
+        "clubsNotLoaded": "Vereine konnten nicht geladen werden",
+        "selectClub": "Bitte einen Verein auswählen",
+        "requiredFields": "Benutzername und Passwort erforderlich",
+        "failed": "Anmeldung fehlgeschlagen"
+      }
+    },
+    "logout": "Abmelden"
+  },
+  "main": {
+    "enterResults": "Ergebnisse eingeben",
+    "overview": "Übersicht",
+    "notifications": "Benachrichtigungen",
+    "settings": "Einstellungen",
+    "logout": "Abmelden"
+  },
+  "working": {
+    "title": "Ergebnisse eingeben",
+    "loading": "Lade Spiele...",
+    "noGames": "Keine Spiele verfügbar. Bitte zuerst Spiele im Webservice anlegen.",
+    "overview": "Übersicht",
+    "log": "Protokoll",
+    "end": "Beenden"
+  },
+  "selectwho": {
+    "members": "Mitglieder",
+    "guests": "Gäste",
+    "addGuest": "Gast hinzufügen",
+    "guestName": "Name des Gastes:",
+    "guestNameTitle": "Gast hinzufügen",
+    "back": "Zurück zu"
+  },
+  "overview": {
+    "title": "Übersicht",
+    "score": "Punkte",
+    "money": "Geld",
+    "empty": "Noch keine Ergebnisse in dieser Sitzung",
+    "entries": "× eingetragen"
+  },
+  "log": {
+    "title": "Protokoll",
+    "empty": "Keine Einträge",
+    "pending": "ausstehend",
+    "deleteTitle": "Eintrag löschen?",
+    "guest": "Gast"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "account": "Konto",
+    "changePhoto": "Profilbild ändern",
+    "uploading": "Lädt hoch...",
+    "logout": "Abmelden",
+    "session": "Sitzung",
+    "clearSession": "Sitzungsdaten löschen",
+    "clearSessionTitle": "Sitzung löschen?",
+    "clearSessionMessage": "Alle lokalen Ergebnisse dieser Sitzung werden gelöscht.",
+    "clearSessionDone": "Sitzungsdaten wurden gelöscht.",
+    "info": "Info",
+    "server": "Server",
+    "permissionMissing": "Berechtigung fehlt",
+    "permissionMessage": "Bitte erlaube den Zugriff auf die Medienbibliothek.",
+    "photoUpdated": "Profilbild wurde aktualisiert.",
+    "photoError": "Foto konnte nicht hochgeladen werden."
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "settingsSection": "Einstellungen",
+    "recentSection": "Zuletzt erhalten",
+    "empty": "Noch keine Benachrichtigungen",
+    "types": {
+      "events": "Terminerinnerungen",
+      "news": "Neue Neuigkeiten",
+      "votes": "Neue Abstimmungen"
+    }
+  },
+  "sync": {
+    "offline": "Offline –",
+    "pending_one": "{{count}} Ergebnis ausstehend",
+    "pending_other": "{{count}} Ergebnisse ausstehend"
+  },
+  "valueDialog": {
+    "title": "Wert eingeben",
+    "placeholder": "Wert",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen"
+  }
+}

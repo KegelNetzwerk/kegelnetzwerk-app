@@ -9,7 +9,8 @@ export default function AppLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: '#005982' },
         headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
+        headerTitleStyle: { fontWeight: '700', fontFamily: 'DMSans_700Bold' },
+        headerBackTitleStyle: { fontFamily: 'DMSans_400Regular' },
       }}
     />
   );

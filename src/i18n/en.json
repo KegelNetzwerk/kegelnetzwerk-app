@@ -1,0 +1,112 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "add": "Add",
+    "unknownError": "An unknown error occurred."
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "clubLabel": "Club",
+      "clubPlaceholder": "Select club...",
+      "nickname": "Nickname",
+      "nicknamePlaceholder": "Your nickname",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "autoLogin": "Auto sign-in",
+      "submit": "Sign In",
+      "subtitle": "Club Management",
+      "error": {
+        "clubsNotLoaded": "Could not load clubs",
+        "selectClub": "Please select a club",
+        "requiredFields": "Username and password are required",
+        "failed": "Sign-in failed"
+      }
+    },
+    "logout": "Sign Out"
+  },
+  "main": {
+    "enterResults": "Enter Results",
+    "overview": "Overview",
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "logout": "Sign Out"
+  },
+  "working": {
+    "title": "Enter Results",
+    "loading": "Loading games...",
+    "noGames": "No games available. Please create games in the web service first.",
+    "overview": "Overview",
+    "log": "Log",
+    "end": "End"
+  },
+  "selectwho": {
+    "members": "Members",
+    "guests": "Guests",
+    "addGuest": "Add Guest",
+    "guestName": "Guest name:",
+    "guestNameTitle": "Add Guest",
+    "back": "Back to"
+  },
+  "overview": {
+    "title": "Overview",
+    "score": "Score",
+    "money": "Money",
+    "empty": "No results yet in this session",
+    "entries": "× recorded"
+  },
+  "log": {
+    "title": "Log",
+    "empty": "No entries",
+    "pending": "pending",
+    "deleteTitle": "Delete entry?",
+    "guest": "Guest"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "changePhoto": "Change profile photo",
+    "uploading": "Uploading...",
+    "logout": "Sign Out",
+    "session": "Session",
+    "clearSession": "Clear session data",
+    "clearSessionTitle": "Clear session?",
+    "clearSessionMessage": "All local results of this session will be deleted.",
+    "clearSessionDone": "Session data cleared.",
+    "info": "Info",
+    "server": "Server",
+    "permissionMissing": "Permission missing",
+    "permissionMessage": "Please allow access to the media library.",
+    "photoUpdated": "Profile photo updated.",
+    "photoError": "Could not upload photo."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "settingsSection": "Settings",
+    "recentSection": "Recently received",
+    "empty": "No notifications yet",
+    "types": {
+      "events": "Event reminders",
+      "news": "New news",
+      "votes": "New polls"
+    }
+  },
+  "sync": {
+    "offline": "Offline –",
+    "pending_one": "{{count}} result pending",
+    "pending_other": "{{count}} results pending"
+  },
+  "valueDialog": {
+    "title": "Enter value",
+    "placeholder": "Value",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  }
+}

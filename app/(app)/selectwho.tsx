@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalData } from '../../src/hooks/useLocalData';
@@ -24,6 +25,7 @@ const COLUMNS = 3;
 const BUTTON_MARGIN = 8;
 
 export default function SelectWhoScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { user } = useAuth();
   const params = useLocalSearchParams<{
@@ -105,7 +107,6 @@ export default function SelectWhoScreen() {
     const key = dialogTarget.id;
     if (key.startsWith('m-')) {
       const memberId = parseInt(key.slice(2), 10);
-      const member = members.find((m) => m.id === memberId);
       recordResult(memberId, null, value);
     } else {
       const guestId = key.slice(2);
@@ -120,8 +121,8 @@ export default function SelectWhoScreen() {
 
   function addGuest() {
     Alert.prompt(
-      'Gast hinzufügen',
-      'Name des Gastes:',
+      t('selectwho.guestNameTitle'),
+      t('selectwho.guestName'),
       (name) => {
         if (!name?.trim()) return;
         setGuests((prev) => [...prev, { id: uuidv4(), name: name.trim() }]);
@@ -134,16 +135,19 @@ export default function SelectWhoScreen() {
     <View className="flex-1 bg-gray-50">
       {/* Tabs */}
       <View className="flex-row bg-white border-b border-gray-200 px-4 pt-2">
-        {(['members', 'guests'] as const).map((t) => (
+        {(['members', 'guests'] as const).map((tabKey) => (
           <TouchableOpacity
-            key={t}
-            onPress={() => setTab(t)}
+            key={tabKey}
+            onPress={() => setTab(tabKey)}
             className={`mr-4 pb-2 border-b-2 ${
-              tab === t ? 'border-primary' : 'border-transparent'
+              tab === tabKey ? 'border-primary' : 'border-transparent'
             }`}
           >
-            <Text className={`font-medium ${tab === t ? 'text-primary' : 'text-gray-500'}`}>
-              {t === 'members' ? 'Mitglieder' : 'Gäste'}
+            <Text
+              style={{ fontFamily: tab === tabKey ? 'DMSans_600SemiBold' : 'DMSans_400Regular' }}
+              className={tab === tabKey ? 'text-primary' : 'text-gray-500'}
+            >
+              {tabKey === 'members' ? t('selectwho.members') : t('selectwho.guests')}
             </Text>
           </TouchableOpacity>
         ))}
@@ -191,7 +195,12 @@ export default function SelectWhoScreen() {
               onPress={addGuest}
             >
               <Text className="text-3xl text-gray-400">+</Text>
-              <Text className="text-xs text-gray-400 mt-1">Gast</Text>
+              <Text
+                style={{ fontFamily: 'DMSans_400Regular' }}
+                className="text-xs text-gray-400 mt-1"
+              >
+                {t('selectwho.addGuest')}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -203,7 +212,9 @@ export default function SelectWhoScreen() {
           className="bg-gray-100 rounded-lg py-3 items-center"
           onPress={() => router.back()}
         >
-          <Text className="font-medium text-gray-600">← Zurück zu {params.gameName}</Text>
+          <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-gray-600">
+            ← {t('selectwho.back')} {params.gameName}
+          </Text>
         </TouchableOpacity>
       </View>
 
