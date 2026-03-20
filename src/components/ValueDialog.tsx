@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../hooks/useTheme';
 
 interface ValueDialogProps {
   visible: boolean;
@@ -26,6 +27,7 @@ export default function ValueDialog({
   onCancel,
 }: ValueDialogProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [input, setInput] = useState('');
 
   function handleConfirm() {
@@ -74,7 +76,7 @@ export default function ValueDialog({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 bg-primary rounded-lg py-3 items-center"
+              style={{ flex: 1, backgroundColor: theme.primary, borderRadius: 8, paddingVertical: 12, alignItems: 'center' }}
               onPress={handleConfirm}
             >
               <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-white">

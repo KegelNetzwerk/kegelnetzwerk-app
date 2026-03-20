@@ -10,6 +10,7 @@ import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, Banknote } from 'lucide-react-native';
+import { useTheme } from '../../src/hooks/useTheme';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
 import type { ResultEntry } from '../../src/models/Result';
@@ -33,6 +34,7 @@ export default function OverviewScreen() {
   const [members, setMembers] = useState<Member[]>([]);
   const [games, setGames] = useState<GameOrPenalty[]>([]);
   const [filter, setFilter] = useState<'score' | 'money'>('score');
+  const theme = useTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
@@ -76,15 +78,20 @@ export default function OverviewScreen() {
           <TouchableOpacity
             key={f}
             onPress={() => setFilter(f)}
-            className={`mr-4 pb-2 border-b-2 flex-row items-center gap-1.5 ${filter === f ? 'border-primary' : 'border-transparent'}`}
+            style={[
+              { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', gap: 6 },
+              filter === f ? { borderBottomColor: theme.primary } : { borderBottomColor: 'transparent' },
+            ]}
           >
             {f === 'score'
-              ? <Target size={14} color={filter === f ? '#005982' : '#6b7280'} />
-              : <Banknote size={14} color={filter === f ? '#005982' : '#6b7280'} />
+              ? <Target size={14} color={filter === f ? theme.primary : '#6b7280'} />
+              : <Banknote size={14} color={filter === f ? theme.primary : '#6b7280'} />
             }
             <Text
-              style={{ fontFamily: filter === f ? 'DMSans_600SemiBold' : 'DMSans_400Regular' }}
-              className={filter === f ? 'text-primary' : 'text-gray-500'}
+              style={{
+                fontFamily: filter === f ? 'DMSans_600SemiBold' : 'DMSans_400Regular',
+                color: filter === f ? theme.primary : '#6b7280',
+              }}
             >
               {f === 'score' ? t('overview.score') : t('overview.money')}
             </Text>
@@ -118,7 +125,7 @@ export default function OverviewScreen() {
                   </Text>
                 </View>
                 <View className="items-end">
-                  <Text style={{ fontFamily: 'DMSans_700Bold' }} className="text-lg text-primary">
+                  <Text style={{ fontFamily: 'DMSans_700Bold', color: theme.primary, fontSize: 18 }}>
                     {row.total.toFixed(filter === 'money' ? 2 : 0)}
                   </Text>
                   <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400">

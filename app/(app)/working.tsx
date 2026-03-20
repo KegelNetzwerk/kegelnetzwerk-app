@@ -11,6 +11,7 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
+import { useTheme } from '../../src/hooks/useTheme';
 import PartButton from '../../src/components/PartButton';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
@@ -19,6 +20,7 @@ const COLUMNS = 3;
 
 export default function WorkingScreen() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({ title: t('working.title'), headerShown: true });
@@ -82,8 +84,9 @@ export default function WorkingScreen() {
           <TouchableOpacity
             key={game.id}
             onPress={() => setSelectedGameIndex(idx)}
+            style={idx === selectedGameIndex ? { backgroundColor: theme.primary } : undefined}
             className={`px-4 py-2 rounded-full ${
-              idx === selectedGameIndex ? 'bg-primary' : 'bg-gray-100'
+              idx === selectedGameIndex ? '' : 'bg-gray-100'
             }`}
           >
             <Text
@@ -136,8 +139,8 @@ export default function WorkingScreen() {
           className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/main')}
         >
-          <X size={18} color="#a91a1a" />
-          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-accent">
+          <X size={18} color={theme.accent} />
+          <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.accent }} className="text-xs">
             {t('working.end')}
           </Text>
         </TouchableOpacity>

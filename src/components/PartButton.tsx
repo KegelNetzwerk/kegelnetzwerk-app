@@ -1,13 +1,16 @@
-import { TouchableOpacity, Text, View } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
+import { useTheme } from '../hooks/useTheme';
 
 interface PartButtonProps {
   label: string;
   onPress: () => void;
-  size: number; // calculated cell size
+  size: number;
 }
 
 export default function PartButton({ label, onPress, size }: PartButtonProps) {
+  const theme = useTheme();
   const capped = Math.min(size, 160);
+
   return (
     <TouchableOpacity
       style={{
@@ -15,7 +18,7 @@ export default function PartButton({ label, onPress, size }: PartButtonProps) {
         height: capped,
         margin: 4,
         borderRadius: 12,
-        backgroundColor: '#005982',
+        backgroundColor: theme.primary,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#000',
@@ -30,7 +33,7 @@ export default function PartButton({ label, onPress, size }: PartButtonProps) {
       <Text
         style={{
           color: '#fff',
-          fontWeight: 'bold',
+          fontFamily: 'DMSans_700Bold',
           fontSize: Math.min(16, capped * 0.16),
           textAlign: 'center',
           paddingHorizontal: 8,

@@ -11,7 +11,7 @@ import {
   DMSans_600SemiBold,
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
-import { AuthContext, type AuthUser } from '../src/hooks/useAuth';
+import { AuthContext, DEFAULT_COLORS, type AuthUser } from '../src/hooks/useAuth';
 import {
   getStoredCredentials,
   saveCredentials,
@@ -26,6 +26,14 @@ import { registerBackgroundFetch } from '../src/notifications/backgroundTask';
 import { setupNotificationHandlers } from '../src/notifications/handlers';
 
 const queryClient = new QueryClient();
+
+function colorsFromFarbe(farbe1?: string, farbe2?: string, farbe3?: string) {
+  return {
+    primary: farbe1 ? `#${farbe1}` : DEFAULT_COLORS.primary,
+    secondary: farbe2 ? `#${farbe2}` : DEFAULT_COLORS.secondary,
+    accent: farbe3 ? `#${farbe3}` : DEFAULT_COLORS.accent,
+  };
+}
 
 export default function RootLayout() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -42,11 +50,11 @@ export default function RootLayout() {
     let cleanup: (() => void) | undefined;
 
     async function init() {
-      // Try auto-login
       const creds = await getStoredCredentials();
       if (creds.autoLogin && creds.nickname && creds.password && creds.clubName) {
         try {
           const res = await login(creds.clubName, creds.nickname, creds.password);
+          const colors = colorsFromFarbe(res.farbe1, res.farbe2, res.farbe3);
           await saveCredentials({
             token: res.token,
             clubId: res.clubId,
@@ -54,6 +62,7 @@ export default function RootLayout() {
             nickname: creds.nickname,
             password: creds.password,
             autoLogin: true,
+            colors,
           });
           setUser({
             token: res.token,
@@ -62,8 +71,8 @@ export default function RootLayout() {
             role: res.role,
             clubId: res.clubId,
             clubName: creds.clubName,
+            colors,
           });
-          // Notification setup after login
           const granted = await requestNotificationPermissions();
           if (granted) {
             await registerPushTokenWithServer();
@@ -90,6 +99,7 @@ export default function RootLayout() {
       nickname: authUser.nickname,
       password,
       autoLogin,
+      colors: authUser.colors,
     });
     setUser(authUser);
   }, []);

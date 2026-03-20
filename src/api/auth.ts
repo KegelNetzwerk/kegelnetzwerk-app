@@ -18,6 +18,9 @@ export interface LoginResponse {
   nickname: string;
   role: string;
   clubId: number;
+  farbe1: string; // hex without #, e.g. "005982"
+  farbe2: string;
+  farbe3: string;
 }
 
 export async function login(clubName: string, nickname: string, password: string): Promise<LoginResponse> {

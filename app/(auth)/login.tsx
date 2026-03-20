@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { fetchClubs, login, type Club } from '../../src/api/auth';
-import { useAuth } from '../../src/hooks/useAuth';
+import { useAuth, DEFAULT_COLORS } from '../../src/hooks/useAuth';
 import {
   requestNotificationPermissions,
   registerPushTokenWithServer,
@@ -52,6 +52,11 @@ export default function LoginScreen() {
     setError('');
     try {
       const res = await login(selectedClub.name, nickname.trim(), password);
+      const colors = {
+        primary: res.farbe1 ? `#${res.farbe1}` : DEFAULT_COLORS.primary,
+        secondary: res.farbe2 ? `#${res.farbe2}` : DEFAULT_COLORS.secondary,
+        accent: res.farbe3 ? `#${res.farbe3}` : DEFAULT_COLORS.accent,
+      };
       const authUser = {
         token: res.token,
         memberId: res.memberId,
@@ -59,6 +64,7 @@ export default function LoginScreen() {
         role: res.role,
         clubId: res.clubId,
         clubName: selectedClub.name,
+        colors,
       };
       await signIn(authUser, password, autoLogin);
 

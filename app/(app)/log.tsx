@@ -12,6 +12,7 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react-native';
+import { useTheme } from '../../src/hooks/useTheme';
 import { getResults, removeResult } from '../../src/storage/resultPackage';
 import { dequeue } from '../../src/storage/syncQueue';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
@@ -32,6 +33,7 @@ export default function LogScreen() {
     navigation.setOptions({ title: t('log.title'), headerShown: true });
   }, [navigation, t]);
 
+  const theme = useTheme();
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -117,11 +119,11 @@ export default function LogScreen() {
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
-                  <Text style={{ fontFamily: 'DMSans_700Bold' }} className="text-lg text-primary">
+                  <Text style={{ fontFamily: 'DMSans_700Bold', color: theme.primary, fontSize: 18 }}>
                     {entry.value}
                   </Text>
                   <TouchableOpacity onPress={() => handleDelete(entry)}>
-                    <Trash2 size={18} color="#a91a1a" />
+                    <Trash2 size={18} color={theme.accent} />
                   </TouchableOpacity>
                 </View>
               </View>

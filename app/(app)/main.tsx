@@ -10,6 +10,7 @@ import {
   LogOut,
 } from 'lucide-react-native';
 import { useAuth } from '../../src/hooks/useAuth';
+import { useTheme } from '../../src/hooks/useTheme';
 import SyncStatus from '../../src/components/SyncStatus';
 
 interface MenuButtonProps {
@@ -17,9 +18,10 @@ interface MenuButtonProps {
   icon: React.ReactNode;
   onPress: () => void;
   danger?: boolean;
+  accentColor?: string;
 }
 
-function MenuButton({ label, icon, onPress, danger }: MenuButtonProps) {
+function MenuButton({ label, icon, onPress, danger, accentColor }: MenuButtonProps) {
   return (
     <TouchableOpacity
       className="bg-white border border-gray-200 rounded-xl p-5 flex-row items-center gap-4 shadow-sm active:bg-gray-50"
@@ -27,8 +29,12 @@ function MenuButton({ label, icon, onPress, danger }: MenuButtonProps) {
     >
       <View className="w-8 items-center">{icon}</View>
       <Text
-        style={{ fontFamily: 'DMSans_600SemiBold' }}
-        className={`text-lg flex-1 ${danger ? 'text-accent' : 'text-gray-800'}`}
+        style={{
+          fontFamily: 'DMSans_600SemiBold',
+          color: danger ? (accentColor ?? '#a91a1a') : '#1f2937',
+          flex: 1,
+          fontSize: 18,
+        }}
       >
         {label}
       </Text>
@@ -39,12 +45,13 @@ function MenuButton({ label, icon, onPress, danger }: MenuButtonProps) {
 export default function MainScreen() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const theme = useTheme();
 
   return (
     <View className="flex-1 bg-gray-50">
       {/* Gradient header with logo */}
       <LinearGradient
-        colors={['#005982', '#3089ac']}
+        colors={[theme.primary, theme.secondary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={{ paddingTop: 56, paddingBottom: 24, alignItems: 'center' }}
@@ -70,29 +77,30 @@ export default function MainScreen() {
       {/* Menu */}
       <View className="flex-1 p-6 gap-3">
         <MenuButton
-          icon={<ClipboardList size={24} color="#005982" />}
+          icon={<ClipboardList size={24} color={theme.primary} />}
           label={t('main.enterResults')}
           onPress={() => router.push('/(app)/working')}
         />
         <MenuButton
-          icon={<BarChart2 size={24} color="#005982" />}
+          icon={<BarChart2 size={24} color={theme.primary} />}
           label={t('main.overview')}
           onPress={() => router.push('/(app)/overview')}
         />
         <MenuButton
-          icon={<Bell size={24} color="#005982" />}
+          icon={<Bell size={24} color={theme.primary} />}
           label={t('main.notifications')}
           onPress={() => router.push('/(app)/notifications')}
         />
         <MenuButton
-          icon={<Settings size={24} color="#005982" />}
+          icon={<Settings size={24} color={theme.primary} />}
           label={t('main.settings')}
           onPress={() => router.push('/(app)/settings')}
         />
         <MenuButton
-          icon={<LogOut size={24} color="#a91a1a" />}
+          icon={<LogOut size={24} color={theme.accent} />}
           label={t('main.logout')}
           danger
+          accentColor={theme.accent}
           onPress={async () => { await signOut(); }}
         />
       </View>

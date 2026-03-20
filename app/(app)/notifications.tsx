@@ -11,6 +11,7 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { CalendarDays, Newspaper, CheckSquare, Bell } from 'lucide-react-native';
+import { useTheme } from '../../src/hooks/useTheme';
 import {
   getNotificationState,
   setNotificationEnabled,
@@ -31,6 +32,7 @@ export default function NotificationsScreen() {
     navigation.setOptions({ title: t('notifications.title'), headerShown: true });
   }, [navigation, t]);
 
+  const theme = useTheme();
   const [state, setState] = useState<NotificationState | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -77,7 +79,7 @@ export default function NotificationsScreen() {
               }`}
             >
               <View className="flex-row items-center gap-3 flex-1 mr-4">
-                <TypeIcon type={type} size={20} color="#005982" />
+                <TypeIcon type={type} size={20} color={theme.primary} />
                 <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-gray-700">
                   {t(`notifications.types.${type}`)}
                 </Text>
@@ -85,7 +87,7 @@ export default function NotificationsScreen() {
               <Switch
                 value={state?.enabled[type] ?? true}
                 onValueChange={(v) => toggle(type, v)}
-                trackColor={{ true: '#005982' }}
+                trackColor={{ true: theme.primary }}
               />
             </View>
           ))}

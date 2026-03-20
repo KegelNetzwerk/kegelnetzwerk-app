@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { DEFAULT_COLORS, type ClubColors } from '../hooks/useAuth';
 
 const KEYS = {
   TOKEN: 'kn_token',
@@ -8,6 +9,7 @@ const KEYS = {
   NICKNAME: 'kn_nickname',
   PASSWORD: 'kn_password',
   AUTO_LOGIN: 'kn_auto_login',
+  COLORS: 'kn_colors',
 } as const;
 
 // expo-secure-store is native-only; fall back to localStorage on web
@@ -41,6 +43,7 @@ export async function saveCredentials(data: {
   nickname: string;
   password: string;
   autoLogin: boolean;
+  colors: ClubColors;
 }) {
   await Promise.all([
     setItem(KEYS.TOKEN, data.token),
@@ -49,6 +52,7 @@ export async function saveCredentials(data: {
     setItem(KEYS.NICKNAME, data.nickname),
     setItem(KEYS.PASSWORD, data.password),
     setItem(KEYS.AUTO_LOGIN, data.autoLogin ? '1' : '0'),
+    setItem(KEYS.COLORS, JSON.stringify(data.colors)),
   ]);
 }
 
@@ -63,15 +67,28 @@ export async function getStoredCredentials(): Promise<{
   nickname: string | null;
   password: string | null;
   autoLogin: boolean;
+  colors: ClubColors;
 }> {
-  const [token, clubIdStr, clubName, nickname, password, autoLoginStr] = await Promise.all([
-    getItem(KEYS.TOKEN),
-    getItem(KEYS.CLUB_ID),
-    getItem(KEYS.CLUB_NAME),
-    getItem(KEYS.NICKNAME),
-    getItem(KEYS.PASSWORD),
-    getItem(KEYS.AUTO_LOGIN),
-  ]);
+  const [token, clubIdStr, clubName, nickname, password, autoLoginStr, colorsStr] =
+    await Promise.all([
+      getItem(KEYS.TOKEN),
+      getItem(KEYS.CLUB_ID),
+      getItem(KEYS.CLUB_NAME),
+      getItem(KEYS.NICKNAME),
+      getItem(KEYS.PASSWORD),
+      getItem(KEYS.AUTO_LOGIN),
+      getItem(KEYS.COLORS),
+    ]);
+
+  let colors: ClubColors = DEFAULT_COLORS;
+  if (colorsStr) {
+    try {
+      colors = JSON.parse(colorsStr);
+    } catch {
+      colors = DEFAULT_COLORS;
+    }
+  }
+
   return {
     token,
     clubId: clubIdStr ? parseInt(clubIdStr, 10) : null,
@@ -79,6 +96,7 @@ export async function getStoredCredentials(): Promise<{
     nickname,
     password,
     autoLogin: autoLoginStr === '1',
+    colors,
   };
 }
 

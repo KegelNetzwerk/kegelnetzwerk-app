@@ -11,6 +11,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react-native';
+import { useTheme } from '../../src/hooks/useTheme';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalData } from '../../src/hooks/useLocalData';
@@ -47,6 +48,7 @@ export default function SelectWhoScreen() {
     navigation.setOptions({ title: params.partName ?? 'Wer?', headerShown: true });
   }, [navigation, params.partName]);
 
+  const theme = useTheme();
   const { members } = useLocalData();
   const { addToQueue, flush } = useSyncQueue();
   useNetworkSync(flush);
@@ -140,13 +142,16 @@ export default function SelectWhoScreen() {
           <TouchableOpacity
             key={tabKey}
             onPress={() => setTab(tabKey)}
-            className={`mr-4 pb-2 border-b-2 ${
-              tab === tabKey ? 'border-primary' : 'border-transparent'
-            }`}
+            style={[
+              { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
+              tab === tabKey ? { borderBottomColor: theme.primary } : { borderBottomColor: 'transparent' },
+            ]}
           >
             <Text
-              style={{ fontFamily: tab === tabKey ? 'DMSans_600SemiBold' : 'DMSans_400Regular' }}
-              className={tab === tabKey ? 'text-primary' : 'text-gray-500'}
+              style={{
+                fontFamily: tab === tabKey ? 'DMSans_600SemiBold' : 'DMSans_400Regular',
+                color: tab === tabKey ? theme.primary : '#6b7280',
+              }}
             >
               {tabKey === 'members' ? t('selectwho.members') : t('selectwho.guests')}
             </Text>

@@ -1,5 +1,6 @@
 import { TouchableOpacity, Text, Image, View } from 'react-native';
 import { BASE_URL } from '../../constants/api';
+import { useTheme } from '../hooks/useTheme';
 
 interface MemberButtonProps {
   nickname: string;
@@ -18,8 +19,15 @@ export default function MemberButton({
   size,
   onPress,
 }: MemberButtonProps) {
+  const theme = useTheme();
   const capped = Math.min(size, 160);
-  const bgColor = disabled ? '#d1d5db' : selected ? '#004268' : '#005982';
+
+  // Darken primary color slightly for selected state
+  const bgColor = disabled
+    ? '#d1d5db'
+    : selected
+    ? theme.secondary
+    : theme.primary;
 
   return (
     <TouchableOpacity
@@ -44,7 +52,12 @@ export default function MemberButton({
       {pic ? (
         <Image
           source={{ uri: `${BASE_URL}${pic}` }}
-          style={{ width: capped * 0.55, height: capped * 0.55, borderRadius: capped * 0.275, marginBottom: 4 }}
+          style={{
+            width: capped * 0.55,
+            height: capped * 0.55,
+            borderRadius: capped * 0.275,
+            marginBottom: 4,
+          }}
         />
       ) : (
         <View
@@ -66,7 +79,7 @@ export default function MemberButton({
       <Text
         style={{
           color: '#fff',
-          fontWeight: '600',
+          fontFamily: 'DMSans_600SemiBold',
           fontSize: Math.min(12, capped * 0.12),
           textAlign: 'center',
           paddingHorizontal: 4,

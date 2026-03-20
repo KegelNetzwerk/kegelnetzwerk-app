@@ -10,6 +10,7 @@ import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Camera, LogOut, Trash2, ChevronRight } from 'lucide-react-native';
+import { useTheme } from '../../src/hooks/useTheme';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/hooks/useAuth';
 import { uploadPhoto } from '../../src/api/photo';
@@ -25,6 +26,7 @@ export default function SettingsScreen() {
   }, [navigation, t]);
 
   const { user, signOut } = useAuth();
+  const theme = useTheme();
   const [uploading, setUploading] = useState(false);
 
   async function handlePhotoUpload() {
@@ -108,8 +110,8 @@ export default function SettingsScreen() {
             onPress={signOut}
           >
             <View className="flex-row items-center gap-3">
-              <LogOut size={18} color="#a91a1a" />
-              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
+              <LogOut size={18} color={theme.accent} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.accent }} className="text-base">
                 {t('settings.logout')}
               </Text>
             </View>
@@ -130,8 +132,8 @@ export default function SettingsScreen() {
             onPress={handleClearSession}
           >
             <View className="flex-row items-center gap-3">
-              <Trash2 size={18} color="#a91a1a" />
-              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-accent">
+              <Trash2 size={18} color={theme.accent} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.accent }} className="text-base">
                 {t('settings.clearSession')}
               </Text>
             </View>

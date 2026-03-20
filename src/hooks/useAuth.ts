@@ -1,5 +1,17 @@
 import { createContext, useContext } from 'react';
 
+export interface ClubColors {
+  primary: string;   // e.g. "#005982"
+  secondary: string; // e.g. "#3089ac"
+  accent: string;    // e.g. "#a91a1a"
+}
+
+export const DEFAULT_COLORS: ClubColors = {
+  primary: '#005982',
+  secondary: '#3089ac',
+  accent: '#a91a1a',
+};
+
 export interface AuthUser {
   token: string;
   memberId: number;
@@ -7,6 +19,7 @@ export interface AuthUser {
   role: string;
   clubId: number;
   clubName: string;
+  colors: ClubColors;
 }
 
 export interface AuthContextValue {
