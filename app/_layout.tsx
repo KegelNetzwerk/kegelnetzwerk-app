@@ -1,7 +1,6 @@
 import 'react-native-get-random-values';
 import '../global.css';
-import { StyleSheet, Platform } from 'react-native';
-if (Platform.OS !== 'web') (StyleSheet as any).setFlag('darkMode', 'class');
+import { Platform } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
