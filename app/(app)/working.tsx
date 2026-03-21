@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
+  FlatList,
   TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
@@ -29,24 +30,37 @@ export default function WorkingScreen() {
   const { games, loading } = useLocalData();
   const { width } = useWindowDimensions();
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+  const flatListRef = useRef<FlatList<GameOrPenalty>>(null);
+
+  // Reverse so the last game appears first in the tab bar
+  const reversedGames = useMemo(() => [...games].reverse(), [games]);
 
   const cellSize = Math.floor((width - 32 - COLUMNS * BUTTON_MARGIN) / COLUMNS);
 
-  const currentGame: GameOrPenalty | undefined = games[selectedGameIndex];
+  const handleTabPress = useCallback((idx: number) => {
+    setSelectedGameIndex(idx);
+    flatListRef.current?.scrollToIndex({ index: idx, animated: true });
+  }, []);
 
-  const handlePartPress = useCallback(
-    (game: GameOrPenalty, part: Part) => {
-      router.push({
-        pathname: '/(app)/selectwho',
-        params: {
-          gameId: String(game.id),
-          gameName: game.name,
-          partId: String(part.id),
-          partName: part.name,
-          partValue: part.value !== null ? String(part.value) : '',
-          partOnce: part.once ? '1' : '0',
-        },
-      });
+  const handlePartPress = useCallback((game: GameOrPenalty, part: Part) => {
+    router.push({
+      pathname: '/(app)/selectwho',
+      params: {
+        gameId: String(game.id),
+        gameName: game.name,
+        partId: String(part.id),
+        partName: part.name,
+        partValue: part.value !== null ? String(part.value) : '',
+        partOnce: part.once ? '1' : '0',
+      },
+    });
+  }, []);
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+        setSelectedGameIndex(viewableItems[0].index);
+      }
     },
     []
   );
@@ -61,7 +75,7 @@ export default function WorkingScreen() {
     );
   }
 
-  if (games.length === 0) {
+  if (reversedGames.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-6">
         <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-500 text-center">
@@ -80,14 +94,12 @@ export default function WorkingScreen() {
         className="bg-white border-b border-gray-200"
         contentContainerClassName="px-2 py-2 gap-2"
       >
-        {games.map((game, idx) => (
+        {reversedGames.map((game, idx) => (
           <TouchableOpacity
             key={game.id}
-            onPress={() => setSelectedGameIndex(idx)}
+            onPress={() => handleTabPress(idx)}
             style={idx === selectedGameIndex ? { backgroundColor: theme.primary } : undefined}
-            className={`px-4 py-2 rounded-full ${
-              idx === selectedGameIndex ? '' : 'bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded-full ${idx === selectedGameIndex ? '' : 'bg-gray-100'}`}
           >
             <Text
               style={{ fontFamily: 'DMSans_500Medium' }}
@@ -99,21 +111,32 @@ export default function WorkingScreen() {
         ))}
       </ScrollView>
 
-      {/* Part buttons grid */}
-      {currentGame ? (
-        <ScrollView className="flex-1 p-4">
-          <View className="flex-row flex-wrap justify-start">
-            {currentGame.parts.map((part) => (
-              <PartButton
-                key={part.id}
-                label={part.name}
-                size={cellSize}
-                onPress={() => handlePartPress(currentGame, part)}
-              />
-            ))}
-          </View>
-        </ScrollView>
-      ) : null}
+      {/* Swipeable part buttons — one page per game */}
+      <FlatList
+        ref={flatListRef}
+        data={reversedGames}
+        keyExtractor={(g) => String(g.id)}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+        renderItem={({ item: game }) => (
+          <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {game.parts.map((part) => (
+                <PartButton
+                  key={part.id}
+                  label={part.name}
+                  size={cellSize}
+                  onPress={() => handlePartPress(game, part)}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        )}
+      />
 
       {/* Bottom bar */}
       <View className="flex-row border-t border-gray-200 bg-white">

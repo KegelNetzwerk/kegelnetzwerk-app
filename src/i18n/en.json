@@ -82,6 +82,7 @@
     "clearSessionDone": "Session data cleared.",
     "info": "Info",
     "server": "Server",
+    "version": "Version",
     "permissionMissing": "Permission missing",
     "permissionMessage": "Please allow access to the media library.",
     "photoUpdated": "Profile photo updated.",

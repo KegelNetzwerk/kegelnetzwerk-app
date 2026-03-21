@@ -82,6 +82,7 @@
     "clearSessionDone": "Sitzungsdaten wurden gelöscht.",
     "info": "Info",
     "server": "Server",
+    "version": "Version",
     "permissionMissing": "Berechtigung fehlt",
     "permissionMessage": "Bitte erlaube den Zugriff auf die Medienbibliothek.",
     "photoUpdated": "Profilbild wurde aktualisiert.",

@@ -58,7 +58,7 @@ export default function MainScreen() {
       >
         <Image
           source={require('../../assets/splash_logo.png')}
-          style={{ height: 72, width: 180, resizeMode: 'contain', marginBottom: 10 }}
+          style={{ height: 120, width: 280, resizeMode: 'contain', marginBottom: 10 }}
         />
         <Text
           style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}
@@ -117,7 +117,7 @@ export default function MainScreen() {
           </Text>
           <Image
             source={require('../../assets/fx.png')}
-            style={{ height: 14, width: 40, resizeMode: 'contain' }}
+            style={{ height: 42, width: 120, resizeMode: 'contain' }}
           />
         </View>
         <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: '#9ca3af' }}>

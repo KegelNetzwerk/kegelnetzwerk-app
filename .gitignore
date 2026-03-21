@@ -33,9 +33,6 @@ yarn-error.*
 # Claude Code
 .claude/
 
-# Local guides
-GUIDE.md
-
 # local env files
 .env*.local
 

@@ -87,7 +87,8 @@ export default function NotificationsScreen() {
               <Switch
                 value={state?.enabled[type] ?? true}
                 onValueChange={(v) => toggle(type, v)}
-                trackColor={{ true: theme.primary }}
+                trackColor={{ true: theme.accent, false: '#d1d5db' }}
+                thumbColor="#fff"
               />
             </View>
           ))}

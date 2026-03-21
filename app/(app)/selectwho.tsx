@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   ScrollView,
+  FlatList,
   TouchableOpacity,
   useWindowDimensions,
   Alert,
@@ -53,7 +54,9 @@ export default function SelectWhoScreen() {
   const { addToQueue, flush } = useSyncQueue();
   useNetworkSync(flush);
 
+  const TABS = ['members', 'guests'] as const;
   const [tab, setTab] = useState<'members' | 'guests'>('members');
+  const pagerRef = useRef<FlatList<string>>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [onceDone, setOnceDone] = useState<Set<string>>(new Set());
   const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
@@ -138,10 +141,13 @@ export default function SelectWhoScreen() {
     <View className="flex-1 bg-gray-50">
       {/* Tabs */}
       <View className="flex-row bg-white border-b border-gray-200 px-4 pt-2">
-        {(['members', 'guests'] as const).map((tabKey) => (
+        {TABS.map((tabKey) => (
           <TouchableOpacity
             key={tabKey}
-            onPress={() => setTab(tabKey)}
+            onPress={() => {
+              setTab(tabKey);
+              pagerRef.current?.scrollToIndex({ index: TABS.indexOf(tabKey), animated: true });
+            }}
             style={[
               { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
               tab === tabKey ? { borderBottomColor: theme.primary } : { borderBottomColor: 'transparent' },
@@ -159,58 +165,73 @@ export default function SelectWhoScreen() {
         ))}
       </View>
 
-      {/* Buttons grid */}
-      <ScrollView className="flex-1 p-4">
-        <View className="flex-row flex-wrap justify-start">
-          {tab === 'members'
-            ? members.map((m) => (
-                <MemberButton
-                  key={m.id}
-                  nickname={m.nickname}
-                  pic={m.pic}
-                  size={cellSize}
-                  disabled={partOnce && onceDone.has(`m-${m.id}`)}
-                  onPress={() => handleMemberPress(m.id, m.nickname)}
-                />
-              ))
-            : guests.map((g) => (
-                <MemberButton
-                  key={g.id}
-                  nickname={g.name}
-                  pic={null}
-                  size={cellSize}
-                  disabled={partOnce && onceDone.has(`g-${g.id}`)}
-                  onPress={() => handleGuestPress(g)}
-                />
-              ))}
+      {/* Swipeable tab pages */}
+      <FlatList
+        ref={pagerRef}
+        data={TABS}
+        keyExtractor={(k) => k}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
+        onViewableItemsChanged={useCallback(
+          ({ viewableItems }: { viewableItems: Array<{ item: string; index: number | null }> }) => {
+            if (viewableItems.length > 0) setTab(viewableItems[0].item as 'members' | 'guests');
+          },
+          []
+        )}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        renderItem={({ item: tabKey }) => (
+          <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {tabKey === 'members'
+                ? members.map((m) => (
+                    <MemberButton
+                      key={m.id}
+                      nickname={m.nickname}
+                      pic={m.pic}
+                      size={cellSize}
+                      disabled={partOnce && onceDone.has(`m-${m.id}`)}
+                      onPress={() => handleMemberPress(m.id, m.nickname)}
+                    />
+                  ))
+                : guests.map((g) => (
+                    <MemberButton
+                      key={g.id}
+                      nickname={g.name}
+                      pic={null}
+                      size={cellSize}
+                      disabled={partOnce && onceDone.has(`g-${g.id}`)}
+                      onPress={() => handleGuestPress(g)}
+                    />
+                  ))}
 
-          {/* Add guest button */}
-          {tab === 'guests' && (
-            <TouchableOpacity
-              style={{
-                width: Math.min(cellSize, 160),
-                height: Math.min(cellSize, 160),
-                margin: 4,
-                borderRadius: 12,
-                borderWidth: 2,
-                borderStyle: 'dashed',
-                borderColor: '#9ca3af',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              onPress={addGuest}
-            >
-              <Text className="text-3xl text-gray-400">+</Text>
-              <Text
-                style={{ fontFamily: 'DMSans_400Regular' }}
-                className="text-xs text-gray-400 mt-1"
-              >
-                {t('selectwho.addGuest')}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </ScrollView>
+              {/* Add guest button (guests tab only) */}
+              {tabKey === 'guests' && (
+                <TouchableOpacity
+                  style={{
+                    width: Math.min(cellSize, 160),
+                    height: Math.min(cellSize, 160),
+                    margin: 4,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderStyle: 'dashed',
+                    borderColor: '#9ca3af',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onPress={addGuest}
+                >
+                  <Text className="text-3xl text-gray-400">+</Text>
+                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-1">
+                    {t('selectwho.addGuest')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </ScrollView>
+        )}
+      />
 
       {/* Back button */}
       <View className="p-4 bg-white border-t border-gray-200">

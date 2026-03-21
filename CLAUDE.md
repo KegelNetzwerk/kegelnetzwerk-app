@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code when working with this repository.
 
+## Project Locations
+
+- **App** (this project): `E:\2026_Projects\kegelnetzwerk-app`
+- **Webservice**: `E:\2026_Projects\kegelnetzwerk-web`
+
 ## Project Overview
 
 KegelNetzwerk App is a cross-platform Expo/React Native app (Android, iOS, Web) for German bowling clubs. Its primary purpose is **result entry during bowling sessions** — members tap game parts, select who scored, and results sync automatically to the webservice. It also delivers push notifications for events, news, and votes.

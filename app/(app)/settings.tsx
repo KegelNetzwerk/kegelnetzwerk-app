@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
+  Image,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -16,7 +17,11 @@ import { useAuth } from '../../src/hooks/useAuth';
 import { uploadPhoto } from '../../src/api/photo';
 import { clearResults } from '../../src/storage/resultPackage';
 import { clearQueue } from '../../src/storage/syncQueue';
+import { getCachedMembers } from '../../src/storage/cache';
 import { BASE_URL } from '../../constants/api';
+import Constants from 'expo-constants';
+
+const AVATAR_SIZE = 72;
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -28,6 +33,15 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const theme = useTheme();
   const [uploading, setUploading] = useState(false);
+  // picUri: null = no pic, string = absolute URL or local file URI
+  const [picUri, setPicUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    getCachedMembers().then((members) => {
+      const me = members.find((m) => m.id === user?.memberId);
+      if (me?.pic) setPicUri(`${BASE_URL}${me.pic}`);
+    });
+  }, [user?.memberId]);
 
   async function handlePhotoUpload() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,6 +62,8 @@ export default function SettingsScreen() {
     setUploading(true);
     try {
       await uploadPhoto(result.assets[0].uri);
+      // Show the new image immediately without waiting for a cache refresh
+      setPicUri(result.assets[0].uri);
       Alert.alert(t('common.success'), t('settings.photoUpdated'));
     } catch {
       Alert.alert(t('common.error'), t('settings.photoError'));
@@ -71,6 +87,8 @@ export default function SettingsScreen() {
     ]);
   }
 
+  const initial = (user?.nickname ?? '?').charAt(0).toUpperCase();
+
   return (
     <ScrollView className="flex-1 bg-gray-50">
       <View className="p-4 gap-4">
@@ -82,13 +100,44 @@ export default function SettingsScreen() {
           >
             {t('settings.account')}
           </Text>
-          <View className="px-4 pb-3">
-            <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-base text-gray-800">
-              {user?.nickname}
-            </Text>
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
-              {user?.clubName}
-            </Text>
+
+          {/* Avatar + name row */}
+          <View className="px-4 pb-4 flex-row items-center gap-4">
+            {picUri ? (
+              <Image
+                source={{ uri: picUri }}
+                style={{
+                  width: AVATAR_SIZE,
+                  height: AVATAR_SIZE,
+                  borderRadius: AVATAR_SIZE / 2,
+                  borderWidth: 2,
+                  borderColor: theme.primary,
+                }}
+              />
+            ) : (
+              <View
+                style={{
+                  width: AVATAR_SIZE,
+                  height: AVATAR_SIZE,
+                  borderRadius: AVATAR_SIZE / 2,
+                  backgroundColor: theme.primary,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 28, color: '#fff' }}>
+                  {initial}
+                </Text>
+              </View>
+            )}
+            <View className="flex-1">
+              <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-base text-gray-800">
+                {user?.nickname}
+              </Text>
+              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+                {user?.clubName}
+              </Text>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -149,9 +198,12 @@ export default function SettingsScreen() {
           >
             {t('settings.info')}
           </Text>
-          <View className="px-4 py-3 border-t border-gray-100">
+          <View className="px-4 py-3 border-t border-gray-100 gap-1">
             <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
               {t('settings.server')}: {BASE_URL}
+            </Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+              {t('settings.version')}: {Constants.expoConfig?.version ?? '—'}
             </Text>
           </View>
         </View>

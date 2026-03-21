@@ -41,7 +41,8 @@
           "icon": "./assets/icon.png",
           "color": "#005982"
         }
-      ]
+      ],
+      "expo-localization"
     ]
   }
 }

@@ -1,4 +1,4 @@
-import { Image, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
@@ -6,13 +6,31 @@ import { BASE_URL } from '../../constants/api';
 
 function ClubLogo() {
   const { user } = useAuth();
-  if (!user?.clubPic) return null;
+  const theme = useTheme();
+  if (!user) return null;
   return (
-    <View style={{ marginRight: 12 }}>
-      <Image
-        source={{ uri: `${BASE_URL}${user.clubPic}` }}
-        style={{ width: 32, height: 32, borderRadius: 6, resizeMode: 'contain' }}
-      />
+    <View style={{
+      marginRight: 12,
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+    }}>
+      {user.clubPic ? (
+        <Image
+          source={{ uri: `${BASE_URL}${user.clubPic}` }}
+          style={{ width: 36, height: 36, resizeMode: 'contain' }}
+        />
+      ) : (
+        <Text style={{ color: '#fff', fontFamily: 'DMSans_700Bold', fontSize: 16 }}>
+          {user.clubName.charAt(0).toUpperCase()}
+        </Text>
+      )}
     </View>
   );
 }
