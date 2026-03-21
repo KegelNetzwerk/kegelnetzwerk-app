@@ -21,6 +21,7 @@ export interface AuthUser {
   clubName: string;
   clubPic: string | null;
   colors: ClubColors;
+  clubBg: number; // 0 = fullbg.jpg, 1 = fullbg_alt.jpg, 2 = fullbg_neutral.jpg
 }
 
 export interface AuthContextValue {

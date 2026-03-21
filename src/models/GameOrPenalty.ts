@@ -1,7 +1,8 @@
 export interface Part {
   id: number;
   name: string;
-  value: number | null; // null = variable (user enters a number)
+  value: number;
+  variable: boolean;    // true = user enters a custom number at result-entry time
   once: boolean;        // true = member can only score this part once per session
   position: number;
 }

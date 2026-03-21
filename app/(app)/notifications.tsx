@@ -1,3 +1,4 @@
+import ClubBackground from '../../src/components/ClubBackground';
 import { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -57,10 +58,12 @@ export default function NotificationsScreen() {
   const typeKeys = Object.keys(t('notifications.types', { returnObjects: true })) as Array<keyof NotificationState['enabled']>;
 
   return (
-    <ScrollView
-      className="flex-1 bg-gray-50"
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
+    <View style={{ flex: 1 }}>
+      <ClubBackground />
+      <ScrollView
+        className="flex-1"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
       <View className="p-4 gap-4">
         {/* Toggles */}
         <View className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -137,5 +140,6 @@ export default function NotificationsScreen() {
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }

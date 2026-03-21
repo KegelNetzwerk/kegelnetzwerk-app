@@ -7,4 +7,5 @@ export interface ResultEntry {
   value: number;
   timestamp: string;    // ISO string
   synced: boolean;
+  sessionGroup: number; // unix timestamp (seconds) identifying the bowling session
 }

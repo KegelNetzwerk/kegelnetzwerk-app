@@ -4,6 +4,16 @@ import { markSynced } from '../storage/resultPackage';
 import { uploadResults } from '../api/results';
 import type { ResultEntry } from '../models/Result';
 
+/** Standalone flush — safe to call outside React (e.g. AppState handler). */
+export async function flushQueue(): Promise<void> {
+  const queue = await getQueue();
+  if (queue.length === 0) return;
+  await uploadResults(queue);
+  const ids = queue.map((e) => e.id);
+  await dequeue(ids);
+  await markSynced(ids);
+}
+
 export function useSyncQueue() {
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);

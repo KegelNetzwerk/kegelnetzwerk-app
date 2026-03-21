@@ -72,7 +72,7 @@ export default function ValueDialog({
               onPress={onCancel}
             >
               <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-gray-600">
-                {t('common.cancel')}
+                {t('valueDialog.cancel')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -80,7 +80,7 @@ export default function ValueDialog({
               onPress={handleConfirm}
             >
               <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-white">
-                {t('common.confirm')}
+                {t('valueDialog.confirm')}
               </Text>
             </TouchableOpacity>
           </View>

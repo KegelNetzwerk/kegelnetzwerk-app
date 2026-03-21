@@ -1,3 +1,4 @@
+import ClubBackground from '../../src/components/ClubBackground';
 import { useState, useCallback, useRef } from 'react';
 import {
   View,
@@ -19,9 +20,11 @@ import { useLocalData } from '../../src/hooks/useLocalData';
 import { useSyncQueue } from '../../src/hooks/useSyncQueue';
 import { useNetworkSync } from '../../src/hooks/useNetworkSync';
 import { addResult } from '../../src/storage/resultPackage';
+import { getOrCreateSession, touchSession } from '../../src/storage/session';
 import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
 import ValueDialog from '../../src/components/ValueDialog';
+import Toast from '../../src/components/Toast';
 import type { Guest } from '../../src/models/Guest';
 
 const COLUMNS = 3;
@@ -37,13 +40,17 @@ export default function SelectWhoScreen() {
     partId: string;
     partName: string;
     partValue: string;
+    partVariable: string;
     partOnce: string;
+    stay: string;
   }>();
 
   const gameId = parseInt(params.gameId ?? '0', 10);
   const partId = parseInt(params.partId ?? '0', 10);
-  const partValue = params.partValue ? parseFloat(params.partValue) : null;
+  const partValue = parseFloat(params.partValue ?? '0');
+  const partVariable = params.partVariable === '1';
   const partOnce = params.partOnce === '1';
+  const stay = params.stay === '1';
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: params.partName ?? 'Wer?', headerShown: true });
@@ -60,11 +67,22 @@ export default function SelectWhoScreen() {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [onceDone, setOnceDone] = useState<Set<string>>(new Set());
   const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(message: string) {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToastMessage(message);
+    setToastVisible(true);
+    toastTimer.current = setTimeout(() => setToastVisible(false), 2000);
+  }
 
   const { width } = useWindowDimensions();
   const cellSize = Math.floor((width - 32 - COLUMNS * BUTTON_MARGIN) / COLUMNS);
 
-  async function recordResult(memberId: number | null, guestName: string | null, value: number) {
+  async function recordResult(memberId: number | null, guestName: string | null, value: number, displayName: string) {
+    const sessionGroup = await getOrCreateSession();
     const entry = {
       id: uuidv4(),
       memberId,
@@ -74,20 +92,27 @@ export default function SelectWhoScreen() {
       value,
       timestamp: new Date().toISOString(),
       synced: false,
+      sessionGroup,
     };
     await addResult(entry);
+    await touchSession();
     await addToQueue(entry);
     await flush();
+    if (!stay) {
+      router.back();
+    } else {
+      showToast(`✓ ${displayName} — ${params.partName} — ${value}`);
+    }
   }
 
   function handleMemberPress(memberId: number, nickname: string) {
     const key = `m-${memberId}`;
     if (onceDone.has(key)) return;
 
-    if (partValue === null) {
+    if (partVariable) {
       setDialogTarget({ id: key, name: nickname });
     } else {
-      recordResult(memberId, null, partValue);
+      recordResult(memberId, null, partValue, nickname);
       if (partOnce) {
         setOnceDone((prev) => new Set([...prev, key]));
       }
@@ -98,10 +123,10 @@ export default function SelectWhoScreen() {
     const key = `g-${guest.id}`;
     if (onceDone.has(key)) return;
 
-    if (partValue === null) {
+    if (partVariable) {
       setDialogTarget({ id: key, name: guest.name });
     } else {
-      recordResult(null, guest.name, partValue);
+      recordResult(null, guest.name, partValue, guest.name);
       if (partOnce) {
         setOnceDone((prev) => new Set([...prev, key]));
       }
@@ -113,11 +138,11 @@ export default function SelectWhoScreen() {
     const key = dialogTarget.id;
     if (key.startsWith('m-')) {
       const memberId = parseInt(key.slice(2), 10);
-      recordResult(memberId, null, value);
+      recordResult(memberId, null, value, dialogTarget.name);
     } else {
       const guestId = key.slice(2);
       const guest = guests.find((g) => g.id === guestId);
-      if (guest) recordResult(null, guest.name, value);
+      if (guest) recordResult(null, guest.name, value, guest.name);
     }
     if (partOnce) {
       setOnceDone((prev) => new Set([...prev, key]));
@@ -138,7 +163,8 @@ export default function SelectWhoScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1">
+      <ClubBackground />
       {/* Tabs */}
       <View className="flex-row bg-white border-b border-gray-200 px-4 pt-2">
         {TABS.map((tabKey) => (
@@ -245,6 +271,9 @@ export default function SelectWhoScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Success toast */}
+      <Toast visible={toastVisible} message={toastMessage} />
 
       {/* Value input dialog */}
       <ValueDialog

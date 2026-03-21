@@ -5,10 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
   ActivityIndicator,
   Switch,
+  Image,
+  ImageBackground,
+  Linking,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { fetchClubs, login, type Club } from '../../src/api/auth';
 import { useAuth, DEFAULT_COLORS } from '../../src/hooks/useAuth';
@@ -21,6 +26,7 @@ import { registerBackgroundFetch } from '../../src/notifications/backgroundTask'
 export default function LoginScreen() {
   const { t } = useTranslation();
   const { signIn } = useAuth();
+  const { width, height } = useWindowDimensions();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [showClubPicker, setShowClubPicker] = useState(false);
@@ -66,6 +72,7 @@ export default function LoginScreen() {
         clubName: selectedClub.name,
         clubPic: selectedClub.pic && selectedClub.pic !== 'none' ? selectedClub.pic : null,
         colors,
+        clubBg: res.bg1 ?? 0,
       };
       await signIn(authUser, password, autoLogin);
 
@@ -82,25 +89,42 @@ export default function LoginScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerClassName="flex-grow">
-      {/* Header gradient */}
-      <LinearGradient
-        colors={['#005982', '#3089ac']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={{ paddingTop: 64, paddingBottom: 40, alignItems: 'center' }}
+    <ImageBackground
+      source={require('../../assets/fullbg.jpg')}
+      style={{ width, height }}
+      resizeMode="cover"
+    >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <Text
-          style={{ fontFamily: 'DMSans_700Bold', fontSize: 28, color: '#fff', letterSpacing: 0.5 }}
-        >
-          KegelNetzwerk
-        </Text>
-        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
-          {t('auth.login.subtitle')}
-        </Text>
-      </LinearGradient>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }} keyboardShouldPersistTaps="handled">
+        {/* Logo */}
+        <View style={{ alignItems: 'center', marginBottom: 32 }}>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://KegelNetzwerk.de')}
+            activeOpacity={0.8}
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.45)',
+              borderRadius: 16,
+              padding: 16,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.6,
+              shadowRadius: 20,
+              elevation: 10,
+            }}
+          >
+            <Image
+              source={require('../../assets/splash_logo.png')}
+              style={{ width: 280, height: 70 }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </View>
 
-      <View className="p-6 flex-1">
+        {/* Login card */}
+        <View style={{ backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 16, padding: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.55, shadowRadius: 28, elevation: 12 }}>
         {/* Club picker */}
         <View className="mb-4">
           <Text
@@ -202,7 +226,9 @@ export default function LoginScreen() {
             </Text>
           )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }

@@ -1,3 +1,4 @@
+import ClubBackground from '../../src/components/ClubBackground';
 import { useState, useEffect } from 'react';
 import {
   View,
@@ -10,7 +11,7 @@ import {
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, LogOut, Trash2, ChevronRight } from 'lucide-react-native';
+import { Camera, LogOut, Trash2, RotateCcw, ChevronRight } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/hooks/useAuth';
@@ -18,6 +19,7 @@ import { uploadPhoto } from '../../src/api/photo';
 import { clearResults } from '../../src/storage/resultPackage';
 import { clearQueue } from '../../src/storage/syncQueue';
 import { getCachedMembers } from '../../src/storage/cache';
+import { getOrCreateSession, resetSession } from '../../src/storage/session';
 import { BASE_URL } from '../../constants/api';
 import Constants from 'expo-constants';
 
@@ -35,12 +37,14 @@ export default function SettingsScreen() {
   const [uploading, setUploading] = useState(false);
   // picUri: null = no pic, string = absolute URL or local file URI
   const [picUri, setPicUri] = useState<string | null>(null);
+  const [sessionGroup, setSessionGroup] = useState<number | null>(null);
 
   useEffect(() => {
     getCachedMembers().then((members) => {
       const me = members.find((m) => m.id === user?.memberId);
       if (me?.pic) setPicUri(`${BASE_URL}${me.pic}`);
     });
+    getOrCreateSession().then(setSessionGroup);
   }, [user?.memberId]);
 
   async function handlePhotoUpload() {
@@ -87,10 +91,38 @@ export default function SettingsScreen() {
     ]);
   }
 
+  function handleLogout() {
+    Alert.alert(t('settings.logoutTitle'), t('settings.logoutMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.logout'),
+        style: 'destructive',
+        onPress: signOut,
+      },
+    ]);
+  }
+
+  async function handleNewSession() {
+    Alert.alert(t('settings.newSessionTitle'), t('settings.newSessionMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.confirm'),
+        onPress: async () => {
+          await resetSession();
+          const group = await getOrCreateSession();
+          setSessionGroup(group);
+          Alert.alert(t('common.success'), t('settings.newSessionDone'));
+        },
+      },
+    ]);
+  }
+
   const initial = (user?.nickname ?? '?').charAt(0).toUpperCase();
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
+    <View style={{ flex: 1 }}>
+      <ClubBackground />
+      <ScrollView className="flex-1">
       <View className="p-4 gap-4">
         {/* Account */}
         <View className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -156,7 +188,7 @@ export default function SettingsScreen() {
 
           <TouchableOpacity
             className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
-            onPress={signOut}
+            onPress={handleLogout}
           >
             <View className="flex-row items-center gap-3">
               <LogOut size={18} color={theme.accent} />
@@ -178,6 +210,18 @@ export default function SettingsScreen() {
           </Text>
           <TouchableOpacity
             className="px-4 py-3 flex-row items-center justify-between"
+            onPress={handleNewSession}
+          >
+            <View className="flex-row items-center gap-3">
+              <RotateCcw size={18} color={theme.primary} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.primary }} className="text-base">
+                {t('settings.newSession')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color="#9ca3af" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
             onPress={handleClearSession}
           >
             <View className="flex-row items-center gap-3">
@@ -205,9 +249,13 @@ export default function SettingsScreen() {
             <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
               {t('settings.version')}: {Constants.expoConfig?.version ?? '—'}
             </Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+              {t('settings.sessionId')}: {sessionGroup ?? '—'}
+            </Text>
           </View>
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }

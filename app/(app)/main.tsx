@@ -1,3 +1,4 @@
+import ClubBackground from '../../src/components/ClubBackground';
 import { View, Text, TouchableOpacity, Image, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -48,7 +49,8 @@ export default function MainScreen() {
   const theme = useTheme();
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1">
+      <ClubBackground />
       {/* Gradient header with logo */}
       <LinearGradient
         colors={[theme.primary, theme.secondary]}
@@ -76,11 +78,13 @@ export default function MainScreen() {
 
       {/* Menu */}
       <View className="flex-1 p-6 gap-3">
-        <MenuButton
-          icon={<ClipboardList size={24} color={theme.primary} />}
-          label={t('main.enterResults')}
-          onPress={() => router.push('/(app)/working')}
-        />
+        {user?.role === 'ADMIN' && (
+          <MenuButton
+            icon={<ClipboardList size={24} color={theme.primary} />}
+            label={t('main.enterResults')}
+            onPress={() => router.push('/(app)/working')}
+          />
+        )}
         <MenuButton
           icon={<BarChart2 size={24} color={theme.primary} />}
           label={t('main.overview')}

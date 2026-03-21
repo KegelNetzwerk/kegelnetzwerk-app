@@ -21,6 +21,7 @@ export interface LoginResponse {
   farbe1: string; // hex without #, e.g. "005982"
   farbe2: string;
   farbe3: string;
+  bg1: number;   // 0 = fullbg.jpg, 1 = fullbg_alt.jpg, 2 = fullbg_neutral.jpg
 }
 
 export async function login(clubName: string, nickname: string, password: string): Promise<LoginResponse> {

@@ -11,6 +11,7 @@ const KEYS = {
   PASSWORD: 'kn_password',
   AUTO_LOGIN: 'kn_auto_login',
   COLORS: 'kn_colors',
+  CLUB_BG: 'kn_club_bg',
 } as const;
 
 // expo-secure-store is native-only; fall back to localStorage on web
@@ -46,6 +47,7 @@ export async function saveCredentials(data: {
   password: string;
   autoLogin: boolean;
   colors: ClubColors;
+  clubBg: number;
 }) {
   await Promise.all([
     setItem(KEYS.TOKEN, data.token),
@@ -56,6 +58,7 @@ export async function saveCredentials(data: {
     setItem(KEYS.PASSWORD, data.password),
     setItem(KEYS.AUTO_LOGIN, data.autoLogin ? '1' : '0'),
     setItem(KEYS.COLORS, JSON.stringify(data.colors)),
+    setItem(KEYS.CLUB_BG, String(data.clubBg)),
   ]);
 }
 
@@ -72,8 +75,9 @@ export async function getStoredCredentials(): Promise<{
   password: string | null;
   autoLogin: boolean;
   colors: ClubColors;
+  clubBg: number;
 }> {
-  const [token, clubIdStr, clubName, clubPic, nickname, password, autoLoginStr, colorsStr] =
+  const [token, clubIdStr, clubName, clubPic, nickname, password, autoLoginStr, colorsStr, clubBgStr] =
     await Promise.all([
       getItem(KEYS.TOKEN),
       getItem(KEYS.CLUB_ID),
@@ -83,6 +87,7 @@ export async function getStoredCredentials(): Promise<{
       getItem(KEYS.PASSWORD),
       getItem(KEYS.AUTO_LOGIN),
       getItem(KEYS.COLORS),
+      getItem(KEYS.CLUB_BG),
     ]);
 
   let colors: ClubColors = DEFAULT_COLORS;
@@ -103,6 +108,7 @@ export async function getStoredCredentials(): Promise<{
     password,
     autoLogin: autoLoginStr === '1',
     colors,
+    clubBg: clubBgStr ? parseInt(clubBgStr, 10) : 0,
   };
 }
 

@@ -1,3 +1,4 @@
+import ClubBackground from '../../src/components/ClubBackground';
 import { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
@@ -7,12 +8,13 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from 'react-native';
-import { router, useNavigation } from 'expo-router';
+import { Redirect, router, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
@@ -27,7 +29,10 @@ export default function WorkingScreen() {
     navigation.setOptions({ title: t('working.title'), headerShown: true });
   }, [navigation, t]);
 
+  const { user } = useAuth();
   const { games, loading } = useLocalData();
+
+  if (user?.role !== 'ADMIN') return <Redirect href="/(app)/main" />;
   const { width } = useWindowDimensions();
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
   const flatListRef = useRef<FlatList<GameOrPenalty>>(null);
@@ -42,7 +47,7 @@ export default function WorkingScreen() {
     flatListRef.current?.scrollToIndex({ index: idx, animated: true });
   }, []);
 
-  const handlePartPress = useCallback((game: GameOrPenalty, part: Part) => {
+  const navigateToSelectWho = useCallback((game: GameOrPenalty, part: Part, stay: boolean) => {
     router.push({
       pathname: '/(app)/selectwho',
       params: {
@@ -50,8 +55,10 @@ export default function WorkingScreen() {
         gameName: game.name,
         partId: String(part.id),
         partName: part.name,
-        partValue: part.value !== null ? String(part.value) : '',
+        partValue: String(part.value),
+        partVariable: part.variable ? '1' : '0',
         partOnce: part.once ? '1' : '0',
+        stay: stay ? '1' : '0',
       },
     });
   }, []);
@@ -86,24 +93,31 @@ export default function WorkingScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1">
+      <ClubBackground />
       {/* Game tabs */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="bg-white border-b border-gray-200"
-        contentContainerClassName="px-2 py-2 gap-2"
+        style={{ backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb', flexGrow: 0 }}
+        contentContainerStyle={{ flexDirection: 'row', paddingHorizontal: 16, paddingTop: 8 }}
       >
         {reversedGames.map((game, idx) => (
           <TouchableOpacity
             key={game.id}
             onPress={() => handleTabPress(idx)}
-            style={idx === selectedGameIndex ? { backgroundColor: theme.primary } : undefined}
-            className={`px-4 py-2 rounded-full ${idx === selectedGameIndex ? '' : 'bg-gray-100'}`}
+            style={[
+              { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
+              idx === selectedGameIndex
+                ? { borderBottomColor: theme.primary }
+                : { borderBottomColor: 'transparent' },
+            ]}
           >
             <Text
-              style={{ fontFamily: 'DMSans_500Medium' }}
-              className={`text-sm ${idx === selectedGameIndex ? 'text-white' : 'text-gray-700'}`}
+              style={{
+                fontFamily: idx === selectedGameIndex ? 'DMSans_600SemiBold' : 'DMSans_400Regular',
+                color: idx === selectedGameIndex ? theme.primary : '#6b7280',
+              }}
             >
               {game.name}
             </Text>
@@ -119,8 +133,10 @@ export default function WorkingScreen() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        disableIntervalMomentum
+        decelerationRate="fast"
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
         getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
         renderItem={({ item: game }) => (
           <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }}>
@@ -130,7 +146,8 @@ export default function WorkingScreen() {
                   key={part.id}
                   label={part.name}
                   size={cellSize}
-                  onPress={() => handlePartPress(game, part)}
+                  onPress={() => navigateToSelectWho(game, part, false)}
+                  onLongPress={() => navigateToSelectWho(game, part, true)}
                 />
               ))}
             </View>

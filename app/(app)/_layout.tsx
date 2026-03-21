@@ -1,7 +1,9 @@
-import { Image, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { AppState, Image, Text, View } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
+import { flushQueue } from '../../src/hooks/useSyncQueue';
 import { BASE_URL } from '../../constants/api';
 
 function ClubLogo() {
@@ -38,8 +40,15 @@ function ClubLogo() {
 export default function AppLayout() {
   const { user } = useAuth();
   const theme = useTheme();
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') flushQueue().catch(() => {});
+    });
+    return () => sub.remove();
+  }, []);
 
   if (!user) return <Redirect href="/(auth)/login" />;
+
   return (
     <Stack
       screenOptions={{

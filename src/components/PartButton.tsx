@@ -4,10 +4,11 @@ import { useTheme } from '../hooks/useTheme';
 interface PartButtonProps {
   label: string;
   onPress: () => void;
+  onLongPress: () => void;
   size: number;
 }
 
-export default function PartButton({ label, onPress, size }: PartButtonProps) {
+export default function PartButton({ label, onPress, onLongPress, size }: PartButtonProps) {
   const theme = useTheme();
   const capped = Math.min(size, 160);
 
@@ -29,6 +30,8 @@ export default function PartButton({ label, onPress, size }: PartButtonProps) {
       }}
       activeOpacity={0.75}
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={400}
     >
       <Text
         style={{

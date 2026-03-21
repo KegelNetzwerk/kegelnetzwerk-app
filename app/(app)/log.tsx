@@ -1,3 +1,4 @@
+import ClubBackground from '../../src/components/ClubBackground';
 import { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -86,7 +87,8 @@ export default function LogScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1">
+      <ClubBackground />
       <ScrollView
         className="flex-1 p-4"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

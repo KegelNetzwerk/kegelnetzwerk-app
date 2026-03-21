@@ -68,6 +68,7 @@ export default function RootLayout() {
             password: creds.password,
             autoLogin: true,
             colors,
+            clubBg: res.bg1 ?? 0,
           });
           setUser({
             token: res.token,
@@ -78,6 +79,7 @@ export default function RootLayout() {
             clubName: creds.clubName,
             clubPic: normalizePic(creds.clubPic),
             colors,
+            clubBg: res.bg1 ?? 0,
           });
           const granted = await requestNotificationPermissions();
           if (granted) {
@@ -107,6 +109,7 @@ export default function RootLayout() {
       password,
       autoLogin,
       colors: authUser.colors,
+      clubBg: authUser.clubBg ?? 0,
     });
     setUser(authUser);
   }, []);
