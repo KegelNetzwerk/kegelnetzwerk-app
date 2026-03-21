@@ -1,30 +1,36 @@
 import ClubBackground from '../../src/components/ClubBackground';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  FlatList,
+  Animated,
+  Easing,
   TouchableOpacity,
+  PanResponder,
   useWindowDimensions,
   Alert,
 } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react-native';
+import { ArrowLeft, Settings } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useSyncQueue } from '../../src/hooks/useSyncQueue';
 import { useNetworkSync } from '../../src/hooks/useNetworkSync';
-import { addResult } from '../../src/storage/resultPackage';
+import { addResult, getResults } from '../../src/storage/resultPackage';
 import { getOrCreateSession, touchSession } from '../../src/storage/session';
+import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSettings';
 import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
 import ValueDialog from '../../src/components/ValueDialog';
-import Toast from '../../src/components/Toast';
+import ShortcutMenu from '../../src/components/ShortcutMenu';
+import MemberSettingsModal from '../../src/components/MemberSettingsModal';
+import ToastStack, { type ToastItem } from '../../src/components/Toast';
+import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 import type { Guest } from '../../src/models/Guest';
 
 const COLUMNS = 3;
@@ -53,42 +59,131 @@ export default function SelectWhoScreen() {
   const stay = params.stay === '1';
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: params.partName ?? 'Wer?', headerShown: true });
+    navigation.setOptions({
+      title: params.partName ?? 'Wer?',
+      headerShown: true,
+      headerRight: () => (
+        <TouchableOpacity onPress={() => setMemberSettingsVisible(true)} style={{ marginRight: 12 }}>
+          <Settings size={20} color="#fff" />
+        </TouchableOpacity>
+      ),
+    });
   }, [navigation, params.partName]);
 
   const theme = useTheme();
-  const { members } = useLocalData();
+  const { members, games } = useLocalData();
   const { addToQueue, flush } = useSyncQueue();
   useNetworkSync(flush);
 
+  const [pinnedParts, setPinnedParts] = useState<PinnedPart[]>([]);
+  const [hiddenMemberIds, setHiddenMemberIds] = useState<number[]>([]);
+  const [memberSettingsVisible, setMemberSettingsVisible] = useState(false);
+
+  useEffect(() => {
+    getWorkingSettings().then((s) => {
+      setPinnedParts(s.pinnedParts);
+      setHiddenMemberIds(s.hiddenMemberIds);
+    });
+  }, []);
+
   const TABS = ['members', 'guests'] as const;
   const [tab, setTab] = useState<'members' | 'guests'>('members');
-  const pagerRef = useRef<FlatList<string>>(null);
-  const [guests, setGuests] = useState<Guest[]>([]);
-  const [onceDone, setOnceDone] = useState<Set<string>>(new Set());
-  const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // pagerOffset: 0 = members visible, -width = guests visible
+  const pagerOffset = useRef(new Animated.Value(0)).current;
+  const { width } = useWindowDimensions();
 
-  function showToast(message: string) {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToastMessage(message);
-    setToastVisible(true);
-    toastTimer.current = setTimeout(() => setToastVisible(false), 2000);
+  const tabRef = useRef(tab);
+  tabRef.current = tab;
+
+  function switchTab(newTab: 'members' | 'guests') {
+    if (newTab === tabRef.current) return;
+    tabRef.current = newTab;
+    setTab(newTab);
+    Animated.timing(pagerOffset, {
+      toValue: newTab === 'guests' ? -width : 0,
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
   }
 
-  const { width } = useWindowDimensions();
+  const switchTabRef = useRef(switchTab);
+  switchTabRef.current = switchTab;
+
+  const swipe = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -50 && tabRef.current === 'members') switchTabRef.current('guests');
+        else if (g.dx > 50 && tabRef.current === 'guests') switchTabRef.current('members');
+      },
+    })
+  ).current;
+
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [onceDone, setOnceDone] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!partOnce) return;
+    (async () => {
+      const [results, sessionGroup] = await Promise.all([
+        getResults(),
+        getOrCreateSession(),
+      ]);
+      const done = new Set<string>();
+      for (const r of results) {
+        if (r.partId === partId && r.sessionGroup === sessionGroup) {
+          if (r.memberId !== null) done.add(`m-${r.memberId}`);
+        }
+      }
+      setOnceDone(done);
+    })();
+  }, [partId, partOnce]);
+
+  // Dialog for variable-value entry (regular or shortcut)
+  const [dialogTarget, setDialogTarget] = useState<{ id: string; name: string } | null>(null);
+  const [shortcutDialog, setShortcutDialog] = useState<{
+    memberKey: string;
+    memberName: string;
+    game: GameOrPenalty;
+    part: Part;
+  } | null>(null);
+
+  // Shortcut menu
+  const [shortcutMenuTarget, setShortcutMenuTarget] = useState<{
+    memberKey: string;
+    memberName: string;
+  } | null>(null);
+
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+
+  function showToast(message: string) {
+    const id = Math.random().toString(36).slice(2);
+    setToasts((prev) => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2500);
+  }
+
   const cellSize = Math.floor((width - 32 - COLUMNS * BUTTON_MARGIN) / COLUMNS);
 
-  async function recordResult(memberId: number | null, guestName: string | null, value: number, displayName: string) {
+  async function recordResult(
+    memberId: number | null,
+    guestName: string | null,
+    value: number,
+    displayName: string,
+    overrideGameId?: number,
+    overridePartId?: number,
+  ) {
     const sessionGroup = await getOrCreateSession();
     const entry = {
       id: uuidv4(),
       memberId,
       guestName,
-      gameId,
-      partId,
+      gameId: overrideGameId ?? gameId,
+      partId: overridePartId ?? partId,
       value,
       timestamp: new Date().toISOString(),
       synced: false,
@@ -98,39 +193,43 @@ export default function SelectWhoScreen() {
     await touchSession();
     await addToQueue(entry);
     await flush();
-    if (!stay) {
+    if (!stay && overrideGameId === undefined) {
       router.back();
     } else {
-      showToast(`✓ ${displayName} — ${params.partName} — ${value}`);
+      showToast(`✓ ${displayName} — ${overridePartId !== undefined
+        ? (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')
+        : params.partName} — ${value}`);
     }
   }
 
   function handleMemberPress(memberId: number, nickname: string) {
     const key = `m-${memberId}`;
     if (onceDone.has(key)) return;
-
     if (partVariable) {
       setDialogTarget({ id: key, name: nickname });
     } else {
       recordResult(memberId, null, partValue, nickname);
-      if (partOnce) {
-        setOnceDone((prev) => new Set([...prev, key]));
-      }
+      if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     }
+  }
+
+  function handleMemberLongPress(memberId: number, nickname: string) {
+    setShortcutMenuTarget({ memberKey: `m-${memberId}`, memberName: nickname });
   }
 
   function handleGuestPress(guest: Guest) {
     const key = `g-${guest.id}`;
     if (onceDone.has(key)) return;
-
     if (partVariable) {
       setDialogTarget({ id: key, name: guest.name });
     } else {
       recordResult(null, guest.name, partValue, guest.name);
-      if (partOnce) {
-        setOnceDone((prev) => new Set([...prev, key]));
-      }
+      if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     }
+  }
+
+  function handleGuestLongPress(guest: Guest) {
+    setShortcutMenuTarget({ memberKey: `g-${guest.id}`, memberName: guest.name });
   }
 
   function handleDialogConfirm(value: number) {
@@ -144,10 +243,34 @@ export default function SelectWhoScreen() {
       const guest = guests.find((g) => g.id === guestId);
       if (guest) recordResult(null, guest.name, value, guest.name);
     }
-    if (partOnce) {
-      setOnceDone((prev) => new Set([...prev, key]));
-    }
+    if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     setDialogTarget(null);
+  }
+
+  function handleShortcutSelect(game: GameOrPenalty, part: Part) {
+    if (!shortcutMenuTarget) return;
+    setShortcutMenuTarget(null);
+    const { memberKey, memberName } = shortcutMenuTarget;
+    if (part.variable) {
+      setShortcutDialog({ memberKey, memberName, game, part });
+    } else {
+      const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
+      const guestName = memberKey.startsWith('g-')
+        ? guests.find((g) => g.id === memberKey.slice(2))?.name ?? memberName
+        : null;
+      recordResult(memberId, guestName, part.value, memberName, game.id, part.id);
+    }
+  }
+
+  function handleShortcutDialogConfirm(value: number) {
+    if (!shortcutDialog) return;
+    const { memberKey, memberName, game, part } = shortcutDialog;
+    const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
+    const guestName = memberKey.startsWith('g-')
+      ? guests.find((g) => g.id === memberKey.slice(2))?.name ?? memberName
+      : null;
+    recordResult(memberId, guestName, value, memberName, game.id, part.id);
+    setShortcutDialog(null);
   }
 
   function addGuest() {
@@ -170,10 +293,7 @@ export default function SelectWhoScreen() {
         {TABS.map((tabKey) => (
           <TouchableOpacity
             key={tabKey}
-            onPress={() => {
-              setTab(tabKey);
-              pagerRef.current?.scrollToIndex({ index: TABS.indexOf(tabKey), animated: true });
-            }}
+            onPress={() => switchTab(tabKey)}
             style={[
               { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
               tab === tabKey ? { borderBottomColor: theme.primary } : { borderBottomColor: 'transparent' },
@@ -191,73 +311,65 @@ export default function SelectWhoScreen() {
         ))}
       </View>
 
-      {/* Swipeable tab pages */}
-      <FlatList
-        ref={pagerRef}
-        data={TABS}
-        keyExtractor={(k) => k}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
-        onViewableItemsChanged={useCallback(
-          ({ viewableItems }: { viewableItems: Array<{ item: string; index: number | null }> }) => {
-            if (viewableItems.length > 0) setTab(viewableItems[0].item as 'members' | 'guests');
-          },
-          []
-        )}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-        renderItem={({ item: tabKey }) => (
-          <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {tabKey === 'members'
-                ? members.map((m) => (
-                    <MemberButton
-                      key={m.id}
-                      nickname={m.nickname}
-                      pic={m.pic}
-                      size={cellSize}
-                      disabled={partOnce && onceDone.has(`m-${m.id}`)}
-                      onPress={() => handleMemberPress(m.id, m.nickname)}
-                    />
-                  ))
-                : guests.map((g) => (
-                    <MemberButton
-                      key={g.id}
-                      nickname={g.name}
-                      pic={null}
-                      size={cellSize}
-                      disabled={partOnce && onceDone.has(`g-${g.id}`)}
-                      onPress={() => handleGuestPress(g)}
-                    />
-                  ))}
+      {/* Tab content — two pages side by side, container slides */}
+      <View style={{ flex: 1, overflow: 'hidden' }} {...swipe.panHandlers}>
+        <Animated.View style={{ flex: 1, flexDirection: 'row', width: width * 2, transform: [{ translateX: pagerOffset }] }}>
 
-              {/* Add guest button (guests tab only) */}
-              {tabKey === 'guests' && (
-                <TouchableOpacity
-                  style={{
-                    width: Math.min(cellSize, 160),
-                    height: Math.min(cellSize, 160),
-                    margin: 4,
-                    borderRadius: 12,
-                    borderWidth: 2,
-                    borderStyle: 'dashed',
-                    borderColor: '#9ca3af',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                  onPress={addGuest}
-                >
-                  <Text className="text-3xl text-gray-400">+</Text>
-                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-1">
-                    {t('selectwho.addGuest')}
-                  </Text>
-                </TouchableOpacity>
-              )}
+          {/* Members page */}
+          <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }} nestedScrollEnabled>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {members.filter((m) => !hiddenMemberIds.includes(m.id)).map((m) => (
+                <MemberButton
+                  key={m.id}
+                  nickname={m.nickname}
+                  pic={m.pic}
+                  size={cellSize}
+                  disabled={partOnce && onceDone.has(`m-${m.id}`)}
+                  onPress={() => handleMemberPress(m.id, m.nickname)}
+                  onLongPress={() => handleMemberLongPress(m.id, m.nickname)}
+                />
+              ))}
             </View>
           </ScrollView>
-        )}
-      />
+
+          {/* Guests page */}
+          <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }} nestedScrollEnabled>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {guests.map((g) => (
+                <MemberButton
+                  key={g.id}
+                  nickname={g.name}
+                  pic={null}
+                  size={cellSize}
+                  disabled={partOnce && onceDone.has(`g-${g.id}`)}
+                  onPress={() => handleGuestPress(g)}
+                  onLongPress={() => handleGuestLongPress(g)}
+                />
+              ))}
+              <TouchableOpacity
+                style={{
+                  width: Math.min(cellSize, 160),
+                  height: Math.min(cellSize, 160),
+                  margin: 4,
+                  borderRadius: 12,
+                  borderWidth: 2,
+                  borderStyle: 'dashed',
+                  borderColor: '#9ca3af',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={addGuest}
+              >
+                <Text className="text-3xl text-gray-400">+</Text>
+                <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-1">
+                  {t('selectwho.addGuest')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+
+        </Animated.View>
+      </View>
 
       {/* Back button */}
       <View className="p-4 bg-white border-t border-gray-200">
@@ -272,16 +384,45 @@ export default function SelectWhoScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Success toast */}
-      <Toast visible={toastVisible} message={toastMessage} />
+      {/* Success toasts */}
+      <ToastStack toasts={toasts} />
 
-      {/* Value input dialog */}
+      {/* Regular value input dialog */}
       <ValueDialog
         visible={!!dialogTarget}
         partName={params.partName ?? ''}
         memberName={dialogTarget?.name ?? ''}
         onConfirm={handleDialogConfirm}
         onCancel={() => setDialogTarget(null)}
+      />
+
+      {/* Shortcut value input dialog */}
+      <ValueDialog
+        visible={!!shortcutDialog}
+        partName={shortcutDialog?.part.name ?? ''}
+        memberName={shortcutDialog?.memberName ?? ''}
+        onConfirm={handleShortcutDialogConfirm}
+        onCancel={() => setShortcutDialog(null)}
+      />
+
+      {/* Member visibility settings */}
+      <MemberSettingsModal
+        visible={memberSettingsVisible}
+        members={members}
+        onClose={() => {
+          setMemberSettingsVisible(false);
+          getWorkingSettings().then((s) => setHiddenMemberIds(s.hiddenMemberIds));
+        }}
+      />
+
+      {/* Shortcut menu */}
+      <ShortcutMenu
+        visible={!!shortcutMenuTarget}
+        memberName={shortcutMenuTarget?.memberName ?? ''}
+        games={games}
+        pinnedParts={pinnedParts}
+        onSelect={handleShortcutSelect}
+        onCancel={() => setShortcutMenuTarget(null)}
       />
     </View>
   );

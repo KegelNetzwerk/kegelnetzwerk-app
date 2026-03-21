@@ -46,6 +46,7 @@
     "noGames": "No games available. Please create games in the web service first.",
     "overview": "Overview",
     "log": "Log",
+    "settings": "Settings",
     "end": "End"
   },
   "selectwho": {
@@ -61,7 +62,9 @@
     "score": "Score",
     "money": "Money",
     "empty": "No results yet in this session",
-    "entries": "× recorded"
+    "entries": "× recorded",
+    "filter": "Filter",
+    "filterAll": "All results"
   },
   "log": {
     "title": "Log",
@@ -111,6 +114,16 @@
     "offline": "Offline –",
     "pending_one": "{{count}} result pending",
     "pending_other": "{{count}} results pending"
+  },
+  "memberSettings": {
+    "title": "Show members"
+  },
+  "workingSettings": {
+    "title": "Settings",
+    "pinned": "Shortcut"
+  },
+  "shortcutMenu": {
+    "empty": "No shortcuts configured.\nPin parts in Settings to use them here."
   },
   "valueDialog": {
     "title": "Enter value",

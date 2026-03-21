@@ -46,6 +46,7 @@
     "noGames": "Keine Spiele verfügbar. Bitte zuerst Spiele im Webservice anlegen.",
     "overview": "Übersicht",
     "log": "Protokoll",
+    "settings": "Einstellungen",
     "end": "Beenden"
   },
   "selectwho": {
@@ -61,7 +62,9 @@
     "score": "Punkte",
     "money": "Geld",
     "empty": "Noch keine Ergebnisse in dieser Sitzung",
-    "entries": "× eingetragen"
+    "entries": "× eingetragen",
+    "filter": "Filter",
+    "filterAll": "Alle Ergebnisse"
   },
   "log": {
     "title": "Protokoll",
@@ -111,6 +114,16 @@
     "offline": "Offline –",
     "pending_one": "{{count}} Ergebnis ausstehend",
     "pending_other": "{{count}} Ergebnisse ausstehend"
+  },
+  "memberSettings": {
+    "title": "Mitglieder anzeigen"
+  },
+  "workingSettings": {
+    "title": "Einstellungen",
+    "pinned": "Shortcut"
+  },
+  "shortcutMenu": {
+    "empty": "Keine Shortcuts eingerichtet.\nBitte in den Einstellungen Teile anheften."
   },
   "valueDialog": {
     "title": "Wert eingeben",

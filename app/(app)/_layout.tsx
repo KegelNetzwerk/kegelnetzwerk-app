@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { AppState, Image, Text, View } from 'react-native';
+import { AppState, Image, Platform, Text, View } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
@@ -45,6 +45,12 @@ export default function AppLayout() {
       if (state === 'active') flushQueue().catch(() => {});
     });
     return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.body.style.overscrollBehaviorX = 'none';
+    }
   }, []);
 
   if (!user) return <Redirect href="/(auth)/login" />;

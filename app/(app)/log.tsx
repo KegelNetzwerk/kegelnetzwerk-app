@@ -114,7 +114,7 @@ export default function LogScreen() {
                     {entry.gameLabel} › {entry.partLabel}
                   </Text>
                   <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-0.5">
-                    {format(new Date(entry.timestamp), 'HH:mm')}
+                    {format(new Date(entry.timestamp), 'dd.MM.yyyy HH:mm')}
                     {!entry.synced && (
                       <Text className="text-orange-500"> · {t('log.pending')}</Text>
                     )}

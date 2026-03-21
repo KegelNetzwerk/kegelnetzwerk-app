@@ -1,21 +1,25 @@
 import ClubBackground from '../../src/components/ClubBackground';
-import { useState, useCallback, useRef, useMemo } from 'react';
+import WorkingSettingsModal from '../../src/components/WorkingSettingsModal';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
   ScrollView,
-  FlatList,
+  Animated,
+  Easing,
   TouchableOpacity,
+  PanResponder,
   useWindowDimensions,
 } from 'react-native';
 import { Redirect, router, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart2, ClipboardList, X } from 'lucide-react-native';
+import { BarChart2, ClipboardList, X, Settings } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useTheme } from '../../src/hooks/useTheme';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
+import { getWorkingSettings } from '../../src/storage/workingSettings';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
 const BUTTON_MARGIN = 8;
@@ -26,28 +30,70 @@ export default function WorkingScreen() {
   const theme = useTheme();
   const navigation = useNavigation();
   useLayoutEffect(() => {
-    navigation.setOptions({ title: t('working.title'), headerShown: true });
+    navigation.setOptions({
+      title: t('working.title'),
+      headerShown: true,
+      headerRight: () => (
+        <TouchableOpacity onPress={() => setSettingsVisible(true)} style={{ marginRight: 12 }}>
+          <Settings size={20} color="#fff" />
+        </TouchableOpacity>
+      ),
+    });
   }, [navigation, t]);
 
   const { user } = useAuth();
   const { games, loading } = useLocalData();
+  const [hiddenGameIds, setHiddenGameIds] = useState<number[]>([]);
+  const [settingsVisible, setSettingsVisible] = useState(false);
+
+  useEffect(() => {
+    getWorkingSettings().then((s) => setHiddenGameIds(s.hiddenGameIds));
+  }, []);
 
   if (user?.role !== 'ADMIN') return <Redirect href="/(app)/main" />;
-  const { width } = useWindowDimensions();
-  const [selectedGameIndex, setSelectedGameIndex] = useState(0);
-  const flatListRef = useRef<FlatList<GameOrPenalty>>(null);
 
-  // Reverse so the last game appears first in the tab bar
-  const reversedGames = useMemo(() => [...games].reverse(), [games]);
+  const { width } = useWindowDimensions();
+
+  const reversedGames = useMemo(
+    () => [...games].reverse().filter((g) => !hiddenGameIds.includes(g.id)),
+    [games, hiddenGameIds]
+  );
 
   const cellSize = Math.floor((width - 32 - COLUMNS * BUTTON_MARGIN) / COLUMNS);
 
-  const handleTabPress = useCallback((idx: number) => {
-    setSelectedGameIndex(idx);
-    flatListRef.current?.scrollToIndex({ index: idx, animated: true });
-  }, []);
+  const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+  const pagerOffset = useRef(new Animated.Value(0)).current;
+  const indexRef = useRef(0);
+  indexRef.current = selectedGameIndex;
 
-  const navigateToSelectWho = useCallback((game: GameOrPenalty, part: Part, stay: boolean) => {
+  function switchToIndex(idx: number) {
+    if (idx === indexRef.current) return;
+    if (idx < 0 || idx >= reversedGames.length) return;
+    indexRef.current = idx;
+    setSelectedGameIndex(idx);
+    Animated.timing(pagerOffset, {
+      toValue: -width * idx,
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }
+
+  const switchToIndexRef = useRef(switchToIndex);
+  switchToIndexRef.current = switchToIndex;
+
+  const swipe = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -50) switchToIndexRef.current(indexRef.current + 1);
+        else if (g.dx > 50) switchToIndexRef.current(indexRef.current - 1);
+      },
+    })
+  ).current;
+
+  const navigateToSelectWho = (game: GameOrPenalty, part: Part, stay: boolean) => {
     router.push({
       pathname: '/(app)/selectwho',
       params: {
@@ -61,16 +107,7 @@ export default function WorkingScreen() {
         stay: stay ? '1' : '0',
       },
     });
-  }, []);
-
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-        setSelectedGameIndex(viewableItems[0].index);
-      }
-    },
-    []
-  );
+  };
 
   if (loading) {
     return (
@@ -95,6 +132,7 @@ export default function WorkingScreen() {
   return (
     <View className="flex-1">
       <ClubBackground />
+
       {/* Game tabs */}
       <ScrollView
         horizontal
@@ -105,7 +143,7 @@ export default function WorkingScreen() {
         {reversedGames.map((game, idx) => (
           <TouchableOpacity
             key={game.id}
-            onPress={() => handleTabPress(idx)}
+            onPress={() => switchToIndex(idx)}
             style={[
               { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
               idx === selectedGameIndex
@@ -125,35 +163,36 @@ export default function WorkingScreen() {
         ))}
       </ScrollView>
 
-      {/* Swipeable part buttons — one page per game */}
-      <FlatList
-        ref={flatListRef}
-        data={reversedGames}
-        keyExtractor={(g) => String(g.id)}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        disableIntervalMomentum
-        decelerationRate="fast"
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
-        getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
-        renderItem={({ item: game }) => (
-          <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {game.parts.map((part) => (
-                <PartButton
-                  key={part.id}
-                  label={part.name}
-                  size={cellSize}
-                  onPress={() => navigateToSelectWho(game, part, false)}
-                  onLongPress={() => navigateToSelectWho(game, part, true)}
-                />
-              ))}
-            </View>
-          </ScrollView>
-        )}
-      />
+      {/* Swipeable part pages */}
+      <View style={{ flex: 1, overflow: 'hidden' }} {...swipe.panHandlers}>
+        <Animated.View style={{
+          flex: 1,
+          flexDirection: 'row',
+          width: width * reversedGames.length,
+          transform: [{ translateX: pagerOffset }],
+        }}>
+          {reversedGames.map((game) => (
+            <ScrollView
+              key={game.id}
+              style={{ width }}
+              contentContainerStyle={{ padding: 16 }}
+              nestedScrollEnabled
+            >
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                {game.parts.map((part) => (
+                  <PartButton
+                    key={part.id}
+                    label={part.name}
+                    size={cellSize}
+                    onPress={() => navigateToSelectWho(game, part, false)}
+                    onLongPress={() => navigateToSelectWho(game, part, true)}
+                  />
+                ))}
+              </View>
+            </ScrollView>
+          ))}
+        </Animated.View>
+      </View>
 
       {/* Bottom bar */}
       <View className="flex-row border-t border-gray-200 bg-white">
@@ -185,6 +224,15 @@ export default function WorkingScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <WorkingSettingsModal
+        visible={settingsVisible}
+        games={games}
+        onClose={() => {
+          setSettingsVisible(false);
+          getWorkingSettings().then((s) => setHiddenGameIds(s.hiddenGameIds));
+        }}
+      />
     </View>
   );
 }

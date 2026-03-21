@@ -9,6 +9,7 @@ interface MemberButtonProps {
   selected?: boolean;
   size: number;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
 export default function MemberButton({
@@ -18,6 +19,7 @@ export default function MemberButton({
   selected,
   size,
   onPress,
+  onLongPress,
 }: MemberButtonProps) {
   const theme = useTheme();
   const capped = Math.min(size, 160);
@@ -48,6 +50,8 @@ export default function MemberButton({
       }}
       activeOpacity={disabled ? 1 : 0.75}
       onPress={disabled ? undefined : onPress}
+      onLongPress={disabled ? undefined : onLongPress}
+      delayLongPress={400}
     >
       {pic ? (
         <Image
