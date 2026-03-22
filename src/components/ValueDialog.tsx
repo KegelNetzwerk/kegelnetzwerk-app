@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../hooks/useTheme';
+import { useColors } from '../hooks/useColors';
 
 interface ValueDialogProps {
   visible: boolean;
@@ -27,7 +27,7 @@ export default function ValueDialog({
   onCancel,
 }: ValueDialogProps) {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const c = useColors();
   const [input, setInput] = useState('');
 
   function handleConfirm() {
@@ -43,20 +43,20 @@ export default function ValueDialog({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1 justify-center items-center bg-black/50"
       >
-        <View className="bg-white rounded-2xl p-6 mx-6 w-full max-w-sm shadow-xl">
+        <View className="bg-white dark:bg-gray-800 rounded-2xl p-6 mx-6 w-full max-w-sm shadow-xl">
           <Text
             style={{ fontFamily: 'DMSans_600SemiBold' }}
-            className="text-base text-gray-800 mb-1"
+            className="text-base text-gray-800 dark:text-gray-100 mb-1"
           >
             {partName}
           </Text>
-          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500 mb-4">
+          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             {memberName}
           </Text>
 
           <TextInput
             style={{ fontFamily: 'DMSans_700Bold' }}
-            className="border border-gray-300 rounded-lg p-3 text-center text-2xl text-gray-900 mb-4"
+            className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center text-2xl text-gray-900 dark:text-gray-100 mb-4"
             value={input}
             onChangeText={setInput}
             keyboardType="numeric"
@@ -68,15 +68,15 @@ export default function ValueDialog({
 
           <View className="flex-row gap-3">
             <TouchableOpacity
-              className="flex-1 bg-gray-100 rounded-lg py-3 items-center"
+              className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg py-3 items-center"
               onPress={onCancel}
             >
-              <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-gray-600">
+              <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-gray-600 dark:text-gray-300">
                 {t('valueDialog.cancel')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ flex: 1, backgroundColor: theme.primary, borderRadius: 8, paddingVertical: 12, alignItems: 'center' }}
+              style={{ flex: 1, backgroundColor: c.theme.primary, borderRadius: 8, paddingVertical: 12, alignItems: 'center' }}
               onPress={handleConfirm}
             >
               <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-white">

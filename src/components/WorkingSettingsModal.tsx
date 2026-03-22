@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { X, Eye, EyeOff, ChevronRight, ChevronDown, Pin, PinOff } from 'lucide-react-native';
-import { useTheme } from '../hooks/useTheme';
+import { useColors } from '../hooks/useColors';
 import {
   getWorkingSettings,
   saveWorkingSettings,
@@ -26,7 +26,7 @@ interface Props {
 
 export default function WorkingSettingsModal({ visible, games, onClose }: Props) {
   const { t } = useTranslation();
-  const theme = useTheme();
+  const c = useColors();
 
   const [settings, setSettings] = useState<WorkingSettings>({ hiddenGameIds: [], pinnedParts: [] });
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -73,15 +73,31 @@ export default function WorkingSettingsModal({ visible, games, onClose }: Props)
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
-        <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
+        <View style={{ backgroundColor: c.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
           {/* Header */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
-            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: '#111827' }}>
-              {t('workingSettings.title')}
-            </Text>
-            <TouchableOpacity onPress={onClose}>
-              <X size={22} color="#6b7280" />
-            </TouchableOpacity>
+          <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: c.divider }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: c.textStrong }}>
+                {t('workingSettings.title')}
+              </Text>
+              <TouchableOpacity onPress={onClose}>
+                <X size={22} color={c.textMuted} />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Eye size={14} color={c.textMuted} />
+                <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: c.textMuted }}>
+                  {t('workingSettings.legendShowHide')}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Pin size={14} color={c.textMuted} />
+                <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: c.textMuted }}>
+                  {t('workingSettings.legendShortcut')}
+                </Text>
+              </View>
+            </View>
           </View>
 
           <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -89,22 +105,22 @@ export default function WorkingSettingsModal({ visible, games, onClose }: Props)
               const isHidden = settings.hiddenGameIds.includes(game.id);
               const isExpanded = expanded.has(game.id);
               return (
-                <View key={game.id} style={{ marginBottom: 8, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 12, overflow: 'hidden' }}>
+                <View key={game.id} style={{ marginBottom: 8, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, backgroundColor: c.card, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 1 }}>
                   {/* Game row */}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#f9fafb', padding: 14 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: c.subSurface, padding: 14 }}>
                     <TouchableOpacity onPress={() => toggleGameVisibility(game.id)} style={{ marginRight: 12 }}>
                       {isHidden
-                        ? <EyeOff size={20} color="#9ca3af" />
-                        : <Eye size={20} color={theme.primary} />
+                        ? <EyeOff size={20} color={c.textFaint} />
+                        : <Eye size={20} color={c.primaryFg} />
                       }
                     </TouchableOpacity>
-                    <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 15, color: isHidden ? '#9ca3af' : '#111827', flex: 1 }}>
+                    <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 15, color: isHidden ? c.textFaint : c.textStrong, flex: 1 }}>
                       {game.name}
                     </Text>
                     <TouchableOpacity onPress={() => toggleExpand(game.id)} style={{ padding: 4 }}>
                       {isExpanded
-                        ? <ChevronDown size={18} color="#6b7280" />
-                        : <ChevronRight size={18} color="#6b7280" />
+                        ? <ChevronDown size={18} color={c.textMuted} />
+                        : <ChevronRight size={18} color={c.textMuted} />
                       }
                     </TouchableOpacity>
                   </View>
@@ -118,17 +134,17 @@ export default function WorkingSettingsModal({ visible, games, onClose }: Props)
                       <TouchableOpacity
                         key={part.id}
                         onPress={() => togglePin(game.id, part.id)}
-                        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}
+                        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 14, borderTopWidth: 1, borderTopColor: c.divider }}
                       >
                         {isPinned
-                          ? <Pin size={16} color={theme.primary} style={{ marginRight: 10 }} />
-                          : <PinOff size={16} color="#d1d5db" style={{ marginRight: 10 }} />
+                          ? <Pin size={16} color={c.primaryFg} style={{ marginRight: 10 }} />
+                          : <PinOff size={16} color={c.switchOffTrack} style={{ marginRight: 10 }} />
                         }
-                        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: '#374151', flex: 1 }}>
+                        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 14, color: c.textSecondary, flex: 1 }}>
                           {part.name}
                         </Text>
                         {isPinned && (
-                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: theme.primary }}>
+                          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.primaryFg }}>
                             {t('workingSettings.pinned')}
                           </Text>
                         )}

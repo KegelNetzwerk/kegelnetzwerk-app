@@ -11,8 +11,8 @@ import {
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Camera, LogOut, Trash2, RotateCcw, ChevronRight } from 'lucide-react-native';
-import { useTheme } from '../../src/hooks/useTheme';
+import { Camera, LogOut, Trash2, RotateCcw, ChevronRight, Check, Sun, Moon, Smartphone } from 'lucide-react-native';
+import { useColors } from '../../src/hooks/useColors';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../src/hooks/useAuth';
 import { uploadPhoto } from '../../src/api/photo';
@@ -20,6 +20,8 @@ import { clearResults } from '../../src/storage/resultPackage';
 import { clearQueue } from '../../src/storage/syncQueue';
 import { getCachedMembers } from '../../src/storage/cache';
 import { getOrCreateSession, resetSession } from '../../src/storage/session';
+import { getDisplaySettings, saveDisplaySettings, type MemberDisplayMode, type ColorSchemeMode } from '../../src/storage/displaySettings';
+import { useColorScheme } from 'nativewind';
 import { BASE_URL } from '../../constants/api';
 import Constants from 'expo-constants';
 
@@ -33,8 +35,11 @@ export default function SettingsScreen() {
   }, [navigation, t]);
 
   const { user, signOut } = useAuth();
-  const theme = useTheme();
+  const c = useColors();
+  const { setColorScheme } = useColorScheme();
   const [uploading, setUploading] = useState(false);
+  const [memberDisplayMode, setMemberDisplayMode] = useState<MemberDisplayMode>('nickname');
+  const [colorSchemeMode, setColorSchemeMode] = useState<ColorSchemeMode>('system');
   // picUri: null = no pic, string = absolute URL or local file URI
   const [picUri, setPicUri] = useState<string | null>(null);
   const [sessionGroup, setSessionGroup] = useState<number | null>(null);
@@ -45,6 +50,10 @@ export default function SettingsScreen() {
       if (me?.pic) setPicUri(`${BASE_URL}${me.pic}`);
     });
     getOrCreateSession().then(setSessionGroup);
+    getDisplaySettings().then((s) => {
+      setMemberDisplayMode(s.memberDisplayMode);
+      setColorSchemeMode(s.colorSchemeMode);
+    });
   }, [user?.memberId]);
 
   async function handlePhotoUpload() {
@@ -125,10 +134,9 @@ export default function SettingsScreen() {
       <ScrollView className="flex-1">
       <View className="p-4 gap-4">
         {/* Account */}
-        <View className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
           <Text
-            style={{ fontFamily: 'DMSans_600SemiBold' }}
-            className="px-4 pt-4 pb-2 text-xs text-gray-400 uppercase tracking-wide"
+            style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase' }}
           >
             {t('settings.account')}
           </Text>
@@ -143,7 +151,7 @@ export default function SettingsScreen() {
                   height: AVATAR_SIZE,
                   borderRadius: AVATAR_SIZE / 2,
                   borderWidth: 2,
-                  borderColor: theme.primary,
+                  borderColor: c.primaryFg,
                 }}
               />
             ) : (
@@ -152,59 +160,58 @@ export default function SettingsScreen() {
                   width: AVATAR_SIZE,
                   height: AVATAR_SIZE,
                   borderRadius: AVATAR_SIZE / 2,
-                  backgroundColor: theme.primary,
+                  backgroundColor: c.primaryFg,
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
               >
-                <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 28, color: '#fff' }}>
+                <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 28, color: c.isDark ? '#1e2d3f' : '#fff' }}>
                   {initial}
                 </Text>
               </View>
             )}
             <View className="flex-1">
-              <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-base text-gray-800">
+              <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }} className="text-base">
                 {user?.nickname}
               </Text>
-              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textMuted }} className="text-sm">
                 {user?.clubName}
               </Text>
             </View>
           </View>
 
           <TouchableOpacity
-            className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
+            style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
             onPress={handlePhotoUpload}
             disabled={uploading}
           >
             <View className="flex-row items-center gap-3">
-              <Camera size={18} color="#374151" />
-              <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-base text-gray-700">
+              <Camera size={18} color={c.textSecondary} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textSecondary }} className="text-base">
                 {uploading ? t('settings.uploading') : t('settings.changePhoto')}
               </Text>
             </View>
-            <ChevronRight size={16} color="#9ca3af" />
+            <ChevronRight size={16} color={c.textFaint} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
+            style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
             onPress={handleLogout}
           >
             <View className="flex-row items-center gap-3">
-              <LogOut size={18} color={theme.accent} />
-              <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.accent }} className="text-base">
+              <LogOut size={18} color={c.accentFg} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.accentFg }} className="text-base">
                 {t('settings.logout')}
               </Text>
             </View>
-            <ChevronRight size={16} color="#9ca3af" />
+            <ChevronRight size={16} color={c.textFaint} />
           </TouchableOpacity>
         </View>
 
         {/* Session */}
-        <View className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
           <Text
-            style={{ fontFamily: 'DMSans_600SemiBold' }}
-            className="px-4 pt-4 pb-2 text-xs text-gray-400 uppercase tracking-wide"
+            style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase' }}
           >
             {t('settings.session')}
           </Text>
@@ -213,43 +220,103 @@ export default function SettingsScreen() {
             onPress={handleNewSession}
           >
             <View className="flex-row items-center gap-3">
-              <RotateCcw size={18} color={theme.primary} />
-              <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.primary }} className="text-base">
+              <RotateCcw size={18} color={c.primaryFg} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.primaryFg }} className="text-base">
                 {t('settings.newSession')}
               </Text>
             </View>
-            <ChevronRight size={16} color="#9ca3af" />
+            <ChevronRight size={16} color={c.textFaint} />
           </TouchableOpacity>
           <TouchableOpacity
-            className="px-4 py-3 border-t border-gray-100 flex-row items-center justify-between"
+            style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
             onPress={handleClearSession}
           >
             <View className="flex-row items-center gap-3">
-              <Trash2 size={18} color={theme.accent} />
-              <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.accent }} className="text-base">
+              <Trash2 size={18} color={c.accentFg} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.accentFg }} className="text-base">
                 {t('settings.clearSession')}
               </Text>
             </View>
-            <ChevronRight size={16} color="#9ca3af" />
+            <ChevronRight size={16} color={c.textFaint} />
           </TouchableOpacity>
         </View>
 
-        {/* Info */}
-        <View className="bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Display */}
+        <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
           <Text
-            style={{ fontFamily: 'DMSans_600SemiBold' }}
-            className="px-4 pt-4 pb-2 text-xs text-gray-400 uppercase tracking-wide"
+            style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase' }}
+          >
+            {t('settings.display')}
+          </Text>
+          {/* Color scheme */}
+          <Text
+            style={{ fontFamily: 'DMSans_400Regular', paddingHorizontal: 16, paddingBottom: 8, fontSize: 13, color: c.textMuted }}
+          >
+            {t('settings.colorScheme')}
+          </Text>
+          {([
+            { mode: 'system' as ColorSchemeMode, icon: <Smartphone size={16} color={c.primaryFg} /> },
+            { mode: 'light'  as ColorSchemeMode, icon: <Sun        size={16} color={c.primaryFg} /> },
+            { mode: 'dark'   as ColorSchemeMode, icon: <Moon       size={16} color={c.primaryFg} /> },
+          ]).map(({ mode, icon }) => (
+            <TouchableOpacity
+              key={mode}
+              style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+              onPress={async () => {
+                setColorSchemeMode(mode);
+                setColorScheme(mode);
+                const current = await getDisplaySettings();
+                await saveDisplaySettings({ ...current, colorSchemeMode: mode });
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                {icon}
+                <Text style={{ fontFamily: colorSchemeMode === mode ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 15, color: colorSchemeMode === mode ? c.primaryFg : c.textSecondary }}>
+                  {t(`settings.colorScheme${mode.charAt(0).toUpperCase() + mode.slice(1)}` as any)}
+                </Text>
+              </View>
+              {colorSchemeMode === mode && <Check size={18} color={c.primaryFg} />}
+            </TouchableOpacity>
+          ))}
+
+          {/* Member display mode */}
+          <Text
+            style={{ fontFamily: 'DMSans_400Regular', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, fontSize: 13, borderTopWidth: 1, borderTopColor: c.divider, color: c.textMuted }}
+          >
+            {t('settings.memberDisplayMode')}
+          </Text>
+          {(['nickname', 'firstname', 'fullname'] as MemberDisplayMode[]).map((mode) => (
+            <TouchableOpacity
+              key={mode}
+              style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+              onPress={async () => {
+                setMemberDisplayMode(mode);
+                await saveDisplaySettings({ memberDisplayMode: mode });
+              }}
+            >
+              <Text style={{ fontFamily: memberDisplayMode === mode ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 15, color: memberDisplayMode === mode ? c.primaryFg : c.textSecondary }}>
+                {t(`settings.memberDisplay${mode.charAt(0).toUpperCase() + mode.slice(1)}` as any)}
+              </Text>
+              {memberDisplayMode === mode && <Check size={18} color={c.primaryFg} />}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Info */}
+        <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+          <Text
+            style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase' }}
           >
             {t('settings.info')}
           </Text>
-          <View className="px-4 py-3 border-t border-gray-100 gap-1">
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+          <View style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, gap: 4 }}>
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} style={{ color: c.textMuted }}>
               {t('settings.server')}: {BASE_URL}
             </Text>
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} style={{ color: c.textMuted }}>
               {t('settings.version')}: {Constants.expoConfig?.version ?? '—'}
             </Text>
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+            <Text style={{ fontFamily: 'DMSans_400Regular' }} style={{ color: c.textMuted }}>
               {t('settings.sessionId')}: {sessionGroup ?? '—'}
             </Text>
           </View>

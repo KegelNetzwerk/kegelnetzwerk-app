@@ -11,7 +11,7 @@ import {
   LogOut,
 } from 'lucide-react-native';
 import { useAuth } from '../../src/hooks/useAuth';
-import { useTheme } from '../../src/hooks/useTheme';
+import { useColors } from '../../src/hooks/useColors';
 import SyncStatus from '../../src/components/SyncStatus';
 
 interface MenuButtonProps {
@@ -23,16 +23,31 @@ interface MenuButtonProps {
 }
 
 function MenuButton({ label, icon, onPress, danger, accentColor }: MenuButtonProps) {
+  const c = useColors();
   return (
     <TouchableOpacity
-      className="bg-white border border-gray-200 rounded-xl p-5 flex-row items-center gap-4 shadow-sm active:bg-gray-50"
+      style={{
+        backgroundColor: c.card,
+        borderLeftWidth: 4,
+        borderLeftColor: danger ? (accentColor ?? c.accentFg) : c.primaryFg,
+        borderRadius: 12,
+        padding: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+      }}
       onPress={onPress}
     >
       <View className="w-8 items-center">{icon}</View>
       <Text
         style={{
           fontFamily: 'DMSans_600SemiBold',
-          color: danger ? (accentColor ?? '#a91a1a') : '#1f2937',
+          color: danger ? (accentColor ?? c.accentFg) : c.text,
           flex: 1,
           fontSize: 18,
         }}
@@ -46,14 +61,14 @@ function MenuButton({ label, icon, onPress, danger, accentColor }: MenuButtonPro
 export default function MainScreen() {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
-  const theme = useTheme();
+  const c = useColors();
 
   return (
     <View className="flex-1">
       <ClubBackground />
       {/* Gradient header with logo */}
       <LinearGradient
-        colors={[theme.primary, theme.secondary]}
+        colors={[c.theme.primary, c.theme.secondary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={{ paddingTop: 56, paddingBottom: 24, alignItems: 'center' }}
@@ -80,31 +95,31 @@ export default function MainScreen() {
       <View className="flex-1 p-6 gap-3">
         {user?.role === 'ADMIN' && (
           <MenuButton
-            icon={<ClipboardList size={24} color={theme.primary} />}
+            icon={<ClipboardList size={24} color={c.primaryFg} />}
             label={t('main.enterResults')}
             onPress={() => router.push('/(app)/working')}
           />
         )}
         <MenuButton
-          icon={<BarChart2 size={24} color={theme.primary} />}
+          icon={<BarChart2 size={24} color={c.primaryFg} />}
           label={t('main.overview')}
           onPress={() => router.push('/(app)/overview')}
         />
         <MenuButton
-          icon={<Bell size={24} color={theme.primary} />}
+          icon={<Bell size={24} color={c.primaryFg} />}
           label={t('main.notifications')}
           onPress={() => router.push('/(app)/notifications')}
         />
         <MenuButton
-          icon={<Settings size={24} color={theme.primary} />}
+          icon={<Settings size={24} color={c.primaryFg} />}
           label={t('main.settings')}
           onPress={() => router.push('/(app)/settings')}
         />
         <MenuButton
-          icon={<LogOut size={24} color={theme.accent} />}
+          icon={<LogOut size={24} color={c.accentFg} />}
           label={t('main.logout')}
           danger
-          accentColor={theme.accent}
+          accentColor={c.accentFg}
           onPress={async () => { await signOut(); }}
         />
       </View>
@@ -116,7 +131,7 @@ export default function MainScreen() {
         activeOpacity={0.6}
       >
         <View className="flex-row items-center gap-1.5">
-          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: '#6b7280' }}>
+          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.textMuted }}>
             KegelNetzwerk.de by
           </Text>
           <Image
@@ -124,7 +139,7 @@ export default function MainScreen() {
             style={{ height: 42, width: 120, resizeMode: 'contain' }}
           />
         </View>
-        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: '#9ca3af' }}>
+        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.textFaint }}>
           est. 2015 · revamped 2026
         </Text>
       </TouchableOpacity>

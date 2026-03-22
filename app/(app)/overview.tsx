@@ -17,7 +17,7 @@ import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, Banknote, SlidersHorizontal, X, Check, ChevronDown, ChevronRight } from 'lucide-react-native';
-import { useTheme } from '../../src/hooks/useTheme';
+import { useColors } from '../../src/hooks/useColors';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
 import type { ResultEntry } from '../../src/models/Result';
@@ -35,8 +35,7 @@ type FilterSelection = null | { gameId: number; partId?: number };
 export default function OverviewScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const theme = useTheme();
-
+  const c = useColors();
   const [results, setResults] = useState<ResultEntry[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [games, setGames] = useState<GameOrPenalty[]>([]);
@@ -84,11 +83,11 @@ export default function OverviewScreen() {
       headerShown: true,
       headerRight: () => (
         <TouchableOpacity onPress={() => setFilterVisible(true)} style={{ marginRight: 12 }}>
-          <SlidersHorizontal size={20} color={filterSelection !== null ? theme.accent : '#fff'} />
+          <SlidersHorizontal size={20} color={filterSelection !== null ? c.accentFg : '#fff'} />
         </TouchableOpacity>
       ),
     });
-  }, [navigation, t, filterSelection, theme]);
+  }, [navigation, t, filterSelection, c]);
 
   const load = useCallback(async () => {
     const [r, m, g] = await Promise.all([getResults(), getCachedMembers(), getCachedGames()]);
@@ -174,24 +173,24 @@ export default function OverviewScreen() {
       <ClubBackground />
 
       {/* Score / Money tabs */}
-      <View className="flex-row bg-white border-b border-gray-200 px-4 pt-2">
+      <View style={{ flexDirection: 'row', backgroundColor: c.theme.primary, paddingHorizontal: 16, paddingTop: 8 }}>
         {TABS.map((f) => (
           <TouchableOpacity
             key={f}
             onPress={() => switchTab(f)}
             style={[
               { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', gap: 6 },
-              tab === f ? { borderBottomColor: theme.primary } : { borderBottomColor: 'transparent' },
+              tab === f ? { borderBottomColor: '#fff' } : { borderBottomColor: 'transparent' },
             ]}
           >
             {f === 'score'
-              ? <Target size={14} color={tab === f ? theme.primary : '#6b7280'} />
-              : <Banknote size={14} color={tab === f ? theme.primary : '#6b7280'} />
+              ? <Target size={14} color={tab === f ? '#fff' : 'rgba(255,255,255,0.55)'} />
+              : <Banknote size={14} color={tab === f ? '#fff' : 'rgba(255,255,255,0.55)'} />
             }
             <Text
               style={{
                 fontFamily: tab === f ? 'DMSans_600SemiBold' : 'DMSans_400Regular',
-                color: tab === f ? theme.primary : '#6b7280',
+                color: tab === f ? '#fff' : 'rgba(255,255,255,0.55)',
               }}
             >
               {f === 'score' ? t('overview.score') : t('overview.money')}
@@ -202,13 +201,13 @@ export default function OverviewScreen() {
 
       {/* Active filter chip */}
       {filterLabel && (
-        <View style={{ backgroundColor: '#f3f4f6', paddingHorizontal: 16, paddingVertical: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.primary + '18', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4, gap: 6 }}>
-            <Text style={{ fontFamily: 'DMSans_500Medium', color: theme.primary, fontSize: 13 }}>
+        <View style={{ backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: c.primaryFg + '25', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4, gap: 6 }}>
+            <Text style={{ fontFamily: 'DMSans_500Medium', color: c.primaryFg, fontSize: 13 }}>
               {filterLabel}
             </Text>
             <TouchableOpacity onPress={clearFilter}>
-              <X size={14} color={theme.primary} />
+              <X size={14} color={c.primaryFg} />
             </TouchableOpacity>
           </View>
         </View>
@@ -225,7 +224,7 @@ export default function OverviewScreen() {
             >
               {rows.length === 0 ? (
                 <View className="items-center justify-center p-8">
-                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-400 text-center">
+                  <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textFaint }} className="text-center">
                     {t('overview.empty')}
                   </Text>
                 </View>
@@ -234,21 +233,35 @@ export default function OverviewScreen() {
                   {rows.map((row, idx) => (
                     <View
                       key={idx}
-                      className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm"
+                      style={{
+                        backgroundColor: c.card,
+                        borderLeftWidth: 4,
+                        borderLeftColor: c.primaryFg,
+                        borderRadius: 12,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 8,
+                        elevation: 2,
+                        padding: 16,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                      }}
                     >
                       <View className="flex-row items-center gap-3">
-                        <Text style={{ fontFamily: 'DMSans_700Bold' }} className="text-lg text-gray-400 w-7">
+                        <Text style={{ fontFamily: 'DMSans_700Bold', color: c.textFaint }} className="text-lg w-7">
                           {idx + 1}
                         </Text>
-                        <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-base text-gray-800">
+                        <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }} className="text-base">
                           {row.label}
                         </Text>
                       </View>
                       <View className="items-end">
-                        <Text style={{ fontFamily: 'DMSans_700Bold', color: theme.primary, fontSize: 18 }}>
+                        <Text style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, fontSize: 18 }}>
                           {row.total.toFixed(decimals)}
                         </Text>
-                        <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400">
+                        <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textFaint }} className="text-xs">
                           {row.count}{t('overview.entries')}
                         </Text>
                       </View>
@@ -268,25 +281,25 @@ export default function OverviewScreen() {
           activeOpacity={1}
           onPress={() => setFilterVisible(false)}
         />
-        <SafeAreaView style={{ backgroundColor: '#fff', maxHeight: '75%' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
-            <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 16, color: '#111827' }}>
+        <SafeAreaView style={{ backgroundColor: c.card, maxHeight: '75%' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.divider }}>
+            <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 16, color: c.textStrong }}>
               {t('overview.filter')}
             </Text>
             <TouchableOpacity onPress={() => setFilterVisible(false)}>
-              <X size={20} color="#6b7280" />
+              <X size={20} color={c.textMuted} />
             </TouchableOpacity>
           </View>
 
           <ScrollView>
             <TouchableOpacity
               onPress={clearFilter}
-              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.divider }}
             >
-              <Text style={{ fontFamily: filterSelection === null ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 15, color: filterSelection === null ? theme.primary : '#111827' }}>
+              <Text style={{ fontFamily: filterSelection === null ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 15, color: filterSelection === null ? c.primaryFg : c.textStrong }}>
                 {t('overview.filterAll')}
               </Text>
-              {filterSelection === null && <Check size={18} color={theme.primary} />}
+              {filterSelection === null && <Check size={18} color={c.primaryFg} />}
             </TouchableOpacity>
 
             {games.map((game) => {
@@ -294,21 +307,21 @@ export default function OverviewScreen() {
               const gameSelected = isSelected(game.id, undefined);
               return (
                 <View key={game.id}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: c.divider }}>
                     <TouchableOpacity
                       onPress={() => selectFilter(game.id)}
                       style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 20, paddingRight: 8, paddingVertical: 14 }}
                     >
-                      <Text style={{ fontFamily: gameSelected ? 'DMSans_600SemiBold' : 'DMSans_500Medium', fontSize: 15, color: gameSelected ? theme.primary : '#111827' }}>
+                      <Text style={{ fontFamily: gameSelected ? 'DMSans_600SemiBold' : 'DMSans_500Medium', fontSize: 15, color: gameSelected ? c.primaryFg : c.textStrong }}>
                         {game.name}
                       </Text>
-                      {gameSelected && <Check size={18} color={theme.primary} />}
+                      {gameSelected && <Check size={18} color={c.primaryFg} />}
                     </TouchableOpacity>
                     {game.parts.length > 0 && (
                       <TouchableOpacity onPress={() => toggleGameExpand(game.id)} style={{ padding: 14 }}>
                         {expanded
-                          ? <ChevronDown size={18} color="#6b7280" />
-                          : <ChevronRight size={18} color="#6b7280" />
+                          ? <ChevronDown size={18} color={c.textMuted} />
+                          : <ChevronRight size={18} color={c.textMuted} />
                         }
                       </TouchableOpacity>
                     )}
@@ -320,12 +333,12 @@ export default function OverviewScreen() {
                       <TouchableOpacity
                         key={part.id}
                         onPress={() => selectFilter(game.id, part.id)}
-                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 36, paddingRight: 20, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6', backgroundColor: '#fafafa' }}
+                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 36, paddingRight: 20, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.divider, backgroundColor: c.subSurface }}
                       >
-                        <Text style={{ fontFamily: partSelected ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 14, color: partSelected ? theme.primary : '#374151' }}>
+                        <Text style={{ fontFamily: partSelected ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 14, color: partSelected ? c.primaryFg : c.textSecondary }}>
                           {part.name}
                         </Text>
-                        {partSelected && <Check size={16} color={theme.primary} />}
+                        {partSelected && <Check size={16} color={c.primaryFg} />}
                       </TouchableOpacity>
                     );
                   })}

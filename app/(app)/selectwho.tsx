@@ -16,6 +16,7 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useUIColors } from '../../src/hooks/useUIColors';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalData } from '../../src/hooks/useLocalData';
@@ -24,6 +25,7 @@ import { useNetworkSync } from '../../src/hooks/useNetworkSync';
 import { addResult, getResults } from '../../src/storage/resultPackage';
 import { getOrCreateSession, touchSession } from '../../src/storage/session';
 import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSettings';
+import { getDisplaySettings, getMemberDisplayName, type MemberDisplayMode } from '../../src/storage/displaySettings';
 import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
 import ValueDialog from '../../src/components/ValueDialog';
@@ -71,6 +73,7 @@ export default function SelectWhoScreen() {
   }, [navigation, params.partName]);
 
   const theme = useTheme();
+  const ui = useUIColors();
   const { members, games } = useLocalData();
   const { addToQueue, flush } = useSyncQueue();
   useNetworkSync(flush);
@@ -78,12 +81,14 @@ export default function SelectWhoScreen() {
   const [pinnedParts, setPinnedParts] = useState<PinnedPart[]>([]);
   const [hiddenMemberIds, setHiddenMemberIds] = useState<number[]>([]);
   const [memberSettingsVisible, setMemberSettingsVisible] = useState(false);
+  const [memberDisplayMode, setMemberDisplayMode] = useState<MemberDisplayMode>('nickname');
 
   useEffect(() => {
     getWorkingSettings().then((s) => {
       setPinnedParts(s.pinnedParts);
       setHiddenMemberIds(s.hiddenMemberIds);
     });
+    getDisplaySettings().then((s) => setMemberDisplayMode(s.memberDisplayMode));
   }, []);
 
   const TABS = ['members', 'guests'] as const;
@@ -289,20 +294,20 @@ export default function SelectWhoScreen() {
     <View className="flex-1">
       <ClubBackground />
       {/* Tabs */}
-      <View className="flex-row bg-white border-b border-gray-200 px-4 pt-2">
+      <View style={{ flexDirection: 'row', backgroundColor: theme.primary, paddingHorizontal: 16, paddingTop: 8 }}>
         {TABS.map((tabKey) => (
           <TouchableOpacity
             key={tabKey}
             onPress={() => switchTab(tabKey)}
             style={[
               { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
-              tab === tabKey ? { borderBottomColor: theme.primary } : { borderBottomColor: 'transparent' },
+              tab === tabKey ? { borderBottomColor: '#fff' } : { borderBottomColor: 'transparent' },
             ]}
           >
             <Text
               style={{
                 fontFamily: tab === tabKey ? 'DMSans_600SemiBold' : 'DMSans_400Regular',
-                color: tab === tabKey ? theme.primary : '#6b7280',
+                color: tab === tabKey ? '#fff' : 'rgba(255,255,255,0.55)',
               }}
             >
               {tabKey === 'members' ? t('selectwho.members') : t('selectwho.guests')}
@@ -318,17 +323,20 @@ export default function SelectWhoScreen() {
           {/* Members page */}
           <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }} nestedScrollEnabled>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {members.filter((m) => !hiddenMemberIds.includes(m.id)).map((m) => (
+              {members.filter((m) => !hiddenMemberIds.includes(m.id)).sort((a, b) => getMemberDisplayName(a, memberDisplayMode).localeCompare(getMemberDisplayName(b, memberDisplayMode))).map((m) => {
+                const displayName = getMemberDisplayName(m, memberDisplayMode);
+                return (
                 <MemberButton
                   key={m.id}
-                  nickname={m.nickname}
+                  nickname={displayName}
                   pic={m.pic}
                   size={cellSize}
                   disabled={partOnce && onceDone.has(`m-${m.id}`)}
-                  onPress={() => handleMemberPress(m.id, m.nickname)}
-                  onLongPress={() => handleMemberLongPress(m.id, m.nickname)}
+                  onPress={() => handleMemberPress(m.id, displayName)}
+                  onLongPress={() => handleMemberLongPress(m.id, displayName)}
                 />
-              ))}
+                );
+              })}
             </View>
           </ScrollView>
 
@@ -354,14 +362,14 @@ export default function SelectWhoScreen() {
                   borderRadius: 12,
                   borderWidth: 2,
                   borderStyle: 'dashed',
-                  borderColor: '#9ca3af',
+                  borderColor: ui.textFaint,
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
                 onPress={addGuest}
               >
-                <Text className="text-3xl text-gray-400">+</Text>
-                <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-1">
+                <Text className="text-3xl text-gray-400 dark:text-gray-500">+</Text>
+                <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   {t('selectwho.addGuest')}
                 </Text>
               </TouchableOpacity>
@@ -372,13 +380,13 @@ export default function SelectWhoScreen() {
       </View>
 
       {/* Back button */}
-      <View className="p-4 bg-white border-t border-gray-200">
+      <View style={{ backgroundColor: theme.primary, padding: 12 }}>
         <TouchableOpacity
-          className="bg-gray-100 rounded-lg py-3 flex-row items-center justify-center gap-2"
+          style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingVertical: 10 }}
           onPress={() => router.back()}
         >
-          <ArrowLeft size={16} color="#4b5563" />
-          <Text style={{ fontFamily: 'DMSans_500Medium' }} className="text-gray-600">
+          <ArrowLeft size={16} color="#fff" />
+          <Text style={{ fontFamily: 'DMSans_500Medium', color: '#fff' }}>
             {t('selectwho.back')} {params.gameName}
           </Text>
         </TouchableOpacity>

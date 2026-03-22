@@ -13,7 +13,7 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { Trash2 } from 'lucide-react-native';
-import { useTheme } from '../../src/hooks/useTheme';
+import { useColors } from '../../src/hooks/useColors';
 import { getResults, removeResult } from '../../src/storage/resultPackage';
 import { dequeue } from '../../src/storage/syncQueue';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
@@ -34,7 +34,7 @@ export default function LogScreen() {
     navigation.setOptions({ title: t('log.title'), headerShown: true });
   }, [navigation, t]);
 
-  const theme = useTheme();
+  const c = useColors();
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -95,7 +95,7 @@ export default function LogScreen() {
       >
         {entries.length === 0 ? (
           <View className="items-center justify-center p-8">
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-400">
+            <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textFaint }}>
               {t('log.empty')}
             </Text>
           </View>
@@ -104,16 +104,30 @@ export default function LogScreen() {
             {entries.map((entry) => (
               <View
                 key={entry.id}
-                className="bg-white rounded-xl p-4 flex-row items-center justify-between shadow-sm"
+                style={{
+                  backgroundColor: c.card,
+                  borderLeftWidth: 4,
+                  borderLeftColor: c.primaryFg,
+                  borderRadius: 12,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
+                  elevation: 2,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
               >
                 <View className="flex-1 mr-3">
-                  <Text style={{ fontFamily: 'DMSans_600SemiBold' }} className="text-gray-800">
+                  <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }}>
                     {entry.memberLabel}
                   </Text>
-                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-500">
+                  <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textSecondary }} className="text-sm">
                     {entry.gameLabel} › {entry.partLabel}
                   </Text>
-                  <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 mt-0.5">
+                  <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textFaint }} className="text-xs mt-0.5">
                     {format(new Date(entry.timestamp), 'dd.MM.yyyy HH:mm')}
                     {!entry.synced && (
                       <Text className="text-orange-500"> · {t('log.pending')}</Text>
@@ -121,11 +135,11 @@ export default function LogScreen() {
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
-                  <Text style={{ fontFamily: 'DMSans_700Bold', color: theme.primary, fontSize: 18 }}>
+                  <Text style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, fontSize: 18 }}>
                     {entry.value}
                   </Text>
                   <TouchableOpacity onPress={() => handleDelete(entry)}>
-                    <Trash2 size={18} color={theme.accent} />
+                    <Trash2 size={18} color={c.accentFg} />
                   </TouchableOpacity>
                 </View>
               </View>

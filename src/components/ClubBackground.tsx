@@ -1,5 +1,6 @@
-import { Image, useWindowDimensions } from 'react-native';
+import { Image, View, useWindowDimensions } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
+import { useColors } from '../hooks/useColors';
 
 const bgSources = [
   require('../../assets/fullbg.jpg'),
@@ -9,15 +10,23 @@ const bgSources = [
 
 export default function ClubBackground() {
   const { user } = useAuth();
+  const c = useColors();
   const { width, height } = useWindowDimensions();
   const source = bgSources[user?.clubBg ?? 0] ?? bgSources[0];
+  const overlayColor = c.isDark ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.70)';
 
   return (
-    <Image
-      source={source}
-      style={{ position: 'absolute', top: 0, left: 0, width, height }}
-      resizeMode="cover"
-      pointerEvents="none"
-    />
+    <>
+      <Image
+        source={source}
+        style={{ position: 'absolute', top: 0, left: 0, width, height }}
+        resizeMode="cover"
+        pointerEvents="none"
+      />
+      <View
+        style={{ position: 'absolute', top: 0, left: 0, width, height, backgroundColor: overlayColor }}
+        pointerEvents="none"
+      />
+    </>
   );
 }

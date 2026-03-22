@@ -2,6 +2,8 @@ import 'react-native-get-random-values';
 import '../global.css';
 import '../src/i18n';
 import { useEffect, useState, useCallback } from 'react';
+import { useColorScheme } from 'nativewind';
+import { getDisplaySettings } from '../src/storage/displaySettings';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -39,7 +41,30 @@ function normalizePic(pic: string | null | undefined): string | null {
   return pic && pic !== 'none' ? pic : null;
 }
 
+function applyBodyBg(scheme: 'light' | 'dark' | 'system') {
+  if (typeof document === 'undefined') return;
+  if (scheme === 'dark') {
+    document.body.style.backgroundColor = '#111827';
+  } else if (scheme === 'light') {
+    document.body.style.backgroundColor = '#ffffff';
+  } else {
+    document.body.style.backgroundColor = '';
+  }
+}
+
 export default function RootLayout() {
+  const { setColorScheme, colorScheme } = useColorScheme();
+  useEffect(() => {
+    getDisplaySettings().then((s) => {
+      setColorScheme(s.colorSchemeMode);
+      applyBodyBg(s.colorSchemeMode);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (colorScheme) applyBodyBg(colorScheme as any);
+  }, [colorScheme]);
+
   const [user, setUser] = useState<AuthUser | null>(null);
   const [ready, setReady] = useState(false);
 

@@ -97,7 +97,16 @@
     "permissionMissing": "Berechtigung fehlt",
     "permissionMessage": "Bitte erlaube den Zugriff auf die Medienbibliothek.",
     "photoUpdated": "Profilbild wurde aktualisiert.",
-    "photoError": "Foto konnte nicht hochgeladen werden."
+    "photoError": "Foto konnte nicht hochgeladen werden.",
+    "display": "Anzeige",
+    "colorScheme": "Erscheinungsbild",
+    "colorSchemeSystem": "Systemstandard",
+    "colorSchemeLight": "Hell",
+    "colorSchemeDark": "Dunkel",
+    "memberDisplayMode": "Mitglieder anzeigen mittels",
+    "memberDisplayNickname": "Spitzname",
+    "memberDisplayFirstname": "Vorname",
+    "memberDisplayFullname": "Vor- und Nachname"
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -116,11 +125,14 @@
     "pending_other": "{{count}} Ergebnisse ausstehend"
   },
   "memberSettings": {
-    "title": "Mitglieder anzeigen"
+    "title": "Mitglieder anzeigen",
+    "legendShowHide": "ein- / ausblenden"
   },
   "workingSettings": {
     "title": "Einstellungen",
-    "pinned": "Shortcut"
+    "pinned": "Abkürzung",
+    "legendShowHide": "ein- / ausblenden",
+    "legendShortcut": "Abkürzung"
   },
   "shortcutMenu": {
     "empty": "Keine Shortcuts eingerichtet.\nBitte in den Einstellungen Teile anheften."

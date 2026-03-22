@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { AppState, Image, Platform, Text, View } from 'react-native';
+import { AppState, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
@@ -37,6 +38,18 @@ function ClubLogo() {
   );
 }
 
+function HeaderBackground() {
+  const theme = useTheme();
+  return (
+    <LinearGradient
+      colors={[theme.primary, theme.secondary]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+      style={StyleSheet.absoluteFill}
+    />
+  );
+}
+
 export default function AppLayout() {
   const { user } = useAuth();
   const theme = useTheme();
@@ -58,7 +71,7 @@ export default function AppLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: theme.primary },
+        headerBackground: () => <HeaderBackground />,
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700', fontFamily: 'DMSans_700Bold' },
         headerBackTitleStyle: { fontFamily: 'DMSans_400Regular' },

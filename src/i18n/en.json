@@ -97,7 +97,16 @@
     "permissionMissing": "Permission missing",
     "permissionMessage": "Please allow access to the media library.",
     "photoUpdated": "Profile photo updated.",
-    "photoError": "Could not upload photo."
+    "photoError": "Could not upload photo.",
+    "display": "Display",
+    "colorScheme": "Appearance",
+    "colorSchemeSystem": "System default",
+    "colorSchemeLight": "Light",
+    "colorSchemeDark": "Dark",
+    "memberDisplayMode": "Show members as",
+    "memberDisplayNickname": "Nickname",
+    "memberDisplayFirstname": "First name",
+    "memberDisplayFullname": "First + last name"
   },
   "notifications": {
     "title": "Notifications",
@@ -116,11 +125,14 @@
     "pending_other": "{{count}} results pending"
   },
   "memberSettings": {
-    "title": "Show members"
+    "title": "Show members",
+    "legendShowHide": "show / hide"
   },
   "workingSettings": {
     "title": "Settings",
-    "pinned": "Shortcut"
+    "pinned": "Shortcut",
+    "legendShowHide": "show / hide",
+    "legendShortcut": "shortcut"
   },
   "shortcutMenu": {
     "empty": "No shortcuts configured.\nPin parts in Settings to use them here."

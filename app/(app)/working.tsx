@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X, Settings } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useUIColors } from '../../src/hooks/useUIColors';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
 import { getWorkingSettings } from '../../src/storage/workingSettings';
@@ -28,6 +29,7 @@ const COLUMNS = 3;
 export default function WorkingScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const ui = useUIColors();
   const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -112,7 +114,7 @@ export default function WorkingScreen() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-500">
+        <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-gray-500 dark:text-gray-400">
           {t('working.loading')}
         </Text>
       </View>
@@ -137,7 +139,7 @@ export default function WorkingScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb', flexGrow: 0 }}
+        style={{ backgroundColor: theme.primary, flexGrow: 0 }}
         contentContainerStyle={{ flexDirection: 'row', paddingHorizontal: 16, paddingTop: 8 }}
       >
         {reversedGames.map((game, idx) => (
@@ -147,14 +149,14 @@ export default function WorkingScreen() {
             style={[
               { marginRight: 16, paddingBottom: 8, borderBottomWidth: 2 },
               idx === selectedGameIndex
-                ? { borderBottomColor: theme.primary }
+                ? { borderBottomColor: '#fff' }
                 : { borderBottomColor: 'transparent' },
             ]}
           >
             <Text
               style={{
                 fontFamily: idx === selectedGameIndex ? 'DMSans_600SemiBold' : 'DMSans_400Regular',
-                color: idx === selectedGameIndex ? theme.primary : '#6b7280',
+                color: idx === selectedGameIndex ? '#fff' : 'rgba(255,255,255,0.55)',
               }}
             >
               {game.name}
@@ -195,13 +197,13 @@ export default function WorkingScreen() {
       </View>
 
       {/* Bottom bar */}
-      <View className="flex-row border-t border-gray-200 bg-white">
+      <View style={{ flexDirection: 'row', backgroundColor: theme.primary }}>
         <TouchableOpacity
           className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/overview')}
         >
-          <BarChart2 size={18} color="#4b5563" />
-          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-600">
+          <BarChart2 size={18} color="rgba(255,255,255,0.85)" />
+          <Text style={{ fontFamily: 'DMSans_400Regular', color: 'rgba(255,255,255,0.85)' }} className="text-xs">
             {t('working.overview')}
           </Text>
         </TouchableOpacity>
@@ -209,8 +211,8 @@ export default function WorkingScreen() {
           className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/log')}
         >
-          <ClipboardList size={18} color="#4b5563" />
-          <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-600">
+          <ClipboardList size={18} color="rgba(255,255,255,0.85)" />
+          <Text style={{ fontFamily: 'DMSans_400Regular', color: 'rgba(255,255,255,0.85)' }} className="text-xs">
             {t('working.log')}
           </Text>
         </TouchableOpacity>
@@ -218,8 +220,8 @@ export default function WorkingScreen() {
           className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/main')}
         >
-          <X size={18} color={theme.accent} />
-          <Text style={{ fontFamily: 'DMSans_400Regular', color: theme.accent }} className="text-xs">
+          <X size={18} color="#fff" />
+          <Text style={{ fontFamily: 'DMSans_600SemiBold', color: '#fff' }} className="text-xs">
             {t('working.end')}
           </Text>
         </TouchableOpacity>

@@ -1,5 +1,6 @@
 import { TouchableOpacity, Text } from 'react-native';
-import { useTheme } from '../hooks/useTheme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useColors } from '../hooks/useColors';
 
 interface PartButtonProps {
   label: string;
@@ -9,7 +10,7 @@ interface PartButtonProps {
 }
 
 export default function PartButton({ label, onPress, onLongPress, size }: PartButtonProps) {
-  const theme = useTheme();
+  const c = useColors();
   const capped = Math.min(size, 160);
 
   return (
@@ -19,32 +20,39 @@ export default function PartButton({ label, onPress, onLongPress, size }: PartBu
         height: capped,
         margin: 4,
         borderRadius: 12,
-        backgroundColor: theme.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
+        borderWidth: 1.5,
+        borderColor: c.divider,
+        overflow: 'hidden',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-        elevation: 3,
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
       }}
       activeOpacity={0.75}
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={400}
     >
-      <Text
-        style={{
-          color: '#fff',
-          fontFamily: 'DMSans_700Bold',
-          fontSize: Math.min(16, capped * 0.16),
-          textAlign: 'center',
-          paddingHorizontal: 8,
-        }}
-        numberOfLines={3}
+      <LinearGradient
+        colors={c.isDark ? [c.subSurface, c.card] : ['#ffffff', c.surface]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
       >
-        {label}
-      </Text>
+        <Text
+          style={{
+            color: c.text,
+            fontFamily: 'DMSans_700Bold',
+            fontSize: Math.min(16, capped * 0.16),
+            textAlign: 'center',
+            paddingHorizontal: 8,
+          }}
+          numberOfLines={3}
+        >
+          {label}
+        </Text>
+      </LinearGradient>
     </TouchableOpacity>
   );
 }
