@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { AppState, Platform, StyleSheet } from 'react-native';
+import { AppState, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Redirect, Stack } from 'expo-router';
+import { Redirect, Stack, router } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
 import { flushQueue } from '../../src/hooks/useSyncQueue';
@@ -42,7 +43,11 @@ export default function AppLayout() {
         headerBackground: () => <HeaderBackground />,
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700', fontFamily: 'DMSans_700Bold' },
-        headerBackTitleStyle: { fontFamily: 'DMSans_400Regular' },
+        headerLeft: ({ canGoBack }) => canGoBack ? (
+          <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 12 }}>
+            <ArrowLeft size={22} color="#fff" />
+          </TouchableOpacity>
+        ) : null,
         headerRight: () => null,
       }}
     >

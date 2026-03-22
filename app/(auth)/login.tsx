@@ -201,7 +201,14 @@ export default function LoginScreen() {
           <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-sm text-gray-700">
             {t('auth.login.autoLogin')}
           </Text>
-          <Switch value={autoLogin} onValueChange={setAutoLogin} trackColor={{ true: '#005982' }} />
+          <Switch
+            value={autoLogin}
+            onValueChange={setAutoLogin}
+            trackColor={{ true: '#005982' }}
+            thumbColor="#fff"
+            // @ts-ignore activeThumbColor is a react-native-web specific prop
+            activeThumbColor="#fff"
+          />
         </View>
 
         {error ? (

@@ -89,6 +89,8 @@ export default function NotificationsScreen() {
                 onValueChange={(v) => toggle(type, v)}
                 trackColor={{ true: c.accentFg, false: c.switchOffTrack }}
                 thumbColor="#fff"
+                // @ts-ignore activeThumbColor is a react-native-web specific prop
+                activeThumbColor="#fff"
               />
             </View>
           ))}

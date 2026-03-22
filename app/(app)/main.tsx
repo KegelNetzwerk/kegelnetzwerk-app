@@ -6,7 +6,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import {
   ClipboardList,
-  BarChart2,
   Bell,
   Settings,
 } from 'lucide-react-native';
@@ -140,11 +139,6 @@ export default function MainScreen() {
           />
         )}
         <MenuButton
-          icon={<BarChart2 size={24} color={c.primaryFg} />}
-          label={t('main.overview')}
-          onPress={() => router.push('/(app)/overview')}
-        />
-        <MenuButton
           icon={<Bell size={24} color={c.primaryFg} />}
           label={t('main.notifications')}
           onPress={() => router.push('/(app)/notifications')}
@@ -158,17 +152,17 @@ export default function MainScreen() {
         activeOpacity={0.6}
       >
         <View className="flex-row items-center gap-1.5">
-          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.textMuted }}>
+          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.isDark ? 'rgba(255,255,255,0.7)' : c.textMuted }}>
             KegelNetzwerk.de by
           </Text>
           <Image
             source={require('../../assets/fx.png')}
             style={{ height: 42, width: 120, resizeMode: 'contain' }}
           />
+          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.isDark ? 'rgba(255,255,255,0.7)' : c.textMuted }}>
+            · est. 2015 · revamped 2026
+          </Text>
         </View>
-        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.textFaint }}>
-          est. 2015 · revamped 2026
-        </Text>
       </TouchableOpacity>
     </View>
   );
