@@ -1,6 +1,6 @@
 import ClubBackground from '../../src/components/ClubBackground';
 import WorkingSettingsModal from '../../src/components/WorkingSettingsModal';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   PanResponder,
   useWindowDimensions,
 } from 'react-native';
-import { Redirect, router, useNavigation } from 'expo-router';
+import { Redirect, router, useNavigation, useFocusEffect } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X, Settings } from 'lucide-react-native';
@@ -21,6 +21,8 @@ import { useUIColors } from '../../src/hooks/useUIColors';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
 import { getWorkingSettings } from '../../src/storage/workingSettings';
+import { getResults } from '../../src/storage/resultPackage';
+import { getCachedMembers } from '../../src/storage/cache';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
 const BUTTON_MARGIN = 8;
@@ -31,9 +33,26 @@ export default function WorkingScreen() {
   const theme = useTheme();
   const ui = useUIColors();
   const navigation = useNavigation();
+  const { user } = useAuth();
+  const { games, loading } = useLocalData();
+  const [hiddenGameIds, setHiddenGameIds] = useState<number[]>([]);
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [lastResult, setLastResult] = useState<{ memberLabel: string; partLabel: string; value: number } | null>(null);
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: t('working.title'),
+      headerTitle: () => (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: '#fff', fontFamily: 'DMSans_700Bold', fontSize: 16 }}>
+            {t('working.title')}
+          </Text>
+          {lastResult && (
+            <Text style={{ color: 'rgba(255,255,255,0.75)', fontFamily: 'DMSans_400Regular', fontSize: 11 }}>
+              ✓ {lastResult.memberLabel} – {lastResult.partLabel} · {lastResult.value}
+            </Text>
+          )}
+        </View>
+      ),
       headerShown: true,
       headerRight: () => (
         <TouchableOpacity onPress={() => setSettingsVisible(true)} style={{ marginRight: 12 }}>
@@ -41,16 +60,25 @@ export default function WorkingScreen() {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, t]);
-
-  const { user } = useAuth();
-  const { games, loading } = useLocalData();
-  const [hiddenGameIds, setHiddenGameIds] = useState<number[]>([]);
-  const [settingsVisible, setSettingsVisible] = useState(false);
+  }, [navigation, t, lastResult]);
 
   useEffect(() => {
     getWorkingSettings().then((s) => setHiddenGameIds(s.hiddenGameIds));
   }, []);
+
+  useFocusEffect(useCallback(() => {
+    (async () => {
+      const [results, members] = await Promise.all([getResults(), getCachedMembers()]);
+      if (results.length === 0) return;
+      const last = results[results.length - 1];
+      const memberLabel = last.memberId
+        ? (members.find((m) => m.id === last.memberId)?.nickname ?? `#${last.memberId}`)
+        : (last.guestName ?? '?');
+      const game = games.find((g) => g.id === last.gameId);
+      const partLabel = game?.parts.find((p) => p.id === last.partId)?.name ?? '?';
+      setLastResult({ memberLabel, partLabel, value: last.value });
+    })();
+  }, [games]));
 
   if (user?.role !== 'ADMIN') return <Redirect href="/(app)/main" />;
 
@@ -104,6 +132,8 @@ export default function WorkingScreen() {
         partId: String(part.id),
         partName: part.name,
         partValue: String(part.value),
+        partFactor: String(part.factor),
+        partBonus: String(part.bonus),
         partVariable: part.variable ? '1' : '0',
         partOnce: part.once ? '1' : '0',
         stay: stay ? '1' : '0',

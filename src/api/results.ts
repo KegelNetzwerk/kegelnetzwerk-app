@@ -2,6 +2,7 @@ import { apiFetch } from './client';
 import type { ResultEntry } from '../models/Result';
 
 interface UploadEntry {
+  clientId: string;
   memberId: number;
   partId: number;
   gopId: number;
@@ -15,6 +16,7 @@ export async function uploadResults(entries: ResultEntry[]): Promise<void> {
   const uploadable: UploadEntry[] = entries
     .filter((e) => e.memberId !== null)
     .map((e) => ({
+      clientId: e.id,
       memberId: e.memberId as number,
       partId: e.partId,
       gopId: e.gameId,
@@ -28,5 +30,13 @@ export async function uploadResults(entries: ResultEntry[]): Promise<void> {
   await apiFetch('/api/app/upload-results', {
     method: 'POST',
     body: JSON.stringify(uploadable),
+  });
+}
+
+export async function deleteResults(clientIds: string[]): Promise<void> {
+  if (clientIds.length === 0) return;
+  await apiFetch('/api/app/delete-results', {
+    method: 'POST',
+    body: JSON.stringify({ clientIds }),
   });
 }

@@ -32,7 +32,7 @@ export default function ValueDialog({
 
   function handleConfirm() {
     const val = parseFloat(input.replace(',', '.'));
-    if (isNaN(val) || val <= 0) return;
+    if (isNaN(val)) return;
     onConfirm(val);
     setInput('');
   }

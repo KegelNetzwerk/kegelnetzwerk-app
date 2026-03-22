@@ -53,9 +53,19 @@
     "members": "Members",
     "guests": "Guests",
     "addGuest": "Add Guest",
-    "guestName": "Guest name:",
-    "guestNameTitle": "Add Guest",
-    "back": "Back to"
+    "back": "Back to",
+    "guestDialog": {
+      "addTitle": "Add Guest",
+      "editTitle": "Edit Guest",
+      "nickname": "Nickname",
+      "nicknamePlaceholder": "e.g. Max",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "fallbackHint": "Nickname will be used",
+      "addPhoto": "Photo",
+      "deleteTitle": "Remove Guest",
+      "deleteConfirm": "Remove {{name}}?"
+    }
   },
   "overview": {
     "title": "Overview",
@@ -64,7 +74,8 @@
     "empty": "No results yet in this session",
     "entries": "× recorded",
     "filter": "Filter",
-    "filterAll": "All results"
+    "filterAll": "All results",
+    "showGuests": "Show guests"
   },
   "log": {
     "title": "Log",
@@ -88,7 +99,7 @@
     "clearSessionDone": "Session data cleared.",
     "newSession": "Start new session",
     "newSessionTitle": "Start new session?",
-    "newSessionMessage": "The current session will be closed and a new one started. All future results will be assigned to the new session. Previously entered results are not affected.",
+    "newSessionMessage": "The current session will be closed and a new one started. All future results will be assigned to the new session. Previously entered results are not affected.\n\nNote: This also happens automatically if no new result is entered for 24 hours.",
     "newSessionDone": "New session started.",
     "info": "Info",
     "server": "Server",

@@ -40,8 +40,8 @@ export function useSyncQueue() {
       await dequeue(ids);
       await markSynced(ids);
       setPendingCount(0);
-    } catch {
-      // Will retry on next flush
+    } catch (e) {
+      console.warn('[SyncQueue] Upload failed, will retry on next flush:', e);
     } finally {
       setSyncing(false);
     }

@@ -1,5 +1,6 @@
 import ClubBackground from '../../src/components/ClubBackground';
 import { View, Text, TouchableOpacity, Image, Linking } from 'react-native';
+import { BASE_URL } from '../../constants/api';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
@@ -8,8 +9,9 @@ import {
   BarChart2,
   Bell,
   Settings,
-  LogOut,
 } from 'lucide-react-native';
+import { useLayoutEffect } from 'react';
+import { useNavigation } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useColors } from '../../src/hooks/useColors';
 import SyncStatus from '../../src/components/SyncStatus';
@@ -18,18 +20,16 @@ interface MenuButtonProps {
   label: string;
   icon: React.ReactNode;
   onPress: () => void;
-  danger?: boolean;
-  accentColor?: string;
 }
 
-function MenuButton({ label, icon, onPress, danger, accentColor }: MenuButtonProps) {
+function MenuButton({ label, icon, onPress }: MenuButtonProps) {
   const c = useColors();
   return (
     <TouchableOpacity
       style={{
         backgroundColor: c.card,
         borderLeftWidth: 4,
-        borderLeftColor: danger ? (accentColor ?? c.accentFg) : c.primaryFg,
+        borderLeftColor: c.primaryFg,
         borderRadius: 12,
         padding: 20,
         flexDirection: 'row',
@@ -47,7 +47,7 @@ function MenuButton({ label, icon, onPress, danger, accentColor }: MenuButtonPro
       <Text
         style={{
           fontFamily: 'DMSans_600SemiBold',
-          color: danger ? (accentColor ?? c.accentFg) : c.text,
+          color: c.text,
           flex: 1,
           fontSize: 18,
         }}
@@ -60,34 +60,73 @@ function MenuButton({ label, icon, onPress, danger, accentColor }: MenuButtonPro
 
 export default function MainScreen() {
   const { t } = useTranslation();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const c = useColors();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={() => router.push('/(app)/settings')} style={{ marginRight: 12 }}>
+          <Settings size={20} color="#fff" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   return (
     <View className="flex-1">
       <ClubBackground />
       {/* Gradient header with logo */}
+      <View style={{
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 8,
+        zIndex: 1,
+      }}>
       <LinearGradient
         colors={[c.theme.primary, c.theme.secondary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={{ paddingTop: 56, paddingBottom: 24, alignItems: 'center' }}
       >
-        <Image
-          source={require('../../assets/splash_logo.png')}
-          style={{ height: 120, width: 280, resizeMode: 'contain', marginBottom: 10 }}
-        />
-        <Text
-          style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}
-        >
-          {user?.clubName}
-        </Text>
-        <Text
-          style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}
-        >
-          {user?.nickname}
-        </Text>
+        <TouchableOpacity onPress={() => Linking.openURL('https://KegelNetzwerk.de')} activeOpacity={0.75}>
+          <Image
+            source={require('../../assets/splash_logo.png')}
+            style={{ height: 120, width: 280, resizeMode: 'contain', marginBottom: 10 }}
+          />
+        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
+          <View style={{
+            width: 40, height: 40, borderRadius: 8,
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            justifyContent: 'center', alignItems: 'center',
+            padding: 5,
+          }}>
+            {user?.clubPic ? (
+              <Image
+                source={{ uri: `${BASE_URL}${user.clubPic}` }}
+                style={{ width: '100%', height: '100%', resizeMode: 'contain' }}
+              />
+            ) : (
+              <Text style={{ color: '#fff', fontFamily: 'DMSans_700Bold', fontSize: 16 }}>
+                {user?.clubName.charAt(0).toUpperCase()}
+              </Text>
+            )}
+          </View>
+          <View>
+            <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: 'rgba(255,255,255,0.9)' }}>
+              {user?.clubName}
+            </Text>
+            <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>
+              {user?.nickname}
+            </Text>
+          </View>
+        </View>
       </LinearGradient>
+      </View>
 
       <SyncStatus />
 
@@ -109,18 +148,6 @@ export default function MainScreen() {
           icon={<Bell size={24} color={c.primaryFg} />}
           label={t('main.notifications')}
           onPress={() => router.push('/(app)/notifications')}
-        />
-        <MenuButton
-          icon={<Settings size={24} color={c.primaryFg} />}
-          label={t('main.settings')}
-          onPress={() => router.push('/(app)/settings')}
-        />
-        <MenuButton
-          icon={<LogOut size={24} color={c.accentFg} />}
-          label={t('main.logout')}
-          danger
-          accentColor={c.accentFg}
-          onPress={async () => { await signOut(); }}
         />
       </View>
 

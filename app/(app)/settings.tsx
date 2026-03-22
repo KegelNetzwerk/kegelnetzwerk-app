@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
+import { Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Camera, LogOut, Trash2, RotateCcw, ChevronRight, Check, Sun, Moon, Smartphone } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
@@ -86,44 +87,47 @@ export default function SettingsScreen() {
   }
 
   async function handleClearSession() {
-    Alert.alert(t('settings.clearSessionTitle'), t('settings.clearSessionMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await clearResults();
-          await clearQueue();
-          Alert.alert(t('common.success'), t('settings.clearSessionDone'));
-        },
-      },
-    ]);
+    const message = `${t('settings.clearSessionTitle')}\n\n${t('settings.clearSessionMessage')}`;
+    const confirmed = Platform.OS === 'web'
+      ? window.confirm(message)
+      : await new Promise<boolean>((resolve) =>
+          Alert.alert(t('settings.clearSessionTitle'), t('settings.clearSessionMessage'), [
+            { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
+            { text: t('common.delete'), style: 'destructive', onPress: () => resolve(true) },
+          ])
+        );
+    if (!confirmed) return;
+    await clearResults();
+    await clearQueue();
+    Alert.alert(t('common.success'), t('settings.clearSessionDone'));
   }
 
   function handleLogout() {
+    if (Platform.OS === 'web') {
+      if (window.confirm(`${t('settings.logoutTitle')}\n\n${t('settings.logoutMessage')}`)) signOut();
+      return;
+    }
     Alert.alert(t('settings.logoutTitle'), t('settings.logoutMessage'), [
       { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('settings.logout'),
-        style: 'destructive',
-        onPress: signOut,
-      },
+      { text: t('settings.logout'), style: 'destructive', onPress: signOut },
     ]);
   }
 
   async function handleNewSession() {
-    Alert.alert(t('settings.newSessionTitle'), t('settings.newSessionMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.confirm'),
-        onPress: async () => {
-          await resetSession();
-          const group = await getOrCreateSession();
-          setSessionGroup(group);
-          Alert.alert(t('common.success'), t('settings.newSessionDone'));
-        },
-      },
-    ]);
+    const message = `${t('settings.newSessionTitle')}\n\n${t('settings.newSessionMessage')}`;
+    const confirmed = Platform.OS === 'web'
+      ? window.confirm(message)
+      : await new Promise<boolean>((resolve) =>
+          Alert.alert(t('settings.newSessionTitle'), t('settings.newSessionMessage'), [
+            { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
+            { text: t('common.confirm'), onPress: () => resolve(true) },
+          ])
+        );
+    if (!confirmed) return;
+    await resetSession();
+    const group = await getOrCreateSession();
+    setSessionGroup(group);
+    Alert.alert(t('common.success'), t('settings.newSessionDone'));
   }
 
   const initial = (user?.nickname ?? '?').charAt(0).toUpperCase();
@@ -208,39 +212,6 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Session */}
-        <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
-          <Text
-            style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase' }}
-          >
-            {t('settings.session')}
-          </Text>
-          <TouchableOpacity
-            className="px-4 py-3 flex-row items-center justify-between"
-            onPress={handleNewSession}
-          >
-            <View className="flex-row items-center gap-3">
-              <RotateCcw size={18} color={c.primaryFg} />
-              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.primaryFg }} className="text-base">
-                {t('settings.newSession')}
-              </Text>
-            </View>
-            <ChevronRight size={16} color={c.textFaint} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-            onPress={handleClearSession}
-          >
-            <View className="flex-row items-center gap-3">
-              <Trash2 size={18} color={c.accentFg} />
-              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.accentFg }} className="text-base">
-                {t('settings.clearSession')}
-              </Text>
-            </View>
-            <ChevronRight size={16} color={c.textFaint} />
-          </TouchableOpacity>
-        </View>
-
         {/* Display */}
         <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
           <Text
@@ -291,7 +262,8 @@ export default function SettingsScreen() {
               style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
               onPress={async () => {
                 setMemberDisplayMode(mode);
-                await saveDisplaySettings({ memberDisplayMode: mode });
+                const current = await getDisplaySettings();
+                await saveDisplaySettings({ ...current, memberDisplayMode: mode });
               }}
             >
               <Text style={{ fontFamily: memberDisplayMode === mode ? 'DMSans_600SemiBold' : 'DMSans_400Regular', fontSize: 15, color: memberDisplayMode === mode ? c.primaryFg : c.textSecondary }}>
@@ -302,6 +274,39 @@ export default function SettingsScreen() {
           ))}
         </View>
 
+        {/* Session */}
+        <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
+          <Text
+            style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase' }}
+          >
+            {t('settings.session')}
+          </Text>
+          <TouchableOpacity
+            style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+            onPress={handleNewSession}
+          >
+            <View className="flex-row items-center gap-3">
+              <RotateCcw size={18} color={c.primaryFg} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.primaryFg }} className="text-base">
+                {t('settings.newSession')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color={c.textFaint} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+            onPress={handleClearSession}
+          >
+            <View className="flex-row items-center gap-3">
+              <Trash2 size={18} color={c.accentFg} />
+              <Text style={{ fontFamily: 'DMSans_400Regular', color: c.accentFg }} className="text-base">
+                {t('settings.clearSession')}
+              </Text>
+            </View>
+            <ChevronRight size={16} color={c.textFaint} />
+          </TouchableOpacity>
+        </View>
+
         {/* Info */}
         <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>
           <Text
@@ -310,13 +315,13 @@ export default function SettingsScreen() {
             {t('settings.info')}
           </Text>
           <View style={{ paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: c.divider, gap: 4 }}>
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} style={{ color: c.textMuted }}>
+            <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textMuted }}>
               {t('settings.server')}: {BASE_URL}
             </Text>
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} style={{ color: c.textMuted }}>
+            <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textMuted }}>
               {t('settings.version')}: {Constants.expoConfig?.version ?? '—'}
             </Text>
-            <Text style={{ fontFamily: 'DMSans_400Regular' }} style={{ color: c.textMuted }}>
+            <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textMuted }}>
               {t('settings.sessionId')}: {sessionGroup ?? '—'}
             </Text>
           </View>

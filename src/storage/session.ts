@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { clearGuests } from './guests';
 
 const KEY = 'kn_session';
 const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -25,7 +26,10 @@ export async function getOrCreateSession(): Promise<number> {
     return session.group;
   }
   const group = Math.floor(now / 1000);
-  await save({ group, lastResultAt: now });
+  await Promise.all([
+    save({ group, lastResultAt: now }),
+    clearGuests(),
+  ]);
   return group;
 }
 
@@ -40,5 +44,8 @@ export async function touchSession(): Promise<void> {
 /** Forces a new session regardless of the last activity time. */
 export async function resetSession(): Promise<void> {
   const now = Date.now();
-  await save({ group: Math.floor(now / 1000), lastResultAt: now });
+  await Promise.all([
+    save({ group: Math.floor(now / 1000), lastResultAt: now }),
+    clearGuests(),
+  ]);
 }

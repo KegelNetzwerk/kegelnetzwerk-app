@@ -1,42 +1,10 @@
 import { useEffect } from 'react';
-import { AppState, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { AppState, Platform, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
 import { flushQueue } from '../../src/hooks/useSyncQueue';
-import { BASE_URL } from '../../constants/api';
-
-function ClubLogo() {
-  const { user } = useAuth();
-  const theme = useTheme();
-  if (!user) return null;
-  return (
-    <View style={{
-      marginRight: 12,
-      width: 36,
-      height: 36,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255,255,255,0.25)',
-      borderWidth: 1.5,
-      borderColor: 'rgba(255,255,255,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      overflow: 'hidden',
-    }}>
-      {user.clubPic ? (
-        <Image
-          source={{ uri: `${BASE_URL}${user.clubPic}` }}
-          style={{ width: 36, height: 36, resizeMode: 'contain' }}
-        />
-      ) : (
-        <Text style={{ color: '#fff', fontFamily: 'DMSans_700Bold', fontSize: 16 }}>
-          {user.clubName.charAt(0).toUpperCase()}
-        </Text>
-      )}
-    </View>
-  );
-}
 
 function HeaderBackground() {
   const theme = useTheme();
@@ -75,7 +43,7 @@ export default function AppLayout() {
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700', fontFamily: 'DMSans_700Bold' },
         headerBackTitleStyle: { fontFamily: 'DMSans_400Regular' },
-        headerRight: () => <ClubLogo />,
+        headerRight: () => null,
       }}
     >
       <Stack.Screen

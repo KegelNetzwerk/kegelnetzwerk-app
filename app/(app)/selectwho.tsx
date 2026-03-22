@@ -9,12 +9,11 @@ import {
   TouchableOpacity,
   PanResponder,
   useWindowDimensions,
-  Alert,
 } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Settings } from 'lucide-react-native';
+import { ArrowLeft, Settings, Pencil } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
 import { useUIColors } from '../../src/hooks/useUIColors';
 import 'react-native-get-random-values';
@@ -25,6 +24,7 @@ import { useNetworkSync } from '../../src/hooks/useNetworkSync';
 import { addResult, getResults } from '../../src/storage/resultPackage';
 import { getOrCreateSession, touchSession } from '../../src/storage/session';
 import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSettings';
+import { getGuests, saveGuests } from '../../src/storage/guests';
 import { getDisplaySettings, getMemberDisplayName, type MemberDisplayMode } from '../../src/storage/displaySettings';
 import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
@@ -32,6 +32,7 @@ import ValueDialog from '../../src/components/ValueDialog';
 import ShortcutMenu from '../../src/components/ShortcutMenu';
 import MemberSettingsModal from '../../src/components/MemberSettingsModal';
 import ToastStack, { type ToastItem } from '../../src/components/Toast';
+import GuestDialog from '../../src/components/GuestDialog';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 import type { Guest } from '../../src/models/Guest';
 
@@ -48,6 +49,8 @@ export default function SelectWhoScreen() {
     partId: string;
     partName: string;
     partValue: string;
+    partFactor: string;
+    partBonus: string;
     partVariable: string;
     partOnce: string;
     stay: string;
@@ -56,21 +59,53 @@ export default function SelectWhoScreen() {
   const gameId = parseInt(params.gameId ?? '0', 10);
   const partId = parseInt(params.partId ?? '0', 10);
   const partValue = parseFloat(params.partValue ?? '0');
+  const partFactor = parseFloat(params.partFactor ?? '1');
+  const partBonus = parseFloat(params.partBonus ?? '0');
   const partVariable = params.partVariable === '1';
   const partOnce = params.partOnce === '1';
   const stay = params.stay === '1';
 
+  function applyFormula(rawValue: number, factor: number, bonus: number): number {
+    return rawValue * factor + bonus;
+  }
+
+  function goBack() {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(app)/working');
+    }
+  }
+
+  const [lastResult, setLastResult] = useState<{ memberLabel: string; value: number } | null>(null);
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: params.partName ?? 'Wer?',
+      headerTitle: () => (
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ color: '#fff', fontFamily: 'DMSans_700Bold', fontSize: 16 }}>
+            {params.partName ?? 'Wer?'}
+          </Text>
+          {lastResult && (
+            <Text style={{ color: 'rgba(255,255,255,0.75)', fontFamily: 'DMSans_400Regular', fontSize: 11 }}>
+              ✓ {lastResult.memberLabel} · {lastResult.value}
+            </Text>
+          )}
+        </View>
+      ),
       headerShown: true,
+      headerLeft: () => (
+        <TouchableOpacity onPress={goBack} style={{ marginLeft: 12 }}>
+          <ArrowLeft size={22} color="#fff" />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <TouchableOpacity onPress={() => setMemberSettingsVisible(true)} style={{ marginRight: 12 }}>
           <Settings size={20} color="#fff" />
         </TouchableOpacity>
       ),
     });
-  }, [navigation, params.partName]);
+  }, [navigation, params.partName, lastResult]);
 
   const theme = useTheme();
   const ui = useUIColors();
@@ -89,7 +124,10 @@ export default function SelectWhoScreen() {
       setHiddenMemberIds(s.hiddenMemberIds);
     });
     getDisplaySettings().then((s) => setMemberDisplayMode(s.memberDisplayMode));
+    getGuests().then(setGuests);
   }, []);
+
+  const [guestDialog, setGuestDialog] = useState<{ visible: boolean; guest?: Guest }>({ visible: false });
 
   const TABS = ['members', 'guests'] as const;
   const [tab, setTab] = useState<'members' | 'guests'>('members');
@@ -127,6 +165,11 @@ export default function SelectWhoScreen() {
   ).current;
 
   const [guests, setGuests] = useState<Guest[]>([]);
+
+  useEffect(() => {
+    saveGuests(guests);
+  }, [guests]);
+
   const [onceDone, setOnceDone] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -198,6 +241,7 @@ export default function SelectWhoScreen() {
     await touchSession();
     await addToQueue(entry);
     await flush();
+    setLastResult({ memberLabel: displayName, value });
     if (!stay && overrideGameId === undefined) {
       router.back();
     } else {
@@ -213,7 +257,7 @@ export default function SelectWhoScreen() {
     if (partVariable) {
       setDialogTarget({ id: key, name: nickname });
     } else {
-      recordResult(memberId, null, partValue, nickname);
+      recordResult(memberId, null, applyFormula(partValue, partFactor, partBonus), nickname);
       if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     }
   }
@@ -226,27 +270,28 @@ export default function SelectWhoScreen() {
     const key = `g-${guest.id}`;
     if (onceDone.has(key)) return;
     if (partVariable) {
-      setDialogTarget({ id: key, name: guest.name });
+      setDialogTarget({ id: key, name: guest.nickname });
     } else {
-      recordResult(null, guest.name, partValue, guest.name);
+      recordResult(null, guest.nickname, applyFormula(partValue, partFactor, partBonus), guest.nickname);
       if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     }
   }
 
   function handleGuestLongPress(guest: Guest) {
-    setShortcutMenuTarget({ memberKey: `g-${guest.id}`, memberName: guest.name });
+    setShortcutMenuTarget({ memberKey: `g-${guest.id}`, memberName: guest.nickname });
   }
 
   function handleDialogConfirm(value: number) {
     if (!dialogTarget) return;
     const key = dialogTarget.id;
+    const final = applyFormula(value, partFactor, partBonus);
     if (key.startsWith('m-')) {
       const memberId = parseInt(key.slice(2), 10);
-      recordResult(memberId, null, value, dialogTarget.name);
+      recordResult(memberId, null, final, dialogTarget.name);
     } else {
       const guestId = key.slice(2);
       const guest = guests.find((g) => g.id === guestId);
-      if (guest) recordResult(null, guest.name, value, guest.name);
+      if (guest) recordResult(null, guest.nickname, final, guest.nickname);
     }
     if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     setDialogTarget(null);
@@ -261,9 +306,9 @@ export default function SelectWhoScreen() {
     } else {
       const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
       const guestName = memberKey.startsWith('g-')
-        ? guests.find((g) => g.id === memberKey.slice(2))?.name ?? memberName
+        ? guests.find((g) => g.id === memberKey.slice(2))?.nickname ?? memberName
         : null;
-      recordResult(memberId, guestName, part.value, memberName, game.id, part.id);
+      recordResult(memberId, guestName, applyFormula(part.value, part.factor, part.bonus), memberName, game.id, part.id);
     }
   }
 
@@ -272,22 +317,27 @@ export default function SelectWhoScreen() {
     const { memberKey, memberName, game, part } = shortcutDialog;
     const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
     const guestName = memberKey.startsWith('g-')
-      ? guests.find((g) => g.id === memberKey.slice(2))?.name ?? memberName
+      ? guests.find((g) => g.id === memberKey.slice(2))?.nickname ?? memberName
       : null;
-    recordResult(memberId, guestName, value, memberName, game.id, part.id);
+    recordResult(memberId, guestName, applyFormula(value, part.factor, part.bonus), memberName, game.id, part.id);
     setShortcutDialog(null);
   }
 
-  function addGuest() {
-    Alert.prompt(
-      t('selectwho.guestNameTitle'),
-      t('selectwho.guestName'),
-      (name) => {
-        if (!name?.trim()) return;
-        setGuests((prev) => [...prev, { id: uuidv4(), name: name.trim() }]);
-      },
-      'plain-text'
-    );
+  function handleGuestSave(saved: Guest) {
+    const isNew = !saved.id;
+    const id = saved.id || uuidv4();
+    const guest: Guest = { ...saved, id };
+    if (isNew) {
+      setGuests((prev) => [...prev, guest]);
+    } else {
+      setGuests((prev) => prev.map((g) => g.id === id ? guest : g));
+    }
+    setGuestDialog({ visible: false });
+  }
+
+  function handleGuestDelete(guestId: string) {
+    setGuests((prev) => prev.filter((g) => g.id !== guestId));
+    setGuestDialog({ visible: false });
   }
 
   return (
@@ -344,15 +394,27 @@ export default function SelectWhoScreen() {
           <ScrollView style={{ width }} contentContainerStyle={{ padding: 16 }} nestedScrollEnabled>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               {guests.map((g) => (
-                <MemberButton
-                  key={g.id}
-                  nickname={g.name}
-                  pic={null}
-                  size={cellSize}
-                  disabled={partOnce && onceDone.has(`g-${g.id}`)}
-                  onPress={() => handleGuestPress(g)}
-                  onLongPress={() => handleGuestLongPress(g)}
-                />
+                <View key={g.id} style={{ position: 'relative' }}>
+                  <MemberButton
+                    nickname={g.nickname}
+                    pic={null}
+                    picUri={g.picUri}
+                    size={cellSize}
+                    disabled={partOnce && onceDone.has(`g-${g.id}`)}
+                    onPress={() => handleGuestPress(g)}
+                    onLongPress={() => handleGuestLongPress(g)}
+                  />
+                  <TouchableOpacity
+                    style={{
+                      position: 'absolute', top: 8, right: 8,
+                      backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 10,
+                      padding: 4,
+                    }}
+                    onPress={() => setGuestDialog({ visible: true, guest: g })}
+                  >
+                    <Pencil size={11} color="#fff" />
+                  </TouchableOpacity>
+                </View>
               ))}
               <TouchableOpacity
                 style={{
@@ -366,7 +428,7 @@ export default function SelectWhoScreen() {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
-                onPress={addGuest}
+                onPress={() => setGuestDialog({ visible: true })}
               >
                 <Text className="text-3xl text-gray-400 dark:text-gray-500">+</Text>
                 <Text style={{ fontFamily: 'DMSans_400Regular' }} className="text-xs text-gray-400 dark:text-gray-500 mt-1">
@@ -383,7 +445,7 @@ export default function SelectWhoScreen() {
       <View style={{ backgroundColor: theme.primary, padding: 12 }}>
         <TouchableOpacity
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingVertical: 10 }}
-          onPress={() => router.back()}
+          onPress={goBack}
         >
           <ArrowLeft size={16} color="#fff" />
           <Text style={{ fontFamily: 'DMSans_500Medium', color: '#fff' }}>
@@ -421,6 +483,15 @@ export default function SelectWhoScreen() {
           setMemberSettingsVisible(false);
           getWorkingSettings().then((s) => setHiddenMemberIds(s.hiddenMemberIds));
         }}
+      />
+
+      {/* Guest add/edit dialog */}
+      <GuestDialog
+        visible={guestDialog.visible}
+        guest={guestDialog.guest}
+        onSave={handleGuestSave}
+        onDelete={handleGuestDelete}
+        onCancel={() => setGuestDialog({ visible: false })}
       />
 
       {/* Shortcut menu */}

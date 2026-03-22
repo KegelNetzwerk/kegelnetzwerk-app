@@ -16,7 +16,7 @@ import {
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Target, Banknote, SlidersHorizontal, X, Check, ChevronDown, ChevronRight } from 'lucide-react-native';
+import { Target, Banknote, SlidersHorizontal, X, Check, ChevronDown, ChevronRight, UserRound } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
@@ -28,6 +28,7 @@ interface Row {
   label: string;
   total: number;
   count: number;
+  isGuest: boolean;
 }
 
 type FilterSelection = null | { gameId: number; partId?: number };
@@ -74,6 +75,7 @@ export default function OverviewScreen() {
   ).current;
 
   const [filterSelection, setFilterSelection] = useState<FilterSelection>(null);
+  const [showGuests, setShowGuests] = useState(true);
   const [filterVisible, setFilterVisible] = useState(false);
   const [expandedGames, setExpandedGames] = useState<Set<number>>(new Set());
 
@@ -83,11 +85,11 @@ export default function OverviewScreen() {
       headerShown: true,
       headerRight: () => (
         <TouchableOpacity onPress={() => setFilterVisible(true)} style={{ marginRight: 12 }}>
-          <SlidersHorizontal size={20} color={filterSelection !== null ? c.accentFg : '#fff'} />
+          <SlidersHorizontal size={20} color={(filterSelection !== null || !showGuests) ? c.accentFg : '#fff'} />
         </TouchableOpacity>
       ),
     });
-  }, [navigation, t, filterSelection, c]);
+  }, [navigation, t, filterSelection, showGuests, c]);
 
   const load = useCallback(async () => {
     const [r, m, g] = await Promise.all([getResults(), getCachedMembers(), getCachedGames()]);
@@ -105,13 +107,14 @@ export default function OverviewScreen() {
   }, [load]);
 
   const filteredResults = useMemo(() => {
-    if (!filterSelection) return results;
     return results.filter((r) => {
+      if (!showGuests && r.memberId === null) return false;
+      if (!filterSelection) return true;
       if (r.gameId !== filterSelection.gameId) return false;
       if (filterSelection.partId !== undefined && r.partId !== filterSelection.partId) return false;
       return true;
     });
-  }, [results, filterSelection]);
+  }, [results, filterSelection, showGuests]);
 
   function buildRows(unit: 'POINTS' | 'EURO'): Row[] {
     const map = new Map<string, Row>();
@@ -123,7 +126,7 @@ export default function OverviewScreen() {
         ? (members.find((m) => m.id === r.memberId)?.nickname ?? `#${r.memberId}`)
         : (r.guestName ?? t('log.guest'));
       const key = r.memberId ? `m-${r.memberId}` : `g-${r.guestName}`;
-      const existing = map.get(key) ?? { label, total: 0, count: 0 };
+      const existing = map.get(key) ?? { label, total: 0, count: 0, isGuest: !r.memberId };
       existing.total += r.value;
       existing.count += 1;
       map.set(key, existing);
@@ -253,9 +256,12 @@ export default function OverviewScreen() {
                         <Text style={{ fontFamily: 'DMSans_700Bold', color: c.textFaint }} className="text-lg w-7">
                           {idx + 1}
                         </Text>
-                        <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }} className="text-base">
-                          {row.label}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                          <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }} className="text-base">
+                            {row.label}
+                          </Text>
+                          {row.isGuest && <UserRound size={13} color={c.textMuted} />}
+                        </View>
                       </View>
                       <View className="items-end">
                         <Text style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, fontSize: 18 }}>
@@ -292,6 +298,26 @@ export default function OverviewScreen() {
           </View>
 
           <ScrollView>
+            <TouchableOpacity
+              onPress={() => setShowGuests((v) => !v)}
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.divider }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <UserRound size={16} color={c.textMuted} />
+                <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 15, color: c.textStrong }}>
+                  {t('overview.showGuests')}
+                </Text>
+              </View>
+              <View style={{
+                width: 20, height: 20, borderRadius: 4, borderWidth: 2,
+                borderColor: showGuests ? c.primaryFg : c.divider,
+                backgroundColor: showGuests ? c.primaryFg : 'transparent',
+                justifyContent: 'center', alignItems: 'center',
+              }}>
+                {showGuests && <Check size={13} color="#fff" />}
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity
               onPress={clearFilter}
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.divider }}

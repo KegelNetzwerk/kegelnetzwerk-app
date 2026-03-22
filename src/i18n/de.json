@@ -53,9 +53,19 @@
     "members": "Mitglieder",
     "guests": "Gäste",
     "addGuest": "Gast hinzufügen",
-    "guestName": "Name des Gastes:",
-    "guestNameTitle": "Gast hinzufügen",
-    "back": "Zurück zu"
+    "back": "Zurück zu",
+    "guestDialog": {
+      "addTitle": "Gast hinzufügen",
+      "editTitle": "Gast bearbeiten",
+      "nickname": "Spitzname",
+      "nicknamePlaceholder": "z. B. Maxi",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "fallbackHint": "Spitzname wird verwendet",
+      "addPhoto": "Foto",
+      "deleteTitle": "Gast entfernen",
+      "deleteConfirm": "{{name}} wirklich entfernen?"
+    }
   },
   "overview": {
     "title": "Übersicht",
@@ -64,7 +74,8 @@
     "empty": "Noch keine Ergebnisse in dieser Sitzung",
     "entries": "× eingetragen",
     "filter": "Filter",
-    "filterAll": "Alle Ergebnisse"
+    "filterAll": "Alle Ergebnisse",
+    "showGuests": "Gäste anzeigen"
   },
   "log": {
     "title": "Protokoll",
@@ -88,7 +99,7 @@
     "clearSessionDone": "Sitzungsdaten wurden gelöscht.",
     "newSession": "Neue Sitzung starten",
     "newSessionTitle": "Neue Sitzung starten?",
-    "newSessionMessage": "Die aktuelle Sitzung wird abgeschlossen und eine neue gestartet. Alle zukünftigen Ergebnisse werden der neuen Sitzung zugeordnet. Bereits eingetragene Ergebnisse bleiben erhalten.",
+    "newSessionMessage": "Die aktuelle Sitzung wird abgeschlossen und eine neue gestartet. Alle zukünftigen Ergebnisse werden der neuen Sitzung zugeordnet. Bereits eingetragene Ergebnisse bleiben erhalten.\n\nHinweis: Dies geschieht automatisch, wenn 24 Stunden lang kein neues Ergebnis eingetragen wird.",
     "newSessionDone": "Neue Sitzung gestartet.",
     "info": "Info",
     "server": "Server",

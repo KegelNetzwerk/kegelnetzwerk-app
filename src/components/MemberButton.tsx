@@ -6,6 +6,7 @@ import { useColors } from '../hooks/useColors';
 interface MemberButtonProps {
   nickname: string;
   pic: string | null;
+  picUri?: string; // local URI (guests); takes precedence over pic
   disabled?: boolean;
   selected?: boolean;
   size: number;
@@ -16,6 +17,7 @@ interface MemberButtonProps {
 export default function MemberButton({
   nickname,
   pic,
+  picUri,
   disabled,
   selected,
   size,
@@ -59,9 +61,9 @@ export default function MemberButton({
         end={{ x: 0, y: 1 }}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
       >
-        {pic ? (
+        {(picUri || pic) ? (
           <Image
-            source={{ uri: `${BASE_URL}${pic}` }}
+            source={{ uri: picUri ?? `${BASE_URL}${pic}` }}
             style={{
               width: capped * 0.55,
               height: capped * 0.55,

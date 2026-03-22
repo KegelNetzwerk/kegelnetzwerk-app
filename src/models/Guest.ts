@@ -1,4 +1,7 @@
 export interface Guest {
-  id: string; // local UUID
-  name: string;
+  id: string;
+  nickname: string;
+  firstName?: string;
+  lastName?: string;
+  picUri?: string; // local URI from device image picker
 }
