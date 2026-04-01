@@ -92,7 +92,7 @@ export default function MemberButton({
           style={{
             color: disabled ? c.textFaint : c.text,
             fontFamily: 'DMSans_600SemiBold',
-            fontSize: Math.min(12, capped * 0.12),
+            fontSize: Math.min(16, capped * 0.16),
             textAlign: 'center',
             paddingHorizontal: 4,
           }}

@@ -52,6 +52,10 @@ Base URL configured via `EXPO_PUBLIC_API_URL` in `.env`. All authenticated endpo
 | GET | `/api/app/events` | Upcoming events with cancel deadlines |
 | POST | `/api/app/upload-photo` | Multipart photo upload |
 
+## Language
+
+All English-language strings (i18n, code comments, documentation) must use **American English** (e.g. "color" not "colour", "center" not "centre").
+
 ## Styling
 
 NativeWind v4 — use `className` on all React Native primitives. The `nativewind-env.d.ts` file provides the required TypeScript augmentation. Primary color is `#005982` (configured in `tailwind.config.js` as `primary`).

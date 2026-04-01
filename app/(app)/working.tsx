@@ -215,6 +215,7 @@ export default function WorkingScreen() {
                   <PartButton
                     key={part.id}
                     label={part.name}
+                    pic={part.pic}
                     size={cellSize}
                     onPress={() => navigateToSelectWho(game, part, false)}
                     onLongPress={() => navigateToSelectWho(game, part, true)}
