@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { Platform } from 'react-native';
@@ -37,6 +38,7 @@ export default function SettingsScreen() {
 
   const { user, signOut } = useAuth();
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const { setColorScheme } = useColorScheme();
   const [uploading, setUploading] = useState(false);
   const [memberDisplayMode, setMemberDisplayMode] = useState<MemberDisplayMode>('nickname');
@@ -135,7 +137,7 @@ export default function SettingsScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ClubBackground />
-      <ScrollView className="flex-1">
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: insets.bottom }}>
       <View className="p-4 gap-4">
         {/* Account */}
         <View style={{ backgroundColor: c.card, borderLeftWidth: 4, borderLeftColor: c.primaryFg, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 2 }}>

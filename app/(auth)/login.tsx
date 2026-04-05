@@ -22,10 +22,12 @@ import {
   registerPushTokenWithServer,
 } from '../../src/notifications/setup';
 import { registerBackgroundFetch } from '../../src/notifications/backgroundTask';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const { t } = useTranslation();
   const { signIn } = useAuth();
+  const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
@@ -98,7 +100,7 @@ export default function LoginScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, paddingBottom: 24 + insets.bottom }} keyboardShouldPersistTaps="handled">
         {/* Logo */}
         <View style={{ alignItems: 'center', marginBottom: 32 }}>
           <TouchableOpacity

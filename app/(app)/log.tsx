@@ -11,6 +11,7 @@ import {
   Modal,
   SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { Platform } from 'react-native';
@@ -43,6 +44,7 @@ export default function LogScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const c = useColors();
+  const insets = useSafeAreaInsets();
 
   const [allEntries, setAllEntries] = useState<DisplayEntry[]>([]);
   const [games, setGames] = useState<GameOrPenalty[]>([]);
@@ -193,6 +195,7 @@ export default function LogScreen() {
 
       <ScrollView
         className="flex-1 p-4"
+        contentContainerStyle={{ paddingBottom: insets.bottom }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {entries.length === 0 ? (

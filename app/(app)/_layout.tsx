@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
 import { flushQueue } from '../../src/hooks/useSyncQueue';
+import { useNetworkSync } from '../../src/hooks/useNetworkSync';
 import { checkAndNotify } from '../../src/notifications/backgroundTask';
 
 function HeaderBackground() {
@@ -32,6 +33,8 @@ export default function AppLayout() {
     });
     return () => sub.remove();
   }, []);
+
+  useNetworkSync(() => flushQueue().catch(() => {}));
 
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {

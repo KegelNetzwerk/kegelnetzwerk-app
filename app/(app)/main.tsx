@@ -1,5 +1,6 @@
 import ClubBackground from '../../src/components/ClubBackground';
 import { View, Text, TouchableOpacity, Image, Linking } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BASE_URL } from '../../constants/api';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -61,6 +62,7 @@ export default function MainScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -147,7 +149,8 @@ export default function MainScreen() {
 
       {/* FoelliX footer */}
       <TouchableOpacity
-        className="items-center pb-6 pt-2 gap-1"
+        style={{ paddingBottom: 24 + insets.bottom }}
+        className="items-center pt-2 gap-1"
         onPress={() => Linking.openURL('https://FoelliX.de')}
         activeOpacity={0.6}
       >

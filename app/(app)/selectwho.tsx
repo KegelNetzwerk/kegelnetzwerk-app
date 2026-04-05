@@ -10,6 +10,7 @@ import {
   PanResponder,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +21,6 @@ import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useSyncQueue } from '../../src/hooks/useSyncQueue';
-import { useNetworkSync } from '../../src/hooks/useNetworkSync';
 import { addResult, getResults } from '../../src/storage/resultPackage';
 import { getOrCreateSession, touchSession } from '../../src/storage/session';
 import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSettings';
@@ -110,9 +110,9 @@ export default function SelectWhoScreen() {
 
   const theme = useTheme();
   const ui = useUIColors();
+  const insets = useSafeAreaInsets();
   const { members, games } = useLocalData();
   const { addToQueue, flush } = useSyncQueue();
-  useNetworkSync(flush);
 
   const [pinnedParts, setPinnedParts] = useState<PinnedPart[]>([]);
   const [hiddenMemberIds, setHiddenMemberIds] = useState<number[]>([]);
@@ -450,7 +450,7 @@ export default function SelectWhoScreen() {
       </View>
 
       {/* Back button */}
-      <View style={{ backgroundColor: theme.primary, padding: 12 }}>
+      <View style={{ backgroundColor: theme.primary, padding: 12, paddingBottom: 12 + insets.bottom }}>
         <TouchableOpacity
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingVertical: 10 }}
           onPress={goBack}

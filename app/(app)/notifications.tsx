@@ -7,6 +7,7 @@ import {
   Switch,
   RefreshControl,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +35,7 @@ export default function NotificationsScreen() {
   }, [navigation, t]);
 
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const [state, setState] = useState<NotificationState | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -62,6 +64,7 @@ export default function NotificationsScreen() {
       <ClubBackground />
       <ScrollView
         className="flex-1"
+        contentContainerStyle={{ paddingBottom: insets.bottom }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
       <View className="p-4 gap-4">

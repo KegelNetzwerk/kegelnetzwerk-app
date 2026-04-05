@@ -13,6 +13,7 @@ import {
   SafeAreaView,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ export default function OverviewScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const [results, setResults] = useState<ResultEntry[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [games, setGames] = useState<GameOrPenalty[]>([]);
@@ -229,6 +231,7 @@ export default function OverviewScreen() {
             <ScrollView
               key={pageIdx}
               style={{ width }}
+              contentContainerStyle={{ paddingBottom: insets.bottom }}
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
               nestedScrollEnabled
             >
