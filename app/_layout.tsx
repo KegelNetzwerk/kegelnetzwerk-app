@@ -2,6 +2,7 @@ import 'react-native-get-random-values';
 import '../global.css';
 import '../src/i18n';
 import { useEffect, useState, useCallback } from 'react';
+import { Appearance } from 'react-native';
 import { useColorScheme } from 'nativewind';
 import { getDisplaySettings } from '../src/storage/displaySettings';
 import { Stack } from 'expo-router';
@@ -57,6 +58,7 @@ export default function RootLayout() {
   useEffect(() => {
     getDisplaySettings().then((s) => {
       setColorScheme(s.colorSchemeMode);
+      Appearance.setColorScheme(s.colorSchemeMode === 'system' ? null : s.colorSchemeMode);
       applyBodyBg(s.colorSchemeMode);
     });
   }, []);
