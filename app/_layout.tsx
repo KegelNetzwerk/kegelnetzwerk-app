@@ -59,7 +59,7 @@ export default function RootLayout() {
     getDisplaySettings().then((s) => {
       setColorScheme(s.colorSchemeMode);
       if (Platform.OS !== 'web') {
-        Appearance.setColorScheme(s.colorSchemeMode === 'system' ? null : s.colorSchemeMode);
+        try { Appearance.setColorScheme(s.colorSchemeMode === 'system' ? null : s.colorSchemeMode); } catch {}
       }
       applyBodyBg(s.colorSchemeMode);
     });

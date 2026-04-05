@@ -239,7 +239,7 @@ export default function SettingsScreen() {
                 setColorSchemeMode(mode);
                 setColorScheme(mode);
                 if (Platform.OS !== 'web') {
-                  Appearance.setColorScheme(mode === 'system' ? null : mode);
+                  try { Appearance.setColorScheme(mode === 'system' ? null : mode); } catch {}
                 }
                 const current = await getDisplaySettings();
                 await saveDisplaySettings({ ...current, colorSchemeMode: mode });

@@ -32,7 +32,7 @@ export function setupNotificationHandlers() {
       if (!response) return;
       const data = response.notification.request.content.data as Record<string, unknown>;
       openForNotification(data);
-    });
+    }).catch(() => {});
   }
 
   return () => subscription.remove();
