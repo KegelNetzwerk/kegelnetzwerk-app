@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { subHours, isFuture } from 'date-fns';
 import type { AppEvent } from '../api/events';
 import { getNotificationState } from '../storage/notificationState';
+import i18n from '../i18n';
 
 const NOTIFY_BEFORE_HOURS = 24;
 
@@ -25,8 +26,8 @@ export async function scheduleEventDeadlineNotifications(events: AppEvent[]) {
     await Notifications.scheduleNotificationAsync({
       identifier,
       content: {
-        title: 'Absagefrist läuft ab',
-        body: `${event.subject} – Absagefrist endet morgen!`,
+        title: i18n.t('notifications.push.eventTitle'),
+        body: i18n.t('notifications.push.eventBody', { subject: event.subject }),
         data: { type: 'event', eventId: event.id },
       },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: notifyAt },

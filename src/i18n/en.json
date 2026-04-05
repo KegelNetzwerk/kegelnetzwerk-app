@@ -128,6 +128,16 @@
       "events": "Event reminders",
       "news": "New news",
       "votes": "New polls"
+    },
+    "push": {
+      "newsTitle": "New Post",
+      "newsBody": "\"{{title}}\"",
+      "newsBodyCount": "{{count}} new post(s)",
+      "voteTitle": "New Poll",
+      "voteBody": "\"{{title}}\"",
+      "voteBodyCount": "{{count}} new poll(s)",
+      "eventTitle": "Cancellation deadline approaching",
+      "eventBody": "{{subject}} – Cancellation deadline ends tomorrow!"
     }
   },
   "sync": {

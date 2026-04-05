@@ -7,6 +7,7 @@ import {
   updateLastChecked,
   appendNotificationLog,
 } from '../storage/notificationState';
+import i18n from '../i18n';
 
 export const BACKGROUND_FETCH_TASK = 'kn-background-fetch';
 
@@ -19,10 +20,10 @@ export async function checkAndNotify(): Promise<void> {
   await updateLastChecked(now);
 
   if (state.enabled.news && activity.newNewsCount > 0) {
-    const title = 'Neue Neuigkeit';
+    const title = i18n.t('notifications.push.newsTitle');
     const body = activity.latestNewsTitle
-      ? `„${activity.latestNewsTitle}"`
-      : `${activity.newNewsCount} neue Neuigkeit(en)`;
+      ? i18n.t('notifications.push.newsBody', { title: activity.latestNewsTitle })
+      : i18n.t('notifications.push.newsBodyCount', { count: activity.newNewsCount });
     await Notifications.scheduleNotificationAsync({
       content: { title, body, data: { type: 'news', newsId: activity.latestNewsId } },
       trigger: null,
@@ -31,10 +32,10 @@ export async function checkAndNotify(): Promise<void> {
   }
 
   if (state.enabled.votes && activity.newVotesCount > 0) {
-    const title = 'Neue Abstimmung';
+    const title = i18n.t('notifications.push.voteTitle');
     const body = activity.latestVoteTitle
-      ? `„${activity.latestVoteTitle}"`
-      : `${activity.newVotesCount} neue Abstimmung(en)`;
+      ? i18n.t('notifications.push.voteBody', { title: activity.latestVoteTitle })
+      : i18n.t('notifications.push.voteBodyCount', { count: activity.newVotesCount });
     await Notifications.scheduleNotificationAsync({
       content: { title, body, data: { type: 'vote', voteId: activity.latestVoteId } },
       trigger: null,
