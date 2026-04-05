@@ -1,24 +1,34 @@
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { BASE_URL } from '../../constants/api';
 
+function openForNotification(data: Record<string, unknown>) {
+  const type = data?.type as string | undefined;
+  let url: string | null = null;
+
+  if (type === 'event' && data.eventId) {
+    url = `${BASE_URL}/events/${data.eventId}`;
+  } else if (type === 'news') {
+    url = data.newsId ? `${BASE_URL}/news/${data.newsId}` : `${BASE_URL}/news`;
+  } else if (type === 'vote') {
+    url = data.voteId ? `${BASE_URL}/votes/${data.voteId}` : `${BASE_URL}/votes`;
+  }
+
+  if (url) Linking.openURL(url);
+}
+
 export function setupNotificationHandlers() {
-  // Handle notification tap while app is running
+  // Handle taps while the app is running (foreground or background)
   const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
     const data = response.notification.request.content.data as Record<string, unknown>;
-    const type = data?.type as string | undefined;
+    openForNotification(data);
+  });
 
-    if (type === 'event' && data.eventId) {
-      // Open browser to the event detail page
-      const url = `${BASE_URL}/events/${data.eventId}`;
-      import('expo-linking').then(({ default: Linking }) => Linking.openURL(url));
-    } else if (type === 'news') {
-      const url = `${BASE_URL}/news`;
-      import('expo-linking').then(({ default: Linking }) => Linking.openURL(url));
-    } else if (type === 'vote') {
-      const url = `${BASE_URL}/votes`;
-      import('expo-linking').then(({ default: Linking }) => Linking.openURL(url));
-    }
+  // Handle taps that cold-started the app (notification tapped while app was killed)
+  Notifications.getLastNotificationResponseAsync().then((response) => {
+    if (!response) return;
+    const data = response.notification.request.content.data as Record<string, unknown>;
+    openForNotification(data);
   });
 
   return () => subscription.remove();

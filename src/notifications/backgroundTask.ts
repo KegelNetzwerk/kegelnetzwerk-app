@@ -24,7 +24,7 @@ export async function checkAndNotify(): Promise<void> {
       ? `„${activity.latestNewsTitle}"`
       : `${activity.newNewsCount} neue Neuigkeit(en)`;
     await Notifications.scheduleNotificationAsync({
-      content: { title, body, data: { type: 'news' } },
+      content: { title, body, data: { type: 'news', newsId: activity.latestNewsId } },
       trigger: null,
     });
     await appendNotificationLog({ id: `news-${now}`, type: 'news', title, body, timestamp: now });
@@ -36,7 +36,7 @@ export async function checkAndNotify(): Promise<void> {
       ? `„${activity.latestVoteTitle}"`
       : `${activity.newVotesCount} neue Abstimmung(en)`;
     await Notifications.scheduleNotificationAsync({
-      content: { title, body, data: { type: 'vote' } },
+      content: { title, body, data: { type: 'vote', voteId: activity.latestVoteId } },
       trigger: null,
     });
     await appendNotificationLog({ id: `vote-${now}`, type: 'vote', title, body, timestamp: now });
