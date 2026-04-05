@@ -2,6 +2,8 @@ import { Modal, View, Text, ScrollView, TouchableOpacity, useWindowDimensions } 
 import { useTranslation } from 'react-i18next';
 import { X, Zap } from 'lucide-react-native';
 import { useColors } from '../hooks/useColors';
+import PartButton from './PartButton';
+
 import type { GameOrPenalty, Part } from '../models/GameOrPenalty';
 import type { PinnedPart } from '../storage/workingSettings';
 
@@ -60,54 +62,17 @@ export default function ShortcutMenu({ visible, memberName, games, pinnedParts, 
               </Text>
             </View>
           ) : (
-            <ScrollView contentContainerStyle={{ padding: 12 }}>
+            <ScrollView contentContainerStyle={{ padding: 8 }}>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {shortcuts.map(({ game, part }) => (
-                  <TouchableOpacity
+                  <PartButton
                     key={`${game.id}-${part.id}`}
+                    label={part.name}
+                    pic={part.pic}
+                    size={cellSize}
                     onPress={() => onSelect(game, part)}
-                    activeOpacity={0.75}
-                    style={{
-                      width: cellSize,
-                      height: cellSize,
-                      margin: BUTTON_MARGIN / 2,
-                      borderRadius: 12,
-                      backgroundColor: c.primaryFg,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.15,
-                      shadowRadius: 4,
-                      elevation: 3,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: '#fff',
-                        fontFamily: 'DMSans_700Bold',
-                        fontSize: Math.min(16, cellSize * 0.16),
-                        textAlign: 'center',
-                        paddingHorizontal: 8,
-                      }}
-                      numberOfLines={3}
-                    >
-                      {part.name}
-                    </Text>
-                    <Text
-                      style={{
-                        color: 'rgba(255,255,255,0.7)',
-                        fontFamily: 'DMSans_400Regular',
-                        fontSize: Math.min(11, cellSize * 0.11),
-                        textAlign: 'center',
-                        paddingHorizontal: 6,
-                        marginTop: 4,
-                      }}
-                      numberOfLines={1}
-                    >
-                      {game.name}
-                    </Text>
-                  </TouchableOpacity>
+                    onLongPress={() => {}}
+                  />
                 ))}
               </View>
             </ScrollView>
