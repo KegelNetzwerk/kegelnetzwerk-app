@@ -238,7 +238,9 @@ export default function SettingsScreen() {
               onPress={async () => {
                 setColorSchemeMode(mode);
                 setColorScheme(mode);
-                Appearance.setColorScheme(mode === 'system' ? null : mode);
+                if (Platform.OS !== 'web') {
+                  Appearance.setColorScheme(mode === 'system' ? null : mode);
+                }
                 const current = await getDisplaySettings();
                 await saveDisplaySettings({ ...current, colorSchemeMode: mode });
               }}

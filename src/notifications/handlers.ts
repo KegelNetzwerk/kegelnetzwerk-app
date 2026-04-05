@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 import { BASE_URL } from '../../constants/api';
 
 function openForNotification(data: Record<string, unknown>) {
@@ -25,11 +26,14 @@ export function setupNotificationHandlers() {
   });
 
   // Handle taps that cold-started the app (notification tapped while app was killed)
-  Notifications.getLastNotificationResponseAsync().then((response) => {
-    if (!response) return;
-    const data = response.notification.request.content.data as Record<string, unknown>;
-    openForNotification(data);
-  });
+  // Not supported on web
+  if (Platform.OS !== 'web') {
+    Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (!response) return;
+      const data = response.notification.request.content.data as Record<string, unknown>;
+      openForNotification(data);
+    });
+  }
 
   return () => subscription.remove();
 }
