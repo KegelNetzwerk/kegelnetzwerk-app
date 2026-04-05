@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
 import { flushQueue } from '../../src/hooks/useSyncQueue';
+import { checkAndNotify } from '../../src/notifications/backgroundTask';
 
 function HeaderBackground() {
   const theme = useTheme();
@@ -24,7 +25,10 @@ export default function AppLayout() {
   const theme = useTheme();
   useEffect(() => {
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') flushQueue().catch(() => {});
+      if (state === 'active') {
+        flushQueue().catch(() => {});
+        checkAndNotify().catch(() => {});
+      }
     });
     return () => sub.remove();
   }, []);

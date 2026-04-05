@@ -11,6 +11,7 @@ import {
   PanResponder,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Redirect, router, useNavigation, useFocusEffect } from 'expo-router';
 import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -83,6 +84,7 @@ export default function WorkingScreen() {
   if (user?.role !== 'ADMIN') return <Redirect href="/(app)/main" />;
 
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const reversedGames = useMemo(
     () => [...games].reverse().filter((g) => !hiddenGameIds.includes(g.id)),
@@ -228,7 +230,7 @@ export default function WorkingScreen() {
       </View>
 
       {/* Bottom bar */}
-      <View style={{ flexDirection: 'row', backgroundColor: theme.primary }}>
+      <View style={{ flexDirection: 'row', backgroundColor: theme.primary, paddingBottom: insets.bottom }}>
         <TouchableOpacity
           className="flex-1 py-3 items-center gap-1"
           onPress={() => router.push('/(app)/overview')}

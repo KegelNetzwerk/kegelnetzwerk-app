@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { apiFetch } from '../api/client';
 
@@ -27,7 +28,10 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
 export async function registerPushTokenWithServer() {
   try {
-    const tokenData = await Notifications.getExpoPushTokenAsync();
+    const projectId =
+      Constants.easConfig?.projectId ??
+      (Constants.expoConfig?.extra?.eas?.projectId as string | undefined);
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
     await apiFetch('/api/app/push-token', {
       method: 'POST',
       body: JSON.stringify({ token: tokenData.data }),
