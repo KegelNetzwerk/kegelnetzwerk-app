@@ -25,6 +25,7 @@ import { addResult, getResults } from '../../src/storage/resultPackage';
 import { getOrCreateSession, touchSession } from '../../src/storage/session';
 import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSettings';
 import { getGuests, saveGuests } from '../../src/storage/guests';
+import { pullGuests } from '../../src/api/guests';
 import { getDisplaySettings, getMemberDisplayName, type MemberDisplayMode } from '../../src/storage/displaySettings';
 import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
@@ -148,6 +149,9 @@ export default function SelectWhoScreen() {
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
+    if (newTab === 'guests') {
+      pullGuests().then(setGuests).catch(() => {});
+    }
   }
 
   const switchTabRef = useRef(switchTab);
@@ -219,6 +223,7 @@ export default function SelectWhoScreen() {
 
   async function recordResult(
     memberId: number | null,
+    guestLocalId: string | null,
     guestName: string | null,
     value: number,
     displayName: string,
@@ -229,6 +234,7 @@ export default function SelectWhoScreen() {
     const entry = {
       id: uuidv4(),
       memberId,
+      guestLocalId,
       guestName,
       gameId: overrideGameId ?? gameId,
       partId: overridePartId ?? partId,
@@ -257,7 +263,7 @@ export default function SelectWhoScreen() {
     if (partVariable) {
       setDialogTarget({ id: key, name: nickname });
     } else {
-      recordResult(memberId, null, applyFormula(partValue, partFactor, partBonus), nickname);
+      recordResult(memberId, null, null, applyFormula(partValue, partFactor, partBonus), nickname);
       if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     }
   }
@@ -272,7 +278,7 @@ export default function SelectWhoScreen() {
     if (partVariable) {
       setDialogTarget({ id: key, name: guest.nickname });
     } else {
-      recordResult(null, guest.nickname, applyFormula(partValue, partFactor, partBonus), guest.nickname);
+      recordResult(null, guest.id, guest.nickname, applyFormula(partValue, partFactor, partBonus), guest.nickname);
       if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     }
   }
@@ -287,11 +293,11 @@ export default function SelectWhoScreen() {
     const final = applyFormula(value, partFactor, partBonus);
     if (key.startsWith('m-')) {
       const memberId = parseInt(key.slice(2), 10);
-      recordResult(memberId, null, final, dialogTarget.name);
+      recordResult(memberId, null, null, final, dialogTarget.name);
     } else {
-      const guestId = key.slice(2);
-      const guest = guests.find((g) => g.id === guestId);
-      if (guest) recordResult(null, guest.nickname, final, guest.nickname);
+      const guestLocalId = key.slice(2);
+      const guest = guests.find((g) => g.id === guestLocalId);
+      if (guest) recordResult(null, guest.id, guest.nickname, final, guest.nickname);
     }
     if (partOnce) setOnceDone((prev) => new Set([...prev, key]));
     setDialogTarget(null);
@@ -305,10 +311,11 @@ export default function SelectWhoScreen() {
       setShortcutDialog({ memberKey, memberName, game, part });
     } else {
       const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
-      const guestName = memberKey.startsWith('g-')
-        ? guests.find((g) => g.id === memberKey.slice(2))?.nickname ?? memberName
+      const guestLocalId = memberKey.startsWith('g-') ? memberKey.slice(2) : null;
+      const guestName = guestLocalId
+        ? guests.find((g) => g.id === guestLocalId)?.nickname ?? memberName
         : null;
-      recordResult(memberId, guestName, applyFormula(part.value, part.factor, part.bonus), memberName, game.id, part.id);
+      recordResult(memberId, guestLocalId, guestName, applyFormula(part.value, part.factor, part.bonus), memberName, game.id, part.id);
     }
   }
 
@@ -316,10 +323,11 @@ export default function SelectWhoScreen() {
     if (!shortcutDialog) return;
     const { memberKey, memberName, game, part } = shortcutDialog;
     const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
-    const guestName = memberKey.startsWith('g-')
-      ? guests.find((g) => g.id === memberKey.slice(2))?.nickname ?? memberName
+    const guestLocalId = memberKey.startsWith('g-') ? memberKey.slice(2) : null;
+    const guestName = guestLocalId
+      ? guests.find((g) => g.id === guestLocalId)?.nickname ?? memberName
       : null;
-    recordResult(memberId, guestName, applyFormula(value, part.factor, part.bonus), memberName, game.id, part.id);
+    recordResult(memberId, guestLocalId, guestName, applyFormula(value, part.factor, part.bonus), memberName, game.id, part.id);
     setShortcutDialog(null);
   }
 

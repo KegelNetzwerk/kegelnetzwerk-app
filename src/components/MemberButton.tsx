@@ -1,7 +1,7 @@
-import { TouchableOpacity, Text, Image, View } from 'react-native';
+import { TouchableOpacity, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BASE_URL } from '../../constants/api';
 import { useColors } from '../hooks/useColors';
+import MemberAvatar from './MemberAvatar';
 
 interface MemberButtonProps {
   nickname: string;
@@ -61,33 +61,9 @@ export default function MemberButton({
         end={{ x: 0, y: 1 }}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
       >
-        {(picUri || pic) ? (
-          <Image
-            source={{ uri: picUri ?? `${BASE_URL}${pic}` }}
-            style={{
-              width: capped * 0.55,
-              height: capped * 0.55,
-              borderRadius: capped * 0.275,
-              marginBottom: 4,
-            }}
-          />
-        ) : (
-          <View
-            style={{
-              width: capped * 0.45,
-              height: capped * 0.45,
-              borderRadius: capped * 0.225,
-              backgroundColor: c.primaryFg + '25',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: 4,
-            }}
-          >
-            <Text style={{ fontSize: capped * 0.18, color: c.primaryFg }}>
-              {nickname.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+        <View style={{ marginBottom: 4 }}>
+          <MemberAvatar pic={pic} picUri={picUri} size={capped * 0.55} />
+        </View>
         <Text
           style={{
             color: disabled ? c.textFaint : c.text,
@@ -97,6 +73,7 @@ export default function MemberButton({
             paddingHorizontal: 4,
           }}
           numberOfLines={2}
+          ellipsizeMode="tail"
         >
           {nickname}
         </Text>

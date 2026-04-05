@@ -10,12 +10,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
-import { Camera, Trash2 } from 'lucide-react-native';
+import { Camera, Trash2, UserPlus, Users } from 'lucide-react-native';
 import { useUIColors } from '../hooks/useUIColors';
 import { useTheme } from '../hooks/useTheme';
+import { getGuests } from '../storage/guests';
 import type { Guest } from '../models/Guest';
 
 interface GuestDialogProps {
@@ -26,10 +28,16 @@ interface GuestDialogProps {
   onCancel: () => void;
 }
 
+type Tab = 'new' | 'existing';
+
 export default function GuestDialog({ visible, guest, onSave, onDelete, onCancel }: GuestDialogProps) {
   const { t } = useTranslation();
   const ui = useUIColors();
   const theme = useTheme();
+
+  const isEdit = !!guest;
+  const [tab, setTab] = useState<Tab>('new');
+  const [existingGuests, setExistingGuests] = useState<Guest[]>([]);
 
   const [nickname, setNickname] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -38,12 +46,17 @@ export default function GuestDialog({ visible, guest, onSave, onDelete, onCancel
 
   useEffect(() => {
     if (visible) {
+      setTab('new');
       setNickname(guest?.nickname ?? '');
       setFirstName(guest?.firstName ?? '');
       setLastName(guest?.lastName ?? '');
       setPicUri(guest?.picUri);
+
+      if (!isEdit) {
+        getGuests().then(setExistingGuests);
+      }
     }
-  }, [visible, guest]);
+  }, [visible, guest, isEdit]);
 
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -90,7 +103,6 @@ export default function GuestDialog({ visible, guest, onSave, onDelete, onCancel
   }
 
   const avatarSize = 80;
-  const isEdit = !!guest;
   const canSave = nickname.trim().length > 0;
 
   return (
@@ -99,148 +111,248 @@ export default function GuestDialog({ visible, guest, onSave, onDelete, onCancel
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}
       >
-        <View style={{ backgroundColor: ui.card, borderRadius: 20, marginHorizontal: 24, width: '100%', maxWidth: 380, overflow: 'hidden' }}>
-          <ScrollView contentContainerStyle={{ padding: 24 }} keyboardShouldPersistTaps="handled">
+        <View style={{ backgroundColor: ui.card, borderRadius: 20, marginHorizontal: 24, width: '100%', maxWidth: 380, overflow: 'hidden', maxHeight: '85%' }}>
 
-            {/* Title */}
-            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: ui.text, marginBottom: 20 }}>
-              {isEdit ? t('selectwho.guestDialog.editTitle') : t('selectwho.guestDialog.addTitle')}
-            </Text>
-
-            {/* Photo picker */}
-            <TouchableOpacity
-              onPress={pickImage}
-              style={{ alignSelf: 'center', marginBottom: 20 }}
-            >
-              <View style={{
-                width: avatarSize,
-                height: avatarSize,
-                borderRadius: avatarSize / 2,
-                backgroundColor: ui.surface,
-                borderWidth: 2,
-                borderColor: ui.inputBorder,
-                overflow: 'hidden',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-                {picUri ? (
-                  <Image source={{ uri: picUri }} style={{ width: avatarSize, height: avatarSize }} />
-                ) : (
-                  <>
-                    <Camera size={24} color={ui.textMuted} />
-                    <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 10, color: ui.textMuted, marginTop: 4 }}>
-                      {t('selectwho.guestDialog.addPhoto')}
+          {/* Tab bar — only shown in add mode when existing guests are available */}
+          {!isEdit && existingGuests.length > 0 && (
+            <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: ui.divider }}>
+              {(['new', 'existing'] as Tab[]).map((t_) => {
+                const active = tab === t_;
+                const label = t_ === 'new'
+                  ? t('selectwho.guestDialog.tabNew', { defaultValue: 'Neuer Gast' })
+                  : t('selectwho.guestDialog.tabExisting', { defaultValue: 'Vorhandene Gäste' });
+                const Icon = t_ === 'new' ? UserPlus : Users;
+                return (
+                  <TouchableOpacity
+                    key={t_}
+                    onPress={() => setTab(t_)}
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      paddingVertical: 12,
+                      borderBottomWidth: 2,
+                      borderBottomColor: active ? theme.primary : 'transparent',
+                    }}
+                  >
+                    <Icon size={14} color={active ? theme.primary : ui.textMuted} />
+                    <Text style={{
+                      fontFamily: 'DMSans_500Medium',
+                      fontSize: 13,
+                      color: active ? theme.primary : ui.textMuted,
+                    }}>
+                      {label}
                     </Text>
-                  </>
-                )}
-              </View>
-              {picUri && (
-                <View style={{
-                  position: 'absolute', bottom: 0, right: 0,
-                  backgroundColor: theme.primary, borderRadius: 12, padding: 4,
-                }}>
-                  <Camera size={12} color="#fff" />
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {/* Nickname (required) */}
-            <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: ui.textSecondary, marginBottom: 4 }}>
-              {t('selectwho.guestDialog.nickname')} <Text style={{ color: '#ef4444' }}>*</Text>
-            </Text>
-            <TextInput
-              style={{
-                fontFamily: 'DMSans_400Regular',
-                borderWidth: 1,
-                borderColor: nickname.trim() ? ui.inputBorder : '#ef4444',
-                borderRadius: 8,
-                padding: 10,
-                fontSize: 15,
-                color: ui.text,
-                backgroundColor: ui.inputBg,
-                marginBottom: 12,
-              }}
-              value={nickname}
-              onChangeText={setNickname}
-              placeholder={t('selectwho.guestDialog.nicknamePlaceholder')}
-              placeholderTextColor={ui.textFaint}
-              autoFocus={!isEdit}
-              returnKeyType="next"
-            />
-
-            {/* First name */}
-            <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: ui.textSecondary, marginBottom: 4 }}>
-              {t('selectwho.guestDialog.firstName')}
-            </Text>
-            <TextInput
-              style={{
-                fontFamily: 'DMSans_400Regular',
-                borderWidth: 1,
-                borderColor: ui.inputBorder,
-                borderRadius: 8,
-                padding: 10,
-                fontSize: 15,
-                color: ui.text,
-                backgroundColor: ui.inputBg,
-                marginBottom: 12,
-              }}
-              value={firstName}
-              onChangeText={setFirstName}
-              placeholder={nickname.trim() || t('selectwho.guestDialog.fallbackHint')}
-              placeholderTextColor={ui.textFaint}
-              returnKeyType="next"
-            />
-
-            {/* Last name */}
-            <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: ui.textSecondary, marginBottom: 4 }}>
-              {t('selectwho.guestDialog.lastName')}
-            </Text>
-            <TextInput
-              style={{
-                fontFamily: 'DMSans_400Regular',
-                borderWidth: 1,
-                borderColor: ui.inputBorder,
-                borderRadius: 8,
-                padding: 10,
-                fontSize: 15,
-                color: ui.text,
-                backgroundColor: ui.inputBg,
-                marginBottom: 20,
-              }}
-              value={lastName}
-              onChangeText={setLastName}
-              placeholder={nickname.trim() || t('selectwho.guestDialog.fallbackHint')}
-              placeholderTextColor={ui.textFaint}
-              returnKeyType="done"
-              onSubmitEditing={handleSave}
-            />
-
-            {/* Action buttons */}
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              {isEdit && onDelete && (
-                <TouchableOpacity
-                  onPress={handleDelete}
-                  style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: '#fee2e2', justifyContent: 'center', alignItems: 'center' }}
-                >
-                  <Trash2 size={18} color="#ef4444" />
-                </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={{ flex: 1, backgroundColor: ui.cancelBg, borderRadius: 8, height: 44, justifyContent: 'center', alignItems: 'center' }}
-                onPress={onCancel}
-              >
-                <Text style={{ fontFamily: 'DMSans_500Medium', color: ui.cancelText }}>{t('common.cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{ flex: 1, backgroundColor: canSave ? theme.primary : ui.divider, borderRadius: 8, height: 44, justifyContent: 'center', alignItems: 'center' }}
-                onPress={handleSave}
-                disabled={!canSave}
-              >
-                <Text style={{ fontFamily: 'DMSans_600SemiBold', color: canSave ? '#fff' : ui.textFaint }}>{t('common.save')}</Text>
-              </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
+          )}
 
-          </ScrollView>
+          {/* Existing guests list */}
+          {tab === 'existing' && (
+            <View style={{ flex: 1 }}>
+              <FlatList
+                data={existingGuests}
+                keyExtractor={(g) => g.id}
+                contentContainerStyle={{ padding: 16 }}
+                ListHeaderComponent={
+                  <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: ui.textSecondary, marginBottom: 12 }}>
+                    {t('selectwho.guestDialog.existingHint', { defaultValue: 'Gast aus einer früheren Session auswählen:' })}
+                  </Text>
+                }
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => onSave(item)}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 12,
+                      paddingVertical: 10,
+                      paddingHorizontal: 12,
+                      borderRadius: 10,
+                      marginBottom: 6,
+                      backgroundColor: ui.surface,
+                    }}
+                  >
+                    {item.picUri ? (
+                      <Image source={{ uri: item.picUri }} style={{ width: 36, height: 36, borderRadius: 18 }} />
+                    ) : (
+                      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: ui.inputBorder, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: ui.textMuted }}>
+                          {item.nickname.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 15, color: ui.text }}>{item.nickname}</Text>
+                      {(item.firstName || item.lastName) && item.firstName !== item.nickname && (
+                        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: ui.textSecondary }}>
+                          {[item.firstName, item.lastName].filter(Boolean).join(' ')}
+                        </Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+              <View style={{ padding: 16, paddingTop: 0 }}>
+                <TouchableOpacity
+                  style={{ backgroundColor: ui.cancelBg, borderRadius: 8, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                  onPress={onCancel}
+                >
+                  <Text style={{ fontFamily: 'DMSans_500Medium', color: ui.cancelText }}>{t('common.cancel')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* New guest form */}
+          {tab === 'new' && (
+            <ScrollView contentContainerStyle={{ padding: 24 }} keyboardShouldPersistTaps="handled">
+
+              {/* Title */}
+              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: ui.text, marginBottom: 20 }}>
+                {isEdit ? t('selectwho.guestDialog.editTitle') : t('selectwho.guestDialog.addTitle')}
+              </Text>
+
+              {/* Photo picker */}
+              <TouchableOpacity
+                onPress={pickImage}
+                style={{ alignSelf: 'center', marginBottom: 20 }}
+              >
+                <View style={{
+                  width: avatarSize,
+                  height: avatarSize,
+                  borderRadius: avatarSize / 2,
+                  backgroundColor: ui.surface,
+                  borderWidth: 2,
+                  borderColor: ui.inputBorder,
+                  overflow: 'hidden',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                  {picUri ? (
+                    <Image source={{ uri: picUri }} style={{ width: avatarSize, height: avatarSize }} />
+                  ) : (
+                    <>
+                      <Camera size={24} color={ui.textMuted} />
+                      <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 10, color: ui.textMuted, marginTop: 4 }}>
+                        {t('selectwho.guestDialog.addPhoto')}
+                      </Text>
+                    </>
+                  )}
+                </View>
+                {picUri && (
+                  <View style={{
+                    position: 'absolute', bottom: 0, right: 0,
+                    backgroundColor: theme.primary, borderRadius: 12, padding: 4,
+                  }}>
+                    <Camera size={12} color="#fff" />
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              {/* Nickname (required) */}
+              <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: ui.textSecondary, marginBottom: 4 }}>
+                {t('selectwho.guestDialog.nickname')} <Text style={{ color: '#ef4444' }}>*</Text>
+              </Text>
+              <TextInput
+                style={{
+                  fontFamily: 'DMSans_400Regular',
+                  borderWidth: 1,
+                  borderColor: nickname.trim() ? ui.inputBorder : '#ef4444',
+                  borderRadius: 8,
+                  padding: 10,
+                  fontSize: 15,
+                  color: ui.text,
+                  backgroundColor: ui.inputBg,
+                  marginBottom: 12,
+                }}
+                value={nickname}
+                onChangeText={setNickname}
+                placeholder={t('selectwho.guestDialog.nicknamePlaceholder')}
+                placeholderTextColor={ui.textFaint}
+                autoFocus={!isEdit}
+                returnKeyType="next"
+              />
+
+              {/* First name */}
+              <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: ui.textSecondary, marginBottom: 4 }}>
+                {t('selectwho.guestDialog.firstName')}
+              </Text>
+              <TextInput
+                style={{
+                  fontFamily: 'DMSans_400Regular',
+                  borderWidth: 1,
+                  borderColor: ui.inputBorder,
+                  borderRadius: 8,
+                  padding: 10,
+                  fontSize: 15,
+                  color: ui.text,
+                  backgroundColor: ui.inputBg,
+                  marginBottom: 12,
+                }}
+                value={firstName}
+                onChangeText={setFirstName}
+                placeholder={nickname.trim() || t('selectwho.guestDialog.fallbackHint')}
+                placeholderTextColor={ui.textFaint}
+                returnKeyType="next"
+              />
+
+              {/* Last name */}
+              <Text style={{ fontFamily: 'DMSans_500Medium', fontSize: 13, color: ui.textSecondary, marginBottom: 4 }}>
+                {t('selectwho.guestDialog.lastName')}
+              </Text>
+              <TextInput
+                style={{
+                  fontFamily: 'DMSans_400Regular',
+                  borderWidth: 1,
+                  borderColor: ui.inputBorder,
+                  borderRadius: 8,
+                  padding: 10,
+                  fontSize: 15,
+                  color: ui.text,
+                  backgroundColor: ui.inputBg,
+                  marginBottom: 20,
+                }}
+                value={lastName}
+                onChangeText={setLastName}
+                placeholder={nickname.trim() || t('selectwho.guestDialog.fallbackHint')}
+                placeholderTextColor={ui.textFaint}
+                returnKeyType="done"
+                onSubmitEditing={handleSave}
+              />
+
+              {/* Action buttons */}
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                {isEdit && onDelete && (
+                  <TouchableOpacity
+                    onPress={handleDelete}
+                    style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: '#fee2e2', justifyContent: 'center', alignItems: 'center' }}
+                  >
+                    <Trash2 size={18} color="#ef4444" />
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={{ flex: 1, backgroundColor: ui.cancelBg, borderRadius: 8, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                  onPress={onCancel}
+                >
+                  <Text style={{ fontFamily: 'DMSans_500Medium', color: ui.cancelText }}>{t('common.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, backgroundColor: canSave ? theme.primary : ui.divider, borderRadius: 8, height: 44, justifyContent: 'center', alignItems: 'center' }}
+                  onPress={handleSave}
+                  disabled={!canSave}
+                >
+                  <Text style={{ fontFamily: 'DMSans_600SemiBold', color: canSave ? '#fff' : ui.textFaint }}>{t('common.save')}</Text>
+                </TouchableOpacity>
+              </View>
+
+            </ScrollView>
+          )}
+
         </View>
       </KeyboardAvoidingView>
     </Modal>

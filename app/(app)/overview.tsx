@@ -18,8 +18,10 @@ import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, Banknote, SlidersHorizontal, X, Check, ChevronDown, ChevronRight, UserRound } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
+import MemberAvatar from '../../src/components/MemberAvatar';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
+import { getCurrentSessionGroup } from '../../src/storage/session';
 import type { ResultEntry } from '../../src/models/Result';
 import type { Member } from '../../src/models/Member';
 import type { GameOrPenalty } from '../../src/models/GameOrPenalty';
@@ -29,6 +31,7 @@ interface Row {
   total: number;
   count: number;
   isGuest: boolean;
+  pic: string | null;
 }
 
 type FilterSelection = null | { gameId: number; partId?: number };
@@ -92,7 +95,12 @@ export default function OverviewScreen() {
   }, [navigation, t, filterSelection, showGuests, c]);
 
   const load = useCallback(async () => {
-    const [r, m, g] = await Promise.all([getResults(), getCachedMembers(), getCachedGames()]);
+    const [allResults, m, g, sessionGroup] = await Promise.all([
+      getResults(), getCachedMembers(), getCachedGames(), getCurrentSessionGroup(),
+    ]);
+    const r = sessionGroup !== null
+      ? allResults.filter((e) => e.sessionGroup === sessionGroup)
+      : [];
     setResults(r);
     setMembers(m);
     setGames(g);
@@ -122,11 +130,10 @@ export default function OverviewScreen() {
       const game = games.find((g) => g.id === r.gameId);
       const part = game?.parts.find((p) => p.id === r.partId);
       if (part?.unit !== unit) continue;
-      const label = r.memberId
-        ? (members.find((m) => m.id === r.memberId)?.nickname ?? `#${r.memberId}`)
-        : (r.guestName ?? t('log.guest'));
+      const member = r.memberId ? members.find((m) => m.id === r.memberId) : null;
+      const label = member?.nickname ?? (r.memberId ? `#${r.memberId}` : (r.guestName ?? t('log.guest')));
       const key = r.memberId ? `m-${r.memberId}` : `g-${r.guestName}`;
-      const existing = map.get(key) ?? { label, total: 0, count: 0, isGuest: !r.memberId };
+      const existing = map.get(key) ?? { label, total: 0, count: 0, isGuest: !r.memberId, pic: member?.pic ?? null };
       existing.total += r.value;
       existing.count += 1;
       map.set(key, existing);
@@ -256,6 +263,7 @@ export default function OverviewScreen() {
                         <Text style={{ fontFamily: 'DMSans_700Bold', color: c.textFaint }} className="text-lg w-7">
                           {idx + 1}
                         </Text>
+                        <MemberAvatar pic={row.pic} size={44} />
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
                           <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }} className="text-base">
                             {row.label}

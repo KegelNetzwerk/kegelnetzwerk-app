@@ -20,7 +20,7 @@ export default function PartButton({ label, pic, onPress, onLongPress, size }: P
 
   // Image area: 90% of button width; height leaves room for the label below
   const imgWidth = Math.round(capped * 0.9);
-  const imgAreaHeight = Math.round(capped * 0.68);
+  const imgAreaHeight = Math.round(capped * 0.58);
 
   const imageUri = isCustomImage
     ? (pic.startsWith('http') ? pic : `${BASE_URL}${pic}`)
@@ -99,7 +99,8 @@ export default function PartButton({ label, pic, onPress, onLongPress, size }: P
             paddingHorizontal: 8,
             paddingTop: 3,
           }}
-          numberOfLines={1}
+          numberOfLines={2}
+          ellipsizeMode="tail"
         >
           {label}
         </Text>

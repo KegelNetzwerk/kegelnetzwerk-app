@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
+  Image,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -18,8 +19,11 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Trash2, UserRound, SlidersHorizontal, X, Check, ChevronDown, ChevronRight } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
+import { BASE_URL } from '../../constants/api';
+import MemberAvatar from '../../src/components/MemberAvatar';
 import { getResults, removeResult } from '../../src/storage/resultPackage';
 import { dequeue } from '../../src/storage/syncQueue';
+import { getCurrentSessionGroup } from '../../src/storage/session';
 import { deleteResults } from '../../src/api/results';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
 import type { ResultEntry } from '../../src/models/Result';
@@ -29,6 +33,8 @@ interface DisplayEntry extends ResultEntry {
   memberLabel: string;
   gameLabel: string;
   partLabel: string;
+  memberPic: string | null;
+  partPic: string | undefined;
 }
 
 type FilterSelection = null | { gameId: number; partId?: number };
@@ -62,11 +68,16 @@ export default function LogScreen() {
   }, [navigation, t, filterActive, c]);
 
   const load = useCallback(async () => {
-    const [results, members, fetchedGames] = await Promise.all([
+    const [allResults, members, fetchedGames, sessionGroup] = await Promise.all([
       getResults(),
       getCachedMembers(),
       getCachedGames(),
+      getCurrentSessionGroup(),
     ]);
+
+    const results = sessionGroup !== null
+      ? allResults.filter((e) => e.sessionGroup === sessionGroup)
+      : [];
 
     setGames(fetchedGames);
 
@@ -75,13 +86,14 @@ export default function LogScreen() {
       .map((r) => {
         const game = fetchedGames.find((g) => g.id === r.gameId);
         const part = game?.parts.find((p) => p.id === r.partId);
+        const member = r.memberId ? members.find((m) => m.id === r.memberId) : null;
         return {
           ...r,
-          memberLabel: r.memberId
-            ? (members.find((m) => m.id === r.memberId)?.nickname ?? `#${r.memberId}`)
-            : (r.guestName ?? t('log.guest')),
+          memberLabel: member?.nickname ?? (r.memberId ? `#${r.memberId}` : (r.guestName ?? t('log.guest'))),
           gameLabel: game?.name ?? `Spiel ${r.gameId}`,
           partLabel: part?.name ?? `Teil ${r.partId}`,
+          memberPic: member?.pic ?? null,
+          partPic: part?.pic,
         };
       });
 
@@ -119,7 +131,7 @@ export default function LogScreen() {
           ])
         );
     if (!confirmed) return;
-    if (entry.synced && entry.memberId !== null) {
+    if (entry.synced) {
       await deleteResults([entry.id]);
     }
     await removeResult(entry.id);
@@ -211,7 +223,8 @@ export default function LogScreen() {
                 }}
               >
                 <View className="flex-1 mr-3">
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <MemberAvatar pic={entry.memberPic} size={28} />
                     <Text style={{ fontFamily: 'DMSans_600SemiBold', color: c.textStrong }}>
                       {entry.memberLabel}
                     </Text>
@@ -219,15 +232,37 @@ export default function LogScreen() {
                       <UserRound size={13} color={c.textMuted} />
                     )}
                   </View>
-                  <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textSecondary }} className="text-sm">
-                    {entry.gameLabel} › {entry.partLabel}
-                  </Text>
-                  <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textFaint }} className="text-xs mt-0.5">
-                    {format(new Date(entry.timestamp), 'dd.MM.yyyy HH:mm')}
-                    {!entry.synced && (
-                      <Text className="text-orange-500"> · {t('log.pending')}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                    <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textSecondary, fontSize: 14 }}>
+                      {entry.gameLabel} ›
+                    </Text>
+                    {entry.partPic?.startsWith('emoji:') ? (
+                      <Text style={{ fontSize: 14 }}>{entry.partPic.slice(6)}</Text>
+                    ) : entry.partPic && entry.partPic !== 'none' ? (
+                      <Image
+                        source={{ uri: entry.partPic.startsWith('http') ? entry.partPic : `${BASE_URL}${entry.partPic}` }}
+                        style={{ width: 18, height: 18, borderRadius: 3 }}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: c.primaryFg + '20', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 10, color: c.primaryFg, fontFamily: 'DMSans_600SemiBold' }}>{entry.partLabel.charAt(0).toUpperCase()}</Text>
+                      </View>
                     )}
-                  </Text>
+                    <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textSecondary, fontSize: 14 }}>
+                      {entry.partLabel}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                    <Text style={{ fontFamily: 'DMSans_400Regular', color: c.textFaint, fontSize: 12 }}>
+                      {format(new Date(entry.timestamp), 'dd.MM.yyyy HH:mm')}
+                    </Text>
+                    {entry.synced ? (
+                      <Check size={12} color={c.primaryFg} />
+                    ) : (
+                      <Text style={{ fontFamily: 'DMSans_400Regular', color: '#f97316', fontSize: 12 }}> · {t('log.pending')}</Text>
+                    )}
+                  </View>
                 </View>
                 <View className="flex-row items-center gap-3">
                   <Text style={{ fontFamily: 'DMSans_700Bold', color: c.primaryFg, fontSize: 18 }}>

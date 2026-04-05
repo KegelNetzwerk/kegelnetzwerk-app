@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Modal, View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { Modal, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { X, Eye, EyeOff } from 'lucide-react-native';
 import { useColors } from '../hooks/useColors';
-import { BASE_URL } from '../../constants/api';
+import MemberAvatar from './MemberAvatar';
 import {
   getWorkingSettings,
   saveWorkingSettings,
@@ -76,22 +76,9 @@ export default function MemberSettingsModal({ visible, members, onClose }: Props
                   }}
                 >
                   {/* Avatar */}
-                  {member.pic ? (
-                    <Image
-                      source={{ uri: `${BASE_URL}${member.pic}` }}
-                      style={{ width: 36, height: 36, borderRadius: 18, marginRight: 12 }}
-                    />
-                  ) : (
-                    <View style={{
-                      width: 36, height: 36, borderRadius: 18, marginRight: 12,
-                      backgroundColor: isHidden ? c.divider : c.primaryFg,
-                      justifyContent: 'center', alignItems: 'center',
-                    }}>
-                      <Text style={{ color: c.isDark ? '#1e2d3f' : '#fff', fontFamily: 'DMSans_700Bold', fontSize: 14 }}>
-                        {member.nickname.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                  )}
+                  <View style={{ marginRight: 12 }}>
+                    <MemberAvatar pic={member.pic} size={36} />
+                  </View>
 
                   <Text style={{
                     fontFamily: 'DMSans_500Medium',

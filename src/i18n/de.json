@@ -70,7 +70,7 @@
   "overview": {
     "title": "Übersicht",
     "score": "Punkte",
-    "money": "Geld",
+    "money": "Strafen",
     "empty": "Noch keine Ergebnisse in dieser Sitzung",
     "entries": "× eingetragen",
     "filter": "Filter",
@@ -133,7 +133,11 @@
   "sync": {
     "offline": "Offline –",
     "pending_one": "{{count}} Ergebnis ausstehend",
-    "pending_other": "{{count}} Ergebnisse ausstehend"
+    "pending_other": "{{count}} Ergebnisse ausstehend",
+    "invalidParticipantsTitle": "Sync-Fehler",
+    "invalidParticipantsMessage": "Die folgenden Personen wurden gelöscht und ihre Einträge können nicht hochgeladen werden:\n\n{{names}}\n\nSollen diese Einträge aus der Warteschlange entfernt werden?",
+    "invalidParticipantsFallback": "Mitglied #{{id}}",
+    "removeEntries": "Entfernen"
   },
   "memberSettings": {
     "title": "Mitglieder anzeigen",

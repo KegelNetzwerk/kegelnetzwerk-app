@@ -70,7 +70,7 @@
   "overview": {
     "title": "Overview",
     "score": "Score",
-    "money": "Money",
+    "money": "Penalties",
     "empty": "No results yet in this session",
     "entries": "× recorded",
     "filter": "Filter",
@@ -133,7 +133,11 @@
   "sync": {
     "offline": "Offline –",
     "pending_one": "{{count}} result pending",
-    "pending_other": "{{count}} results pending"
+    "pending_other": "{{count}} results pending",
+    "invalidParticipantsTitle": "Sync error",
+    "invalidParticipantsMessage": "The following people were deleted and their entries cannot be uploaded:\n\n{{names}}\n\nRemove these entries from the upload queue?",
+    "invalidParticipantsFallback": "Member #{{id}}",
+    "removeEntries": "Remove"
   },
   "memberSettings": {
     "title": "Show members",

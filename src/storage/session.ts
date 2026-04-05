@@ -33,6 +33,14 @@ export async function getOrCreateSession(): Promise<number> {
   return group;
 }
 
+/** Returns the current session group, or null if no session has been started. */
+export async function getCurrentSessionGroup(): Promise<number | null> {
+  const session = await load();
+  if (!session) return null;
+  const expired = Date.now() - session.lastResultAt >= SESSION_TIMEOUT_MS;
+  return expired ? null : session.group;
+}
+
 /** Updates the last-result timestamp so the 24 h window stays open. */
 export async function touchSession(): Promise<void> {
   const session = await load();
