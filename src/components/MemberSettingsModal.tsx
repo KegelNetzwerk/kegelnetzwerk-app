@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { X, Eye, EyeOff } from 'lucide-react-native';
 import { useColors } from '../hooks/useColors';
@@ -20,6 +21,7 @@ interface Props {
 export default function MemberSettingsModal({ visible, members, onClose }: Props) {
   const { t } = useTranslation();
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const [settings, setSettings] = useState<WorkingSettings>({ hiddenGameIds: [], hiddenMemberIds: [], pinnedParts: [] });
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function MemberSettingsModal({ visible, members, onClose }: Props
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
-        <View style={{ backgroundColor: c.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%' }}>
+        <View style={{ backgroundColor: c.card, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '85%', paddingBottom: insets.bottom }}>
           {/* Header */}
           <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: c.divider }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

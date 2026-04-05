@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Modal,
-  SafeAreaView,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -298,7 +297,7 @@ export default function OverviewScreen() {
           activeOpacity={1}
           onPress={() => setFilterVisible(false)}
         />
-        <SafeAreaView style={{ backgroundColor: c.card, maxHeight: '75%' }}>
+        <View style={{ backgroundColor: c.card, maxHeight: '75%', paddingBottom: insets.bottom }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.divider }}>
             <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 16, color: c.textStrong }}>
               {t('overview.filter')}
@@ -383,7 +382,7 @@ export default function OverviewScreen() {
               );
             })}
           </ScrollView>
-        </SafeAreaView>
+        </View>
       </Modal>
     </View>
   );
