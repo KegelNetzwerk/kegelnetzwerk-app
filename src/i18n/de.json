@@ -131,10 +131,10 @@
     },
     "push": {
       "newsTitle": "Neue Neuigkeit",
-      "newsBody": "„{{title}}"",
+      "newsBody": "\u201E{{title}}\u201C",
       "newsBodyCount": "{{count}} neue Neuigkeit(en)",
       "voteTitle": "Neue Abstimmung",
-      "voteBody": "„{{title}}"",
+      "voteBody": "\u201E{{title}}\u201C",
       "voteBodyCount": "{{count}} neue Abstimmung(en)",
       "eventTitle": "Absagefrist läuft ab",
       "eventBody": "{{subject}} – Absagefrist endet morgen!"
