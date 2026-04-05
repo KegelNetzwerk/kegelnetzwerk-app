@@ -3,7 +3,7 @@
     "name": "kegelnetzwerk-app",
     "slug": "kegelnetzwerk-app",
     "scheme": "kegelnetzwerk",
-    "version": "2.0.0",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -16,6 +16,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "de.foellix.kegelnetzwerk",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -43,6 +44,12 @@
         }
       ],
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7b9912c0-d6c2-47d0-9042-f8c8a17705d8"
+      }
+    }
   }
 }

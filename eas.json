@@ -1,0 +1,17 @@
+{
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production-apk": {
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      },
+	  "env": {
+		"EXPO_PUBLIC_API_URL": "https://kegelnetzwerk.de"
+	  },
+	  "autoIncrement": true
+    }
+  }
+}
