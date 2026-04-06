@@ -4,6 +4,10 @@ const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
+// Remove server.tls which was dropped from Metro's schema in newer versions
+// but is still set by Expo's getDefaultConfig, causing a validation warning.
+if (config.server) delete config.server.tls;
+
 const webStubs = {
   'expo-notifications': path.resolve(__dirname, 'src/web-stubs/expo-notifications.ts'),
   'expo-background-fetch': path.resolve(__dirname, 'src/web-stubs/expo-background-fetch.ts'),
