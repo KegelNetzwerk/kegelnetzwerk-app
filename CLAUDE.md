@@ -99,3 +99,22 @@ npx expo start --tunnel # for physical device testing
 ```
 
 No build step, no Composer, no native code to compile in managed workflow.
+
+## Debugging Production Crashes (Android)
+
+When the production APK crashes on launch, use `adb logcat` with a proper filter. **Do not** use `findstr de.foellix` — the real exception stack trace lines do not contain the package name and will be filtered out entirely.
+
+Clear the log first, then capture only errors:
+
+```bash
+adb logcat -c                        # clear existing log
+adb logcat AndroidRuntime:E *:S      # show only fatal exceptions
+```
+
+Alternatively, to also include lines mentioning the package name:
+
+```bash
+adb logcat | findstr /i "FATAL AndroidRuntime kegelnetzwerk"
+```
+
+The crash will appear as a `FATAL EXCEPTION` block from `AndroidRuntime`, showing the exception type, message, and full Java/native stack trace.
