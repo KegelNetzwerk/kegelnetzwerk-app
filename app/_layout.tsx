@@ -58,8 +58,8 @@ export default function RootLayout() {
   useEffect(() => {
     getDisplaySettings().then((s) => {
       setColorScheme(s.colorSchemeMode);
-      if (Platform.OS !== 'web') {
-        try { Appearance.setColorScheme(s.colorSchemeMode === 'system' ? null : s.colorSchemeMode); } catch {}
+      if (Platform.OS !== 'web' && s.colorSchemeMode !== 'system') {
+        try { Appearance.setColorScheme(s.colorSchemeMode); } catch {}
       }
       applyBodyBg(s.colorSchemeMode);
     });
