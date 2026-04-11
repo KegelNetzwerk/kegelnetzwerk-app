@@ -93,10 +93,11 @@ export function ensureContrast(
   const { r, g, b } = hexToRgb(color);
   let { h, s, l } = rgbToHsl(r, g, b);
   const step = direction === 'lighten' ? 1 : -1;
-  while (l >= 0 && l <= 100) {
+  const limit = direction === 'lighten' ? 100 : 0;
+  while ((direction === 'lighten' && l < 100) || (direction === 'darken' && l > 0)) {
     l = Math.min(100, Math.max(0, l + step));
     const adjusted = hslToHex(h, s, l);
     if (contrastRatio(adjusted, bgHex) >= minRatio) return adjusted;
   }
-  return hslToHex(h, s, direction === 'lighten' ? 100 : 0);
+  return hslToHex(h, s, limit);
 }

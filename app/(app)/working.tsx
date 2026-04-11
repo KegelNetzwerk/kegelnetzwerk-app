@@ -39,6 +39,28 @@ export default function WorkingScreen() {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [lastResult, setLastResult] = useState<{ memberLabel: string; partLabel: string; value: number } | null>(null);
 
+  // These hooks must be declared before any early return to comply with Rules of Hooks
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const reversedGames = useMemo(
+    () => [...games].reverse().filter((g) => !hiddenGameIds.includes(g.id)),
+    [games, hiddenGameIds]
+  );
+  const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+  const pagerOffset = useRef(new Animated.Value(0)).current;
+  const indexRef = useRef(0);
+  const switchToIndexRef = useRef<(idx: number) => void>(() => {});
+  const swipe = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
+      onPanResponderRelease: (_, g) => {
+        if (g.dx < -50) switchToIndexRef.current(indexRef.current + 1);
+        else if (g.dx > 50) switchToIndexRef.current(indexRef.current - 1);
+      },
+    })
+  ).current;
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
@@ -82,19 +104,7 @@ export default function WorkingScreen() {
 
   if (user?.role !== 'ADMIN') return <Redirect href="/(app)/main" />;
 
-  const { width } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
-
-  const reversedGames = useMemo(
-    () => [...games].reverse().filter((g) => !hiddenGameIds.includes(g.id)),
-    [games, hiddenGameIds]
-  );
-
   const cellSize = Math.floor((width - 32 - COLUMNS * BUTTON_MARGIN) / COLUMNS);
-
-  const [selectedGameIndex, setSelectedGameIndex] = useState(0);
-  const pagerOffset = useRef(new Animated.Value(0)).current;
-  const indexRef = useRef(0);
   indexRef.current = selectedGameIndex;
 
   function switchToIndex(idx: number) {
@@ -109,20 +119,7 @@ export default function WorkingScreen() {
       useNativeDriver: true,
     }).start();
   }
-
-  const switchToIndexRef = useRef(switchToIndex);
   switchToIndexRef.current = switchToIndex;
-
-  const swipe = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
-      onPanResponderRelease: (_, g) => {
-        if (g.dx < -50) switchToIndexRef.current(indexRef.current + 1);
-        else if (g.dx > 50) switchToIndexRef.current(indexRef.current - 1);
-      },
-    })
-  ).current;
 
   const navigateToSelectWho = (game: GameOrPenalty, part: Part, stay: boolean) => {
     router.push({

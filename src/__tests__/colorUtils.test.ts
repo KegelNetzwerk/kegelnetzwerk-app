@@ -67,8 +67,53 @@ describe('rgbToHsl', () => {
 });
 
 describe('hslToHex', () => {
-  it('converts red', () => {
+  it('converts red (h < 60)', () => {
     expect(hslToHex(0, 100, 50).toLowerCase()).toBe('#ff0000');
+  });
+
+  it('converts yellow-green (h < 120)', () => {
+    // h=90: r=x, g=c, b=0
+    const hex = hslToHex(90, 100, 50).toLowerCase();
+    const { r, g, b } = hexToRgb(hex);
+    expect(g).toBe(255);
+    expect(b).toBe(0);
+    expect(r).toBeGreaterThan(0);
+  });
+
+  it('converts cyan-green (h < 180)', () => {
+    // h=150: r=0, g=c, b=x
+    const hex = hslToHex(150, 100, 50).toLowerCase();
+    const { r, g, b } = hexToRgb(hex);
+    expect(r).toBe(0);
+    expect(g).toBe(255);
+    expect(b).toBeGreaterThan(0);
+  });
+
+  it('converts cyan-blue (h < 240)', () => {
+    // h=210: r=0, g=x, b=c
+    const hex = hslToHex(210, 100, 50).toLowerCase();
+    const { r, g, b } = hexToRgb(hex);
+    expect(r).toBe(0);
+    expect(b).toBe(255);
+    expect(g).toBeGreaterThan(0);
+  });
+
+  it('converts purple-blue (h < 300)', () => {
+    // h=270: r=x, g=0, b=c
+    const hex = hslToHex(270, 100, 50).toLowerCase();
+    const { r, g, b } = hexToRgb(hex);
+    expect(g).toBe(0);
+    expect(b).toBe(255);
+    expect(r).toBeGreaterThan(0);
+  });
+
+  it('converts pink-red (h >= 300)', () => {
+    // h=330: r=c, g=0, b=x
+    const hex = hslToHex(330, 100, 50).toLowerCase();
+    const { r, g, b } = hexToRgb(hex);
+    expect(r).toBe(255);
+    expect(g).toBe(0);
+    expect(b).toBeGreaterThan(0);
   });
 
   it('converts white', () => {
@@ -120,6 +165,13 @@ describe('ensureContrast', () => {
   it('lightens a dark color to meet the ratio against a dark background', () => {
     const result = ensureContrast('#111111', '#000000', 4.5, 'lighten');
     expect(contrastRatio(result, '#000000')).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('returns the lightest possible color when ratio cannot be met', () => {
+    // Mid grey on mid grey: even pure white has ratio ~3.95 against #808080, below 4.5
+    // The fallback should return white (#ffffff)
+    const result = ensureContrast('#808080', '#808080', 4.5, 'lighten');
+    expect(result.toLowerCase()).toBe('#ffffff');
   });
 });
 

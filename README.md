@@ -9,9 +9,6 @@
   <a href="https://sonarcloud.io/component_measures?id=KegelNetzwerk_kegelnetzwerk-app&metric=coverage">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=KegelNetzwerk_kegelnetzwerk-app&metric=coverage" alt="Coverage">
   </a>
-  <a href="https://sonarcloud.io/component_measures?id=KegelNetzwerk_kegelnetzwerk-app&metric=bugs">
-    <img src="https://sonarcloud.io/api/project_badges/measure?project=KegelNetzwerk_kegelnetzwerk-app&metric=bugs" alt="Bugs">
-  </a>
   <a href="https://github.com/KegelNetzwerk/kegelnetzwerk-app/actions/workflows/build.yml">
     <img src="https://github.com/KegelNetzwerk/kegelnetzwerk-app/actions/workflows/build.yml/badge.svg" alt="Build">
   </a>
