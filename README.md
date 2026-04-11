@@ -1,4 +1,32 @@
-# KegelNetzwerk App
+<p align="center">
+  <img src="assets/splash_logo.png" alt="KegelNetzwerk" width="420">
+</p>
+
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=KegelNetzwerk_kegelnetzwerk-app">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=KegelNetzwerk_kegelnetzwerk-app&metric=alert_status" alt="Quality Gate Status">
+  </a>
+  <a href="https://sonarcloud.io/component_measures?id=KegelNetzwerk_kegelnetzwerk-app&metric=coverage">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=KegelNetzwerk_kegelnetzwerk-app&metric=coverage" alt="Coverage">
+  </a>
+  <a href="https://sonarcloud.io/component_measures?id=KegelNetzwerk_kegelnetzwerk-app&metric=bugs">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=KegelNetzwerk_kegelnetzwerk-app&metric=bugs" alt="Bugs">
+  </a>
+  <a href="https://github.com/KegelNetzwerk/kegelnetzwerk-app/actions/workflows/build.yml">
+    <img src="https://github.com/KegelNetzwerk/kegelnetzwerk-app/actions/workflows/build.yml/badge.svg" alt="Build">
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Expo-55-000020?logo=expo&logoColor=white" alt="Expo">
+  <img src="https://img.shields.io/badge/React_Native-0.83-61DAFB?logo=react&logoColor=black" alt="React Native">
+  <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/NativeWind-v4-06B6D4?logo=tailwindcss&logoColor=white" alt="NativeWind">
+  <img src="https://img.shields.io/badge/TanStack_Query-v5-FF4154?logo=react-query&logoColor=white" alt="TanStack Query">
+  <img src="https://img.shields.io/badge/Node.js-24-339933?logo=node.js&logoColor=white" alt="Node.js">
+</p>
+
+---
 
 Cross-platform mobile app (Android, iOS, Web) for German bowling clubs — companion to the [KegelNetzwerk webservice](https://github.com/KegelNetzwerk/kegelnetzwerk-web).
 
@@ -41,6 +69,13 @@ The app's primary purpose is **result entry during bowling sessions**. Members t
    npx expo start --tunnel
    ```
 
+## Development
+
+```bash
+npm test               # Run unit tests
+npm run test:coverage  # Run tests with coverage report
+```
+
 ## Project Structure
 
 ```
@@ -64,6 +99,7 @@ src/
   hooks/        useAuth, useLocalData, useSyncQueue, useNetworkSync
   notifications/ Permission setup, local scheduler, background task, tap handler
   components/   PartButton, MemberButton, ValueDialog, SyncStatus
+  utils/        Pure utility functions (color utilities)
 ```
 
 ## Key Flows
