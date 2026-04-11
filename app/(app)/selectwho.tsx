@@ -208,10 +208,10 @@ export default function SelectWhoScreen() {
   } | null>(null);
 
   const [toasts, setToasts] = useState<ToastItem[]>([]);
-
+  const toastIdRef = useRef(0);
 
   function showToast(message: string) {
-    const id = Math.random().toString(36).slice(2);
+    const id = String(++toastIdRef.current);
     setToasts((prev) => [...prev, { id, message }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
