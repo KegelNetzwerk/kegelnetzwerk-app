@@ -101,14 +101,14 @@ export async function getStoredCredentials(): Promise<{
 
   return {
     token,
-    clubId: clubIdStr ? parseInt(clubIdStr, 10) : null,
+    clubId: clubIdStr ? Number.parseInt(clubIdStr, 10) : null,
     clubName,
     clubPic,
     nickname,
     password,
     autoLogin: autoLoginStr === '1',
     colors,
-    clubBg: clubBgStr ? parseInt(clubBgStr, 10) : 0,
+    clubBg: clubBgStr ? Number.parseInt(clubBgStr, 10) : 0,
   };
 }
 

@@ -3,8 +3,7 @@ import { Alert } from 'react-native';
 import i18n from '../i18n';
 import { getQueue, enqueue, dequeue } from '../storage/syncQueue';
 import { markSynced, removeResult } from '../storage/resultPackage';
-import { uploadResults } from '../api/results';
-import type { InvalidParticipantsError } from '../api/results';
+import { uploadResults, type InvalidParticipantsError } from '../api/results';
 import type { ResultEntry } from '../models/Result';
 
 function isInvalidParticipantsError(e: unknown): e is InvalidParticipantsError {

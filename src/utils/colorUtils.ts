@@ -5,9 +5,9 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
     ? clean.split('').map(c => c + c).join('')
     : clean;
   return {
-    r: parseInt(full.slice(0, 2), 16),
-    g: parseInt(full.slice(2, 4), 16),
-    b: parseInt(full.slice(4, 6), 16),
+    r: Number.parseInt(full.slice(0, 2), 16),
+    g: Number.parseInt(full.slice(2, 4), 16),
+    b: Number.parseInt(full.slice(4, 6), 16),
   };
 }
 

@@ -2,7 +2,7 @@ import ClubBackground from '../../src/components/ClubBackground';
 import { View, Text, TouchableOpacity, Image, Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BASE_URL } from '../../constants/api';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,7 +11,6 @@ import {
   Settings,
 } from 'lucide-react-native';
 import { useLayoutEffect } from 'react';
-import { useNavigation } from 'expo-router';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useColors } from '../../src/hooks/useColors';
 import SyncStatus from '../../src/components/SyncStatus';

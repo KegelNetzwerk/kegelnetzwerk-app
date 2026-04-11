@@ -1,6 +1,6 @@
 import ClubBackground from '../../src/components/ClubBackground';
 import WorkingSettingsModal from '../../src/components/WorkingSettingsModal';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Redirect, router, useNavigation, useFocusEffect } from 'expo-router';
-import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X, Settings } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';

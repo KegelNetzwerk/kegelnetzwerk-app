@@ -1,5 +1,5 @@
 import ClubBackground from '../../src/components/ClubBackground';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
+  Appearance,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
-import { useLayoutEffect } from 'react';
-import { Platform, Appearance } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Camera, LogOut, Trash2, RotateCcw, ChevronRight, Check, Sun, Moon, Smartphone } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';

@@ -1,5 +1,5 @@
 import ClubBackground from '../../src/components/ClubBackground';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings, Pencil } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
@@ -57,11 +56,11 @@ export default function SelectWhoScreen() {
     stay: string;
   }>();
 
-  const gameId = parseInt(params.gameId ?? '0', 10);
-  const partId = parseInt(params.partId ?? '0', 10);
-  const partValue = parseFloat(params.partValue ?? '0');
-  const partFactor = parseFloat(params.partFactor ?? '1');
-  const partBonus = parseFloat(params.partBonus ?? '0');
+  const gameId = Number.parseInt(params.gameId ?? '0', 10);
+  const partId = Number.parseInt(params.partId ?? '0', 10);
+  const partValue = Number.parseFloat(params.partValue ?? '0');
+  const partFactor = Number.parseFloat(params.partFactor ?? '1');
+  const partBonus = Number.parseFloat(params.partBonus ?? '0');
   const partVariable = params.partVariable === '1';
   const partOnce = params.partOnce === '1';
   const stay = params.stay === '1';
@@ -292,7 +291,7 @@ export default function SelectWhoScreen() {
     const key = dialogTarget.id;
     const final = applyFormula(value, partFactor, partBonus);
     if (key.startsWith('m-')) {
-      const memberId = parseInt(key.slice(2), 10);
+      const memberId = Number.parseInt(key.slice(2), 10);
       recordResult(memberId, null, null, final, dialogTarget.name);
     } else {
       const guestLocalId = key.slice(2);
@@ -310,7 +309,7 @@ export default function SelectWhoScreen() {
     if (part.variable) {
       setShortcutDialog({ memberKey, memberName, game, part });
     } else {
-      const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
+      const memberId = memberKey.startsWith('m-') ? Number.parseInt(memberKey.slice(2), 10) : null;
       const guestLocalId = memberKey.startsWith('g-') ? memberKey.slice(2) : null;
       const guestName = guestLocalId
         ? guests.find((g) => g.id === guestLocalId)?.nickname ?? memberName
@@ -322,7 +321,7 @@ export default function SelectWhoScreen() {
   function handleShortcutDialogConfirm(value: number) {
     if (!shortcutDialog) return;
     const { memberKey, memberName, game, part } = shortcutDialog;
-    const memberId = memberKey.startsWith('m-') ? parseInt(memberKey.slice(2), 10) : null;
+    const memberId = memberKey.startsWith('m-') ? Number.parseInt(memberKey.slice(2), 10) : null;
     const guestLocalId = memberKey.startsWith('g-') ? memberKey.slice(2) : null;
     const guestName = guestLocalId
       ? guests.find((g) => g.id === guestLocalId)?.nickname ?? memberName

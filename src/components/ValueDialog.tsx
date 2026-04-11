@@ -38,7 +38,7 @@ export default function ValueDialog({
   const inputRef = useRef<TextInput>(null);
 
   function handleConfirm() {
-    const val = parseFloat(input.replace(',', '.'));
+    const val = Number.parseFloat(input.replace(',', '.'));
     if (isNaN(val)) return;
     onConfirm(val);
     setInput('');

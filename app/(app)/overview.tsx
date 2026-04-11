@@ -1,5 +1,5 @@
 import ClubBackground from '../../src/components/ClubBackground';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
-import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, Banknote, SlidersHorizontal, X, Check, ChevronDown, ChevronRight, UserRound } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
