@@ -1,4 +1,4 @@
-import { hexToRgb, rgbToHsl, hslToHex, contrastRatio, ensureContrast } from '../utils/colorUtils';
+import { hexToRgb, rgbToHsl, hslToHex, contrastRatio, ensureContrast, hexToHsl, isLight } from '../utils/colorUtils';
 
 describe('hexToRgb', () => {
   it('converts a 6-char hex without #', () => {
@@ -120,5 +120,45 @@ describe('ensureContrast', () => {
   it('lightens a dark color to meet the ratio against a dark background', () => {
     const result = ensureContrast('#111111', '#000000', 4.5, 'lighten');
     expect(contrastRatio(result, '#000000')).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('hexToHsl', () => {
+  it('converts red hex to HSL', () => {
+    const { h, s, l } = hexToHsl('#ff0000');
+    expect(h).toBeCloseTo(0, 0);
+    expect(s).toBeCloseTo(100, 0);
+    expect(l).toBeCloseTo(50, 0);
+  });
+
+  it('gives same result as hexToRgb + rgbToHsl', () => {
+    const hex = '#3089ac';
+    const { r, g, b } = hexToRgb(hex);
+    const expected = rgbToHsl(r, g, b);
+    const result = hexToHsl(hex);
+    expect(result.h).toBeCloseTo(expected.h, 5);
+    expect(result.s).toBeCloseTo(expected.s, 5);
+    expect(result.l).toBeCloseTo(expected.l, 5);
+  });
+});
+
+describe('isLight', () => {
+  it('returns true for white', () => {
+    expect(isLight('#ffffff')).toBe(true);
+  });
+
+  it('returns false for black', () => {
+    expect(isLight('#000000')).toBe(false);
+  });
+
+  it('returns true for a light color (lightness 51%)', () => {
+    // hslToHex(0, 0, 51) → slightly above 50% lightness
+    const lightGrey = hslToHex(0, 0, 51);
+    expect(isLight(lightGrey)).toBe(true);
+  });
+
+  it('returns false for a dark color (lightness 49%)', () => {
+    const darkGrey = hslToHex(0, 0, 49);
+    expect(isLight(darkGrey)).toBe(false);
   });
 });

@@ -64,6 +64,20 @@ export function contrastRatio(hex1: string, hex2: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/** Convenience: converts a hex color directly to HSL. */
+export function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const { r, g, b } = hexToRgb(hex);
+  return rgbToHsl(r, g, b);
+}
+
+/**
+ * Returns true if the perceived lightness of a hex color is above 50
+ * (i.e. the color would be considered "light" for contrast purposes).
+ */
+export function isLight(hex: string): boolean {
+  return hexToHsl(hex).l > 50;
+}
+
 /**
  * Returns `color` unchanged if it already meets `minRatio` against `bgHex`.
  * Otherwise shifts HSL lightness in `direction` by 1 % per step until the
