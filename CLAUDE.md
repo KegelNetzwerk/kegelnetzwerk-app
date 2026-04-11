@@ -100,6 +100,28 @@ npx expo start --tunnel # for physical device testing
 
 No build step, no Composer, no native code to compile in managed workflow.
 
+## React Rules of Hooks
+
+All hook calls (`useState`, `useRef`, `useMemo`, `useEffect`, `useWindowDimensions`, `useSafeAreaInsets`, etc.) **must appear before any early return**. This applies even to hooks that logically "belong" to the post-guard code. In screens that have a role guard (e.g. `if (user?.role !== 'ADMIN') return <Redirect />`), declare every hook above the guard, then perform non-hook computations below it.
+
+## Unit Testing
+
+Only `src/utils/` contains pure, runtime-free logic that can be unit-tested with Jest. All other directories (`src/hooks/`, `src/components/`, `src/api/`, `src/storage/`, `src/notifications/`, `app/`) require the Expo/React Native runtime and cannot be tested in the Jest environment.
+
+- Test files live in `src/__tests__/` and mirror the `src/utils/` structure.
+- `src/utils/colorUtils.ts` is fully covered (100% statements/branches/functions/lines). Maintain this when adding new utility functions — write tests alongside the implementation.
+- When adding a new pure utility to `src/utils/`, add it to an existing test file or create a new one in `src/__tests__/`.
+
+## Code Quality (SonarQube)
+
+The SonarQube Cloud quality gate is enforced on every push. Key rule to watch:
+
+- **S6440** (Rules of Hooks) — hooks called after an early return are flagged as bugs. See "React Rules of Hooks" section above.
+
+## Pre-commit Hook (SonarQube Secrets)
+
+A global SonarQube Secrets CLI hook (`~/.sonar/sonarqube-cli/hooks/pre-commit`) scans every staged file for hardcoded secrets. The hook has no exclusion mechanism. If i18n or other files containing password-related UI strings are staged, expect false positives that block the commit.
+
 ## Debugging Production Crashes (Android)
 
 When the production APK crashes on launch, use `adb logcat` with a proper filter. **Do not** use `findstr de.foellix` — the real exception stack trace lines do not contain the package name and will be filtered out entirely.
