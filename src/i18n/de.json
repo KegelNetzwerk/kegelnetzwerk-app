@@ -38,7 +38,9 @@
     "overview": "Übersicht",
     "notifications": "Benachrichtigungen",
     "settings": "Einstellungen",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "balance": "Dein Kontostand",
+    "payViaPayPal": "Per PayPal bezahlen"
   },
   "working": {
     "title": "Ergebnisse eingeben",
@@ -127,7 +129,8 @@
     "types": {
       "events": "Terminerinnerungen",
       "news": "Neue Neuigkeiten",
-      "votes": "Neue Abstimmungen"
+      "votes": "Neue Abstimmungen",
+      "payoff": "Abrechnungsbenachrichtigungen"
     },
     "push": {
       "newsTitle": "Neue Neuigkeit",
@@ -137,7 +140,9 @@
       "voteBody": "\u201E{{title}}\u201C",
       "voteBodyCount": "{{count}} neue Abstimmung(en)",
       "eventTitle": "Absagefrist läuft ab",
-      "eventBody": "{{subject}} – Absagefrist endet morgen!"
+      "eventBody": "{{subject}} – Absagefrist endet morgen!",
+      "payoffTitle": "Neue Abrechnung",
+      "payoffBody": "Es wurde eine neue Abrechnung für deinen Verein durchgeführt."
     }
   },
   "sync": {

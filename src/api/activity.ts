@@ -7,6 +7,7 @@ export interface ActivityResponse {
   latestNewsId: number | null;
   latestVoteTitle: string | null;
   latestVoteId: number | null;
+  newPayoffCount: number;
 }
 
 export async function fetchActivity(since: string): Promise<ActivityResponse> {

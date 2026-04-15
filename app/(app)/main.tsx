@@ -9,11 +9,13 @@ import {
   ClipboardList,
   Bell,
   Settings,
+  ExternalLink,
 } from 'lucide-react-native';
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useState, useEffect } from 'react';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useColors } from '../../src/hooks/useColors';
 import SyncStatus from '../../src/components/SyncStatus';
+import { fetchFinanceSummary, type FinanceSummary } from '../../src/api/finance';
 
 interface MenuButtonProps {
   label: string;
@@ -57,12 +59,26 @@ function MenuButton({ label, icon, onPress }: MenuButtonProps) {
   );
 }
 
+function buildPayPalUrl(paypal: string, amount: number): string {
+  const base = paypal.startsWith('http') ? paypal : `https://paypal.me/${paypal}`;
+  return `${base}/${Math.abs(amount).toFixed(2)}`;
+}
+
 export default function MainScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [finance, setFinance] = useState<FinanceSummary | null>(null);
+  const [financeLoading, setFinanceLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFinanceSummary()
+      .then(setFinance)
+      .catch((e) => console.error('[finance] fetch failed:', e))
+      .finally(() => setFinanceLoading(false));
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -129,6 +145,65 @@ export default function MainScreen() {
       </View>
 
       <SyncStatus />
+
+      {/* Balance card — always visible */}
+      <View style={{
+        marginHorizontal: 24,
+        marginTop: 16,
+        backgroundColor: c.card,
+        borderLeftWidth: 4,
+        borderLeftColor: finance && finance.balance < 0 ? '#c0392b' : finance && finance.balance > 0 ? '#27ae60' : c.primaryFg,
+        borderRadius: 12,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+      }}>
+        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 11, color: c.textMuted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 }}>
+          {t('main.balance')}
+        </Text>
+        {financeLoading ? (
+          <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 22, color: c.textMuted }}>
+            —
+          </Text>
+        ) : finance ? (
+          <Text style={{
+            fontFamily: 'DMSans_700Bold',
+            fontSize: 22,
+            color: finance.balance < 0 ? '#c0392b' : finance.balance > 0 ? '#27ae60' : c.text,
+          }}>
+            {finance.balance < 0 ? '–' : finance.balance > 0 ? '+' : ''}{Math.abs(finance.balance).toFixed(2)} €
+          </Text>
+        ) : (
+          <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 15, color: c.textMuted }}>
+            —
+          </Text>
+        )}
+
+        {finance && finance.balance < 0 && finance.paypal ? (
+          <TouchableOpacity
+            style={{
+              marginTop: 12,
+              backgroundColor: '#009cde',
+              borderRadius: 8,
+              paddingVertical: 10,
+              paddingHorizontal: 14,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+            onPress={() => Linking.openURL(buildPayPalUrl(finance.paypal!, finance.balance))}
+          >
+            <ExternalLink size={16} color="#fff" />
+            <Text style={{ fontFamily: 'DMSans_600SemiBold', color: '#fff', fontSize: 14 }}>
+              {t('main.payViaPayPal')}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
 
       {/* Menu */}
       <View className="flex-1 p-6 gap-3">

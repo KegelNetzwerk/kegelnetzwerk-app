@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { CalendarDays, Newspaper, CheckSquare, Bell } from 'lucide-react-native';
+import { CalendarDays, Newspaper, CheckSquare, Bell, Banknote } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
 import {
   getNotificationState,
@@ -23,6 +23,7 @@ function TypeIcon({ type, size = 18, color = '#005982' }: { type: string; size?:
   if (type === 'events' || type === 'event') return <CalendarDays size={size} color={color} />;
   if (type === 'news') return <Newspaper size={size} color={color} />;
   if (type === 'votes' || type === 'vote') return <CheckSquare size={size} color={color} />;
+  if (type === 'payoff') return <Banknote size={size} color={color} />;
   return <Bell size={size} color={color} />;
 }
 

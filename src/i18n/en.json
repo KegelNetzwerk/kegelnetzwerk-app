@@ -38,7 +38,9 @@
     "overview": "Overview",
     "notifications": "Notifications",
     "settings": "Settings",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+    "balance": "Your Balance",
+    "payViaPayPal": "Pay via PayPal"
   },
   "working": {
     "title": "Enter Results",
@@ -127,7 +129,8 @@
     "types": {
       "events": "Event reminders",
       "news": "New news",
-      "votes": "New polls"
+      "votes": "New polls",
+      "payoff": "Payoff notifications"
     },
     "push": {
       "newsTitle": "New Post",
@@ -137,7 +140,9 @@
       "voteBody": "\"{{title}}\"",
       "voteBodyCount": "{{count}} new poll(s)",
       "eventTitle": "Cancellation deadline approaching",
-      "eventBody": "{{subject}} – Cancellation deadline ends tomorrow!"
+      "eventBody": "{{subject}} – Cancellation deadline ends tomorrow!",
+      "payoffTitle": "New Payoff",
+      "payoffBody": "A new payoff has been executed for your club."
     }
   },
   "sync": {

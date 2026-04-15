@@ -42,6 +42,16 @@ export async function checkAndNotify(): Promise<void> {
     });
     await appendNotificationLog({ id: `vote-${now}`, type: 'vote', title, body, timestamp: now });
   }
+
+  if (state.enabled.payoff && activity.newPayoffCount > 0) {
+    const title = i18n.t('notifications.push.payoffTitle');
+    const body = i18n.t('notifications.push.payoffBody');
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, data: { type: 'payoff' } },
+      trigger: null,
+    });
+    await appendNotificationLog({ id: `payoff-${now}`, type: 'payoff', title, body, timestamp: now });
+  }
 }
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {

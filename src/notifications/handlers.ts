@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
+import { router } from 'expo-router';
 import { BASE_URL } from '../../constants/api';
 
 function openForNotification(data: Record<string, unknown>) {
@@ -13,6 +14,9 @@ function openForNotification(data: Record<string, unknown>) {
     url = data.newsId ? `${BASE_URL}/news/${data.newsId}` : `${BASE_URL}/news`;
   } else if (type === 'vote') {
     url = data.voteId ? `${BASE_URL}/votes/${data.voteId}` : `${BASE_URL}/votes`;
+  } else if (type === 'payoff') {
+    router.push('/(app)/main');
+    return;
   }
 
   if (url) Linking.openURL(url);

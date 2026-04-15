@@ -6,13 +6,14 @@ export interface NotificationState {
     events: boolean;
     news: boolean;
     votes: boolean;
+    payoff: boolean;
   };
   recentLog: NotificationLogEntry[];
 }
 
 export interface NotificationLogEntry {
   id: string;
-  type: 'event' | 'news' | 'vote';
+  type: 'event' | 'news' | 'vote' | 'payoff';
   title: string;
   body: string;
   timestamp: string; // ISO
@@ -23,13 +24,19 @@ const KEY = 'kn_notification_state';
 
 const DEFAULT: NotificationState = {
   lastChecked: null,
-  enabled: { events: true, news: true, votes: true },
+  enabled: { events: true, news: true, votes: true, payoff: true },
   recentLog: [],
 };
 
 export async function getNotificationState(): Promise<NotificationState> {
   const raw = await AsyncStorage.getItem(KEY);
-  return raw ? { ...DEFAULT, ...JSON.parse(raw) } : DEFAULT;
+  if (!raw) return DEFAULT;
+  const stored = JSON.parse(raw) as Partial<NotificationState>;
+  return {
+    ...DEFAULT,
+    ...stored,
+    enabled: { ...DEFAULT.enabled, ...stored.enabled },
+  };
 }
 
 export async function saveNotificationState(state: NotificationState) {
