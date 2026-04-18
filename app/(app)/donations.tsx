@@ -214,6 +214,9 @@ export default function DonationsScreen() {
                 onChangeText={setDonateInput}
                 autoFocus
               />
+              <Text style={{ fontFamily: 'DMSans_600SemiBold', fontSize: 12, color: '#d97706' }}>
+                {t('donations.modal.exchangeRate')}
+              </Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
               <TouchableOpacity

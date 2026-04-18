@@ -183,7 +183,8 @@
     "modal": {
       "title": "Convert Euro to KNC",
       "amountLabel": "Amount (€)",
-      "amountPlaceholder": "e.g. 5.00",
+      "amountPlaceholder": "e.g. 10.00",
+      "exchangeRate": "Rate: 1 € = 100 KNC",
       "confirm": "Convert",
       "cancel": "Cancel"
     },
