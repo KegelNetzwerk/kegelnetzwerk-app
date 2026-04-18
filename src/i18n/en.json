@@ -37,7 +37,7 @@
     "enterResults": "Enter Results",
     "overview": "Overview",
     "notifications": "Notifications",
-    "donations": "Donations & KNC",
+    "donations": "Donations Menu",
     "settings": "Settings",
     "logout": "Sign Out",
     "balance": "Your Balance",
@@ -177,7 +177,7 @@
   "donations": {
     "title": "Donations / KNC",
     "kncBalance": "Your KNC Balance",
-    "donate": "Convert to KNC",
+    "donate": "Convert € to KNC",
     "slotMachine": "Slot Machine",
     "comingSoon": "Coming soon!",
     "modal": {

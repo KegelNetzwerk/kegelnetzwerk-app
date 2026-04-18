@@ -37,7 +37,7 @@
     "enterResults": "Ergebnisse eingeben",
     "overview": "Übersicht",
     "notifications": "Benachrichtigungen",
-    "donations": "Spenden & KNC",
+    "donations": "Spenden Menü",
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "balance": "Dein Kontostand",
@@ -177,7 +177,7 @@
   "donations": {
     "title": "Spenden / KNC",
     "kncBalance": "Dein KNC-Guthaben",
-    "donate": "In KNC umwandeln",
+    "donate": "€ in KNC umwandeln",
     "slotMachine": "Slot Machine",
     "comingSoon": "Demnächst verfügbar!",
     "modal": {
