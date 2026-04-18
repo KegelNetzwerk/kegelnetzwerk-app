@@ -7,7 +7,6 @@ import {
   Animated,
   Easing,
   TouchableOpacity,
-  PanResponder,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +14,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings, Pencil } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useUIColors } from '../../src/hooks/useUIColors';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,12 +26,12 @@ import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSe
 import { getGuests, saveGuests } from '../../src/storage/guests';
 import { pullGuests } from '../../src/api/guests';
 import { getDisplaySettings, getMemberDisplayName, type MemberDisplayMode } from '../../src/storage/displaySettings';
-import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
 import ValueDialog from '../../src/components/ValueDialog';
 import ShortcutMenu from '../../src/components/ShortcutMenu';
 import MemberSettingsModal from '../../src/components/MemberSettingsModal';
 import ToastStack, { type ToastItem } from '../../src/components/Toast';
+import { setPendingToast } from '../../src/storage/pendingToast';
 import GuestDialog from '../../src/components/GuestDialog';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 import type { Guest } from '../../src/models/Guest';
@@ -42,7 +42,6 @@ const BUTTON_MARGIN = 8;
 export default function SelectWhoScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { user } = useAuth();
   const params = useLocalSearchParams<{
     gameId: string;
     gameName: string;
@@ -153,19 +152,7 @@ export default function SelectWhoScreen() {
     }
   }
 
-  const switchTabRef = useRef(switchTab);
-  switchTabRef.current = switchTab;
-
-  const swipe = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
-      onPanResponderRelease: (_, g) => {
-        if (g.dx < -50 && tabRef.current === 'members') switchTabRef.current('guests');
-        else if (g.dx > 50 && tabRef.current === 'guests') switchTabRef.current('members');
-      },
-    })
-  ).current;
+  const swipe = useTabSwipe(['members', 'guests'] as const, tabRef, switchTab);
 
   const [guests, setGuests] = useState<Guest[]>([]);
 
@@ -247,12 +234,14 @@ export default function SelectWhoScreen() {
     await addToQueue(entry);
     await flush();
     setLastResult({ memberLabel: displayName, value });
-    if (!stay && overrideGameId === undefined) {
-      router.back();
+    const message = `✓ ${displayName} — ${overridePartId === undefined
+      ? params.partName
+      : (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')} — ${value}`;
+    setPendingToast(message);
+    if (stay || overrideGameId !== undefined) {
+      showToast(message);
     } else {
-      showToast(`✓ ${displayName} — ${overridePartId !== undefined
-        ? (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')
-        : params.partName} — ${value}`);
+      router.back();
     }
   }
 

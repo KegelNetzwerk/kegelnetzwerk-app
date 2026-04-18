@@ -37,6 +37,7 @@
     "enterResults": "Ergebnisse eingeben",
     "overview": "Übersicht",
     "notifications": "Benachrichtigungen",
+    "donations": "Spenden Menü",
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "balance": "Dein Kontostand",
@@ -172,5 +173,23 @@
     "placeholder": "Wert",
     "confirm": "Bestätigen",
     "cancel": "Abbrechen"
+  },
+  "donations": {
+    "title": "Spenden",
+    "kncBalance": "Dein KNC-Guthaben",
+    "donate": "€ in KNC umwandeln",
+    "slotMachine": "Slot Machine",
+    "comingSoon": "Demnächst verfügbar!",
+    "modal": {
+      "title": "Euro in KNC umwandeln",
+      "amountLabel": "Betrag (€)",
+      "amountPlaceholder": "z. B. 10.00",
+      "exchangeRate": "Kurs: 1 € = 100 KNC",
+      "confirm": "Umwandeln",
+      "cancel": "Abbrechen"
+    },
+    "success": "{{knc}} KNC gutgeschrieben!",
+    "error": "Umwandlung fehlgeschlagen.",
+    "invalidAmount": "Bitte einen gültigen Betrag eingeben."
   }
 }

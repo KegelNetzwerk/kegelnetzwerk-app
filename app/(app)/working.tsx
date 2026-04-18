@@ -17,12 +17,14 @@ import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X, Settings } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useTheme } from '../../src/hooks/useTheme';
-import { useUIColors } from '../../src/hooks/useUIColors';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
+import ToastStack from '../../src/components/Toast';
+import { useToast } from '../../src/hooks/useToast';
 import { getWorkingSettings } from '../../src/storage/workingSettings';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers } from '../../src/storage/cache';
+import { consumePendingToast } from '../../src/storage/pendingToast';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
 const BUTTON_MARGIN = 8;
@@ -31,13 +33,13 @@ const COLUMNS = 3;
 export default function WorkingScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const ui = useUIColors();
   const navigation = useNavigation();
   const { user } = useAuth();
   const { games, loading } = useLocalData();
   const [hiddenGameIds, setHiddenGameIds] = useState<number[]>([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [lastResult, setLastResult] = useState<{ memberLabel: string; partLabel: string; value: number } | null>(null);
+  const { toasts, showToast } = useToast();
 
   // These hooks must be declared before any early return to comply with Rules of Hooks
   const { width } = useWindowDimensions();
@@ -89,10 +91,12 @@ export default function WorkingScreen() {
   }, []);
 
   useFocusEffect(useCallback(() => {
+    const pending = consumePendingToast();
+    if (pending) showToast(pending);
     (async () => {
       const [results, members] = await Promise.all([getResults(), getCachedMembers()]);
       if (results.length === 0) return;
-      const last = results[results.length - 1];
+      const last = results.at(-1)!;
       const memberLabel = last.memberId
         ? (members.find((m) => m.id === last.memberId)?.nickname ?? `#${last.memberId}`)
         : (last.guestName ?? '?');
@@ -255,6 +259,8 @@ export default function WorkingScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <ToastStack toasts={toasts} />
 
       <WorkingSettingsModal
         visible={settingsVisible}

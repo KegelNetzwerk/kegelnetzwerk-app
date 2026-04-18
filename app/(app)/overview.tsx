@@ -6,7 +6,6 @@ import {
   ScrollView,
   Animated,
   Easing,
-  PanResponder,
   TouchableOpacity,
   RefreshControl,
   Modal,
@@ -17,6 +16,7 @@ import { useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Target, Banknote, SlidersHorizontal, X, Check, ChevronDown, ChevronRight, UserRound } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
+import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import MemberAvatar from '../../src/components/MemberAvatar';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers, getCachedGames } from '../../src/storage/cache';
@@ -63,19 +63,7 @@ export default function OverviewScreen() {
     }).start();
   }
 
-  const switchTabRef = useRef(switchTab);
-  switchTabRef.current = switchTab;
-
-  const swipe = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
-      onPanResponderRelease: (_, g) => {
-        if (g.dx < -50 && tabRef.current === 'score') switchTabRef.current('money');
-        else if (g.dx > 50 && tabRef.current === 'money') switchTabRef.current('score');
-      },
-    })
-  ).current;
+  const swipe = useTabSwipe(['score', 'money'] as const, tabRef, switchTab);
 
   const [filterSelection, setFilterSelection] = useState<FilterSelection>(null);
   const [showGuests, setShowGuests] = useState(true);

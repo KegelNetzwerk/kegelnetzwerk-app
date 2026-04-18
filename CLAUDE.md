@@ -56,6 +56,10 @@ Base URL configured via `EXPO_PUBLIC_API_URL` in `.env`. All authenticated endpo
 
 All English-language strings (i18n, code comments, documentation) must use **American English** (e.g. "color" not "colour", "center" not "centre").
 
+## German Terminology
+
+Use **"Klub"** (not "Verein") for the concept of a bowling club throughout all German UI strings and code. For example: "Klubprofil" not "Vereinsprofil".
+
 ## Styling
 
 NativeWind v4 — use `className` on all React Native primitives. The `nativewind-env.d.ts` file provides the required TypeScript augmentation. Primary color is `#005982` (configured in `tailwind.config.js` as `primary`).
