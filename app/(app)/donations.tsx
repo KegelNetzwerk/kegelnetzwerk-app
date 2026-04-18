@@ -38,12 +38,14 @@ export default function DonationsScreen() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastIdRef = useRef(0);
 
+  function removeToast(id: string) {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }
+
   function showToast(message: string) {
     const id = String(++toastIdRef.current);
     setToasts((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 2500);
+    setTimeout(() => removeToast(id), 2500);
   }
 
   useEffect(() => {
@@ -54,8 +56,8 @@ export default function DonationsScreen() {
   }, []);
 
   async function handleDonate() {
-    const amt = parseFloat(donateInput.replace(',', '.'));
-    if (isNaN(amt) || amt <= 0) {
+    const amt = Number.parseFloat(donateInput.replace(',', '.'));
+    if (Number.isNaN(amt) || amt <= 0) {
       showToast(t('donations.invalidAmount'));
       return;
     }

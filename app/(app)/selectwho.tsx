@@ -246,9 +246,9 @@ export default function SelectWhoScreen() {
     await addToQueue(entry);
     await flush();
     setLastResult({ memberLabel: displayName, value });
-    const message = `✓ ${displayName} — ${overridePartId !== undefined
-      ? (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')
-      : params.partName} — ${value}`;
+    const message = `✓ ${displayName} — ${overridePartId === undefined
+      ? params.partName
+      : (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')} — ${value}`;
     setPendingToast(message);
     if (stay || overrideGameId !== undefined) {
       showToast(message);
