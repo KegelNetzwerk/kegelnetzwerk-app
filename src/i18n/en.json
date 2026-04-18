@@ -130,7 +130,7 @@
       "events": "Event reminders",
       "news": "New news",
       "votes": "New polls",
-      "payoff": "Payoff notifications"
+      "payoff": "Payoff"
     },
     "push": {
       "newsTitle": "New Post",
