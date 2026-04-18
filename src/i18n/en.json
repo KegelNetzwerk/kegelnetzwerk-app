@@ -37,6 +37,7 @@
     "enterResults": "Enter Results",
     "overview": "Overview",
     "notifications": "Notifications",
+    "donations": "Donations & KNC",
     "settings": "Settings",
     "logout": "Sign Out",
     "balance": "Your Balance",
@@ -172,5 +173,22 @@
     "placeholder": "Value",
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "donations": {
+    "title": "Donations / KNC",
+    "kncBalance": "Your KNC Balance",
+    "donate": "Convert to KNC",
+    "slotMachine": "Slot Machine",
+    "comingSoon": "Coming soon!",
+    "modal": {
+      "title": "Convert Euro to KNC",
+      "amountLabel": "Amount (€)",
+      "amountPlaceholder": "e.g. 5.00",
+      "confirm": "Convert",
+      "cancel": "Cancel"
+    },
+    "success": "{{knc}} KNC credited!",
+    "error": "Conversion failed.",
+    "invalidAmount": "Please enter a valid amount."
   }
 }

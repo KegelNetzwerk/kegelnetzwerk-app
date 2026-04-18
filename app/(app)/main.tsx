@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ClipboardList,
   Bell,
+  Heart,
   Settings,
   ExternalLink,
 } from 'lucide-react-native';
@@ -218,6 +219,11 @@ export default function MainScreen() {
           icon={<Bell size={24} color={c.primaryFg} />}
           label={t('main.notifications')}
           onPress={() => router.push('/(app)/notifications')}
+        />
+        <MenuButton
+          icon={<Heart size={24} color={c.primaryFg} />}
+          label={t('main.donations')}
+          onPress={() => router.push('/(app)/donations')}
         />
       </View>
 
