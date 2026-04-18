@@ -7,7 +7,6 @@ import {
   Animated,
   Easing,
   TouchableOpacity,
-  PanResponder,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +14,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Settings, Pencil } from 'lucide-react-native';
 import { useTheme } from '../../src/hooks/useTheme';
+import { useTabSwipe } from '../../src/hooks/useTabSwipe';
 import { useUIColors } from '../../src/hooks/useUIColors';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
@@ -152,19 +152,7 @@ export default function SelectWhoScreen() {
     }
   }
 
-  const switchTabRef = useRef(switchTab);
-  switchTabRef.current = switchTab;
-
-  const swipe = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) =>
-        Math.abs(g.dx) > Math.abs(g.dy) && Math.abs(g.dx) > 15,
-      onPanResponderRelease: (_, g) => {
-        if (g.dx < -50 && tabRef.current === 'members') switchTabRef.current('guests');
-        else if (g.dx > 50 && tabRef.current === 'guests') switchTabRef.current('members');
-      },
-    })
-  ).current;
+  const swipe = useTabSwipe(['members', 'guests'] as const, tabRef, switchTab);
 
   const [guests, setGuests] = useState<Guest[]>([]);
 

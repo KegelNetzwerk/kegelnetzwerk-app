@@ -19,7 +19,8 @@ import { useLocalData } from '../../src/hooks/useLocalData';
 import { useTheme } from '../../src/hooks/useTheme';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
-import ToastStack, { type ToastItem } from '../../src/components/Toast';
+import ToastStack from '../../src/components/Toast';
+import { useToast } from '../../src/hooks/useToast';
 import { getWorkingSettings } from '../../src/storage/workingSettings';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers } from '../../src/storage/cache';
@@ -38,18 +39,7 @@ export default function WorkingScreen() {
   const [hiddenGameIds, setHiddenGameIds] = useState<number[]>([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [lastResult, setLastResult] = useState<{ memberLabel: string; partLabel: string; value: number } | null>(null);
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const toastIdRef = useRef(0);
-
-  function removeToast(id: string) {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }
-
-  function showToast(message: string) {
-    const id = String(++toastIdRef.current);
-    setToasts((prev) => [...prev, { id, message }]);
-    setTimeout(() => removeToast(id), 2500);
-  }
+  const { toasts, showToast } = useToast();
 
   // These hooks must be declared before any early return to comply with Rules of Hooks
   const { width } = useWindowDimensions();

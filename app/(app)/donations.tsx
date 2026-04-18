@@ -1,5 +1,5 @@
 import ClubBackground from '../../src/components/ClubBackground';
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,8 @@ import { Heart, Dices } from 'lucide-react-native';
 import { useColors } from '../../src/hooks/useColors';
 import { fetchFinanceSummary } from '../../src/api/finance';
 import { postDonate } from '../../src/api/donations';
-import ToastStack, { type ToastItem } from '../../src/components/Toast';
+import ToastStack from '../../src/components/Toast';
+import { useToast } from '../../src/hooks/useToast';
 
 export default function DonationsScreen() {
   const { t } = useTranslation();
@@ -35,18 +36,7 @@ export default function DonationsScreen() {
   const [donateModalVisible, setDonateModalVisible] = useState(false);
   const [donateInput, setDonateInput] = useState('');
   const [donating, setDonating] = useState(false);
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const toastIdRef = useRef(0);
-
-  function removeToast(id: string) {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }
-
-  function showToast(message: string) {
-    const id = String(++toastIdRef.current);
-    setToasts((prev) => [...prev, { id, message }]);
-    setTimeout(() => removeToast(id), 2500);
-  }
+  const { toasts, showToast } = useToast();
 
   useEffect(() => {
     fetchFinanceSummary()
