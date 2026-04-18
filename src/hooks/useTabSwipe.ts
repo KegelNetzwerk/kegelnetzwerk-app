@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { PanResponder } from 'react-native';
-import type { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 
 export function useTabSwipe<T extends string>(
   tabs: readonly [T, T],
-  tabRef: MutableRefObject<T>,
+  tabRef: RefObject<T>,
   switchTab: (newTab: T) => void
 ) {
   const switchTabRef = useRef(switchTab);
