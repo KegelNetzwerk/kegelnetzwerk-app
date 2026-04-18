@@ -26,7 +26,6 @@ import { getWorkingSettings, type PinnedPart } from '../../src/storage/workingSe
 import { getGuests, saveGuests } from '../../src/storage/guests';
 import { pullGuests } from '../../src/api/guests';
 import { getDisplaySettings, getMemberDisplayName, type MemberDisplayMode } from '../../src/storage/displaySettings';
-import { useAuth } from '../../src/hooks/useAuth';
 import MemberButton from '../../src/components/MemberButton';
 import ValueDialog from '../../src/components/ValueDialog';
 import ShortcutMenu from '../../src/components/ShortcutMenu';
@@ -43,7 +42,6 @@ const BUTTON_MARGIN = 8;
 export default function SelectWhoScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { user } = useAuth();
   const params = useLocalSearchParams<{
     gameId: string;
     gameName: string;
@@ -252,10 +250,10 @@ export default function SelectWhoScreen() {
       ? (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')
       : params.partName} — ${value}`;
     setPendingToast(message);
-    if (!stay && overrideGameId === undefined) {
-      router.back();
-    } else {
+    if (stay || overrideGameId !== undefined) {
       showToast(message);
+    } else {
+      router.back();
     }
   }
 

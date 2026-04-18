@@ -17,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { BarChart2, ClipboardList, X, Settings } from 'lucide-react-native';
 import { useLocalData } from '../../src/hooks/useLocalData';
 import { useTheme } from '../../src/hooks/useTheme';
-import { useUIColors } from '../../src/hooks/useUIColors';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
 import ToastStack, { type ToastItem } from '../../src/components/Toast';
@@ -33,7 +32,6 @@ const COLUMNS = 3;
 export default function WorkingScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const ui = useUIColors();
   const navigation = useNavigation();
   const { user } = useAuth();
   const { games, loading } = useLocalData();
@@ -106,7 +104,7 @@ export default function WorkingScreen() {
     (async () => {
       const [results, members] = await Promise.all([getResults(), getCachedMembers()]);
       if (results.length === 0) return;
-      const last = results[results.length - 1];
+      const last = results.at(-1)!;
       const memberLabel = last.memberId
         ? (members.find((m) => m.id === last.memberId)?.nickname ?? `#${last.memberId}`)
         : (last.guestName ?? '?');
