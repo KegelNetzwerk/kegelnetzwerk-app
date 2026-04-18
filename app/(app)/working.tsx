@@ -20,9 +20,11 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { useUIColors } from '../../src/hooks/useUIColors';
 import { useAuth } from '../../src/hooks/useAuth';
 import PartButton from '../../src/components/PartButton';
+import ToastStack, { type ToastItem } from '../../src/components/Toast';
 import { getWorkingSettings } from '../../src/storage/workingSettings';
 import { getResults } from '../../src/storage/resultPackage';
 import { getCachedMembers } from '../../src/storage/cache';
+import { consumePendingToast } from '../../src/storage/pendingToast';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 
 const BUTTON_MARGIN = 8;
@@ -38,6 +40,16 @@ export default function WorkingScreen() {
   const [hiddenGameIds, setHiddenGameIds] = useState<number[]>([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [lastResult, setLastResult] = useState<{ memberLabel: string; partLabel: string; value: number } | null>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastIdRef = useRef(0);
+
+  function showToast(message: string) {
+    const id = String(++toastIdRef.current);
+    setToasts((prev) => [...prev, { id, message }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 2500);
+  }
 
   // These hooks must be declared before any early return to comply with Rules of Hooks
   const { width } = useWindowDimensions();
@@ -89,6 +101,8 @@ export default function WorkingScreen() {
   }, []);
 
   useFocusEffect(useCallback(() => {
+    const pending = consumePendingToast();
+    if (pending) showToast(pending);
     (async () => {
       const [results, members] = await Promise.all([getResults(), getCachedMembers()]);
       if (results.length === 0) return;
@@ -255,6 +269,8 @@ export default function WorkingScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <ToastStack toasts={toasts} />
 
       <WorkingSettingsModal
         visible={settingsVisible}

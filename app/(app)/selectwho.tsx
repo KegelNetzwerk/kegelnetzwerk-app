@@ -32,6 +32,7 @@ import ValueDialog from '../../src/components/ValueDialog';
 import ShortcutMenu from '../../src/components/ShortcutMenu';
 import MemberSettingsModal from '../../src/components/MemberSettingsModal';
 import ToastStack, { type ToastItem } from '../../src/components/Toast';
+import { setPendingToast } from '../../src/storage/pendingToast';
 import GuestDialog from '../../src/components/GuestDialog';
 import type { GameOrPenalty, Part } from '../../src/models/GameOrPenalty';
 import type { Guest } from '../../src/models/Guest';
@@ -247,12 +248,14 @@ export default function SelectWhoScreen() {
     await addToQueue(entry);
     await flush();
     setLastResult({ memberLabel: displayName, value });
+    const message = `✓ ${displayName} — ${overridePartId !== undefined
+      ? (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')
+      : params.partName} — ${value}`;
+    setPendingToast(message);
     if (!stay && overrideGameId === undefined) {
       router.back();
     } else {
-      showToast(`✓ ${displayName} — ${overridePartId !== undefined
-        ? (games.find(g => g.id === (overrideGameId ?? gameId))?.parts.find(p => p.id === overridePartId)?.name ?? '')
-        : params.partName} — ${value}`);
+      showToast(message);
     }
   }
 
