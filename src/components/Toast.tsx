@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Text, View } from 'react-native';
+import { Animated, Text, View, Platform } from 'react-native';
 
 export interface ToastItem {
   id: string;
   message: string;
 }
+
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 function SingleToast({ message }: { message: string }) {
   const opacity = useRef(new Animated.Value(0)).current;
@@ -12,8 +14,8 @@ function SingleToast({ message }: { message: string }) {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: 180, useNativeDriver: true }),
+      Animated.timing(opacity,    { toValue: 1, duration: 180, useNativeDriver: USE_NATIVE_DRIVER }),
+      Animated.timing(translateY, { toValue: 0, duration: 180, useNativeDriver: USE_NATIVE_DRIVER }),
     ]).start();
   }, []);
 
@@ -26,10 +28,7 @@ function SingleToast({ message }: { message: string }) {
         paddingHorizontal: 16,
         opacity,
         transform: [{ translateY }],
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowRadius: 6,
+        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.25)',
         elevation: 6,
       }}
     >
@@ -49,13 +48,13 @@ export default function ToastStack({ toasts }: ToastStackProps) {
 
   return (
     <View
-      pointerEvents="none"
       style={{
         position: 'absolute',
         bottom: 100,
         left: 24,
         right: 24,
         gap: 6,
+        pointerEvents: 'none',
       }}
     >
       {toasts.map((t) => (

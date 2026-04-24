@@ -191,5 +191,51 @@
     "success": "{{knc}} KNC gutgeschrieben!",
     "error": "Umwandlung fehlgeschlagen.",
     "invalidAmount": "Bitte einen gültigen Betrag eingeben."
+  },
+  "slotMachine": {
+    "title": "Slot Machine",
+    "balance": "KNC-Guthaben",
+    "betPerSpin": "Einsatz pro Spin",
+    "spin": "SPIN",
+    "spinCost": "{{cost}} KNC",
+    "freeSpins": "Freispiele",
+    "error": {
+      "offline": "Keine Internetverbindung.",
+      "insufficientBalance": "Nicht genug KNC. Bitte Guthaben aufladen.",
+      "api": "Fehler beim Spin. Bitte erneut versuchen."
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "volume": "Lautstärke",
+      "openGuide": "Spielanleitung"
+    },
+    "guide": {
+      "title": "Spielanleitung",
+      "basicsTitle": "Grundregeln",
+      "basicsBody": "5 Walzen · 3 Reihen · 10 Gewinnlinien\n\nGleiche Symbole müssen von links nach rechts auf einer aktiven Gewinnlinie erscheinen. Mindestens 3 Symbole in Folge werden ausgezahlt. Der Kegel (🎳) ist gleichzeitig Wild und Scatter.",
+      "wildTitle": "Wild-Symbol",
+      "wildBody": "Der Kegel (🎳) ersetzt auf Gewinnlinien alle anderen Symbole und vervollständigt Kombinationen.",
+      "scatterTitle": "Scatter & Freispiele",
+      "scatterBody": "3 oder mehr Kegel (🎳) irgendwo auf den Walzen lösen 10 Freispiele aus. Der Einsatz während der Freispiele beträgt 0 KNC.\n\nIm Durchschnitt erscheinen die Freispiele alle ~53 Drehungen.",
+      "expandingTitle": "Erweiterungssymbol",
+      "expandingBody": "Zu Beginn der Freispiele wird ein zufälliges Erweiterungssymbol gewählt und angezeigt.\n\nErscheint dieses Symbol auf genügend Walzen, dehnt es sich auf die gesamten Walzen aus und zahlt als Scatter – ohne Gewinnlinie, einfach nach Anzahl der Walzen, multipliziert mit Einsatz und aktiven Linien.\n\nDie Scatter-Auszahlung basiert auf einer eigenen Bonusmultiplikatortabelle. Die Gewinne sind kleiner als beim entsprechenden Gewinnlinientreffer, dafür winken in den Freispielen viele solcher Treffer hintereinander.",
+      "scatterPayTableTitle": "Scatter-Auszahlungstabelle (Freispiele)",
+      "scatterPayTableNote": "Multiplikator × Einsatz je Linie × aktive Linien",
+      "reels": "Walzen",
+      "thresholdTitle": "Auslöseschwelle",
+      "thresholdBody": "Hochwertige Symbole (🍺 🧈 🍟 🍕) expandieren bereits ab 2 Walzen und zahlen Scatter ab 2 Walzen.\n\nNiedrigwertige Symbole (🥨 🥐 🍇 🍐 🍓) benötigen mindestens 3 Walzen zur Expansion und Scatter-Auszahlung.",
+      "retriggerTitle": "Neuauslösung",
+      "retriggerBody": "Erscheinen während der Freispiele erneut 3 oder mehr Kegel (🎳), werden sofort 10 weitere Freispiele gutgeschrieben. Das gewählte Erweiterungssymbol bleibt erhalten."
+    },
+    "double": {
+      "button": "2×",
+      "title": "Verdoppeln oder Nichts",
+      "pressToFlip": "SPIN drücken zum Münzwurf",
+      "closeHint": "2× erneut drücken zum Schließen",
+      "won": "Gewonnen! {{win}} K",
+      "lost": "Verloren!",
+      "tapToClose": "Tippe zum Schließen",
+      "maxFlipsReached": "Maximum erreicht"
+    }
   }
 }

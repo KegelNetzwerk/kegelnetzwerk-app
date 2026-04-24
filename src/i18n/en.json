@@ -191,5 +191,51 @@
     "success": "{{knc}} KNC credited!",
     "error": "Conversion failed.",
     "invalidAmount": "Please enter a valid amount."
+  },
+  "slotMachine": {
+    "title": "Slot Machine",
+    "balance": "KNC Balance",
+    "betPerSpin": "Bet per Spin",
+    "spin": "SPIN",
+    "spinCost": "{{cost}} KNC",
+    "freeSpins": "Free Spins",
+    "error": {
+      "offline": "No internet connection.",
+      "insufficientBalance": "Not enough KNC. Please top up your balance.",
+      "api": "Spin failed. Please try again."
+    },
+    "settings": {
+      "title": "Settings",
+      "volume": "Volume",
+      "openGuide": "Game Guide"
+    },
+    "guide": {
+      "title": "Game Guide",
+      "basicsTitle": "Basic Rules",
+      "basicsBody": "5 reels · 3 rows · 10 paylines\n\nMatching symbols must appear left to right on an active payline. At least 3 consecutive symbols pay out. The Kegel (🎳) acts as both Wild and Scatter.",
+      "wildTitle": "Wild Symbol",
+      "wildBody": "The Kegel (🎳) substitutes for all other symbols on paylines and completes winning combinations.",
+      "scatterTitle": "Scatter & Free Spins",
+      "scatterBody": "3 or more Kegel (🎳) anywhere on the reels trigger 10 free spins. All free spins are played at zero cost.\n\nOn average, free spins are triggered every ~53 paid spins.",
+      "expandingTitle": "Expanding Symbol",
+      "expandingBody": "At the start of free spins, a random expanding symbol is chosen and displayed.\n\nIf that symbol appears on enough reels, it expands to fill those entire reels and pays as a scatter — no payline needed, just by reel count, multiplied by bet and active lines.\n\nScatter wins use a dedicated bonus multiplier table. Individual payouts are smaller than an equivalent payline hit, but the free spins round can deliver many such wins in a row.",
+      "scatterPayTableTitle": "Scatter Payout Table (Free Spins)",
+      "scatterPayTableNote": "Multiplier × bet per line × active lines",
+      "reels": "Reels",
+      "thresholdTitle": "Expansion Threshold",
+      "thresholdBody": "High-value symbols (🍺 🧈 🍟 🍕) expand from just 2 reels and pay scatter from 2 reels.\n\nLow-value symbols (🥨 🥐 🍇 🍐 🍓) require at least 3 reels to expand and pay scatter.",
+      "retriggerTitle": "Retrigger",
+      "retriggerBody": "If 3 or more Kegel (🎳) land during free spins, 10 additional free spins are awarded immediately. The chosen expanding symbol stays the same."
+    },
+    "double": {
+      "button": "2×",
+      "title": "Double or Nothing",
+      "pressToFlip": "Press SPIN to flip the coin",
+      "closeHint": "Press 2× again to close",
+      "won": "Won! {{win}} K",
+      "lost": "Lost!",
+      "tapToClose": "Tap anywhere to close",
+      "maxFlipsReached": "Maximum flips reached"
+    }
   }
 }
