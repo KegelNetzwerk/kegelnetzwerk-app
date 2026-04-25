@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { secureRandom } from '../utils/random';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { postSpin } from '../api/slot';
@@ -62,11 +63,11 @@ export function useSlot(initialKncBalance: number): SlotState {
   useEffect(() => {
     AsyncStorage.multiGet([ACTIVE_LINES_KEY, BET_PER_LINE_KEY]).then(([[, linesVal], [, betVal]]) => {
       if (linesVal !== null) {
-        const n = parseInt(linesVal, 10);
+        const n = Number.parseInt(linesVal, 10);
         if ([1, 3, 5, 7, 10].includes(n)) setActiveLines(n);
       }
       if (betVal !== null) {
-        const n = parseInt(betVal, 10);
+        const n = Number.parseInt(betVal, 10);
         if ([1, 2, 5, 10].includes(n)) setBetPerLine(n as BetOption);
       }
     });
@@ -258,7 +259,7 @@ export function useSlot(initialKncBalance: number): SlotState {
     updateBalance: (balance: number) => setKncBalance(balance),
     readySpin: useCallback(() => setCanSpin(true), []),
     debugTriggerFeature: __DEV__ ? () => {
-      const sym = nonBookKeys[Math.floor(Math.random() * nonBookKeys.length)];
+      const sym = nonBookKeys[Math.floor(secureRandom() * nonBookKeys.length)];
       setFeatureSpinsLeft(10);
       setExpandingSymbol(sym);
       setFeatureJustTriggered(true);

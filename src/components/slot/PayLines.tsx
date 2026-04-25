@@ -12,15 +12,15 @@ const LINE_LABELS = [
   'Delle oben', 'Delle unten', 'Diagonal ↘', 'Diagonal ↗', 'Diagonal ↗ Mitte',
 ];
 
-function MiniGrid({ lineIndex, color, dimColor }: { lineIndex: number; color: string; dimColor: string }) {
+function MiniGrid({ lineIndex, color, dimColor }: Readonly<{ lineIndex: number; color: string; dimColor: string }>) {
   const payline = PAYLINES[lineIndex];
   return (
     <View style={{ flexDirection: 'row', gap: GAP }}>
       {payline.map((activeRow, reel) => (
-        <View key={reel} style={{ gap: GAP }}>
+        <View key={`col-${reel}`} style={{ gap: GAP }}>
           {[0, 1, 2].map((row) => (
             <View
-              key={row}
+              key={`row-${row}`}
               style={{
                 width: CELL,
                 height: CELL,
@@ -39,7 +39,7 @@ interface PayLinesProps {
   collapsible?: boolean;
 }
 
-export default function PayLines({ collapsible = true }: PayLinesProps) {
+export default function PayLines({ collapsible = true }: Readonly<PayLinesProps>) {
   const c = useColors();
   const [open, setOpen] = useState(false);
   const height = useSharedValue(0);

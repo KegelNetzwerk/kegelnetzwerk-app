@@ -18,7 +18,8 @@ import SlotGuideModal from '../../src/components/slot/SlotGuideModal';
 import DoubleOrNothingModal from '../../src/components/slot/DoubleOrNothingModal';
 import ToastStack from '../../src/components/Toast';
 import { useToast } from '../../src/hooks/useToast';
-import { LINE_OPTIONS, BET_OPTIONS, SYMBOLS, type BetOption } from '../../src/utils/slotLogic';
+import { LINE_OPTIONS, BET_OPTIONS, SYMBOLS } from '../../src/utils/slotLogic';
+import { secureRandom } from '../../src/utils/random';
 
 const NUM_REELS = 5;
 
@@ -59,6 +60,37 @@ export default function SlotMachineScreen() {
 
 // ── Game component ────────────────────────────────────────────────────────────
 
+function renderSpinContent(
+  isSpinning: boolean,
+  isFeature: boolean,
+  spinDisabled: boolean,
+  t: (key: string) => string,
+  textMuted: string,
+) {
+  const textColor = spinDisabled ? textMuted : '#fff';
+  if (isSpinning) return <ActivityIndicator color={textColor} />;
+  if (isFeature) {
+    return (
+      <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 20, color: textColor, letterSpacing: 2 }}>
+        {t('slotMachine.spin')} 🎰
+      </Text>
+    );
+  }
+  return (
+    <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: textColor, letterSpacing: 1 }}>
+      {t('slotMachine.spin')}
+    </Text>
+  );
+}
+
+function HeaderSettingsButton({ onPress }: Readonly<{ onPress: () => void }>) {
+  return (
+    <TouchableOpacity onPress={onPress} style={{ marginRight: 16, padding: 4 }}>
+      <Settings size={20} color="#fff" />
+    </TouchableOpacity>
+  );
+}
+
 function VolumeSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const c = useColors();
   const THUMB = 22;
@@ -66,7 +98,7 @@ function VolumeSlider({ value, onChange }: { value: number; onChange: (v: number
 
   const apply = (x: number) => {
     if (!trackW) return;
-    onChange(parseFloat(Math.max(0, Math.min(1, x / trackW)).toFixed(2)));
+    onChange(Number.parseFloat(Math.max(0, Math.min(1, x / trackW)).toFixed(2)));
   };
 
   return (
@@ -127,11 +159,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={() => setSettingsVisible(true)} style={{ marginRight: 16, padding: 4 }}>
-          <Settings size={20} color="#fff" />
-        </TouchableOpacity>
-      ),
+      headerRight: () => <HeaderSettingsButton onPress={() => setSettingsVisible(true)} />,
     });
   }, [navigation, c.primaryFg]);
 
@@ -183,14 +211,14 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
   const handleCoinFlip = useCallback(() => {
     if (coinFlipping || donResult === 'lose' || donFlips >= 5) return;
     const startWin = donWinRef.current;
-    const duration = 3000 + Math.random() * 2000; // 3–5 seconds
+    const duration = 3000 + secureRandom() * 2000; // 3–5 seconds
     setDonFlipDuration(duration);
     setCoinFlipping(true);
     // Play coin_flip sound on every full rotation (240 ms cycle)
     const flipInterval = setInterval(() => sounds.play('coin_flip'), 240);
     setTimeout(() => {
       clearInterval(flipInterval);
-      const won = Math.random() < 0.5;
+      const won = secureRandom() < 0.5;
       setCoinFlipping(false);
       setDonFlips((f) => f + 1);
       if (won) {
@@ -319,34 +347,38 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
       const EXPANSION_START = 3700 + extraWait;
       const STAGGER = 300;
       for (let i = 0; i < NUM_REELS; i++) {
-        if (!slot.originalReels[i].some((s) => s === sym)) continue;
+        if (!slot.originalReels[i].includes(sym)) continue;
         timers.push(setTimeout(() => {
           setExpandTriggers((prev) => { const n = [...prev]; n[i]++; return n; });
         }, EXPANSION_START + i * STAGGER));
       }
       const switchAt = EXPANSION_START + (NUM_REELS - 1) * STAGGER + 500;
-      timers.push(setTimeout(() => { setHighlightEnabled(false); setUseExpandedWins(true); }, switchAt));
-      timers.push(setTimeout(() => setHighlightEnabled(true), switchAt + 50));
-      timers.push(setTimeout(() => setWinVisible(true), switchAt + 300));
-      timers.push(setTimeout(() => {
-        slot.readySpin();
-        if (featureSummaryRef.current) {
-          cyclingGenRef.current++;
-          setCyclingIndex(-1);
-          setSummaryVisible(true);
-        }
-      }, switchAt + 500 + summaryDelay));
+      timers.push(
+        setTimeout(() => { setHighlightEnabled(false); setUseExpandedWins(true); }, switchAt),
+        setTimeout(() => setHighlightEnabled(true), switchAt + 50),
+        setTimeout(() => setWinVisible(true), switchAt + 300),
+        setTimeout(() => {
+          slot.readySpin();
+          if (featureSummaryRef.current) {
+            cyclingGenRef.current++;
+            setCyclingIndex(-1);
+            setSummaryVisible(true);
+          }
+        }, switchAt + 500 + summaryDelay),
+      );
     } else if (hasWin || hasFeature) {
       // Win or feature modal pending — show win display then re-enable
-      timers.push(setTimeout(() => setWinVisible(true), 3700 + extraWait));
-      timers.push(setTimeout(() => {
-        slot.readySpin();
-        if (featureSummaryRef.current) {
-          cyclingGenRef.current++;
-          setCyclingIndex(-1);
-          setSummaryVisible(true);
-        }
-      }, 4000 + extraWait + summaryDelay));
+      timers.push(
+        setTimeout(() => setWinVisible(true), 3700 + extraWait),
+        setTimeout(() => {
+          slot.readySpin();
+          if (featureSummaryRef.current) {
+            cyclingGenRef.current++;
+            setCyclingIndex(-1);
+            setSummaryVisible(true);
+          }
+        }, 4000 + extraWait + summaryDelay),
+      );
     }
 
     return () => timers.forEach(clearTimeout);
@@ -535,7 +567,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
               cellHeight={cellHeight}
               expandTrigger={expandTriggers[i]}
               expandToSymbol={slot.expandingSymbol}
-              bookHighlight={bookHighlightEnabled && slot.originalReels[i].some((s) => s === 'book')}
+              bookHighlight={bookHighlightEnabled && slot.originalReels[i].includes('book')}
               stopDelay={bookCountFirst3 >= 2 && (i === 3 || i === 4)
                 ? STOP_DELAY[i] + (i === 3 ? 2000 : 4000)
                 : undefined}
@@ -576,7 +608,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
           <TouchableOpacity
             disabled={spinDisabled || isFeature}
             onPress={() => {
-              const idx = LINE_OPTIONS.findIndex((v) => v === slot.activeLines);
+              const idx = LINE_OPTIONS.indexOf(slot.activeLines);
               slot.setActiveLines(LINE_OPTIONS[(idx + 1) % LINE_OPTIONS.length]);
               cyclingGenRef.current++;
               setCyclingIndex(-1);
@@ -598,7 +630,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
           <TouchableOpacity
             disabled={spinDisabled || isFeature}
             onPress={() => {
-              const idx = BET_OPTIONS.findIndex((v) => v === slot.betPerLine);
+              const idx = BET_OPTIONS.indexOf(slot.betPerLine);
               slot.setBetPerLine(BET_OPTIONS[(idx + 1) % BET_OPTIONS.length]);
               cyclingGenRef.current++;
               setCyclingIndex(-1);
@@ -660,17 +692,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
             }}
             activeOpacity={0.8}
           >
-            {slot.isSpinning ? (
-              <ActivityIndicator color={spinDisabled ? c.textMuted : '#fff'} />
-            ) : isFeature ? (
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 20, color: spinDisabled ? c.textMuted : '#fff', letterSpacing: 2 }}>
-                {t('slotMachine.spin')} 🎰
-              </Text>
-            ) : (
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 18, color: spinDisabled ? c.textMuted : '#fff', letterSpacing: 1 }}>
-                {t('slotMachine.spin')}
-              </Text>
-            )}
+            {renderSpinContent(slot.isSpinning, isFeature, spinDisabled, t, c.textMuted)}
           </TouchableOpacity>
         </View>
         {/* DEV: trigger free spins without spinning */}

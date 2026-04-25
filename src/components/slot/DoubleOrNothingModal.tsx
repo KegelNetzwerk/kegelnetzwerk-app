@@ -22,9 +22,68 @@ interface Props {
   onClose: () => void;
 }
 
+function getCoinColor(face: 'win' | 'lose' | 'neutral'): string {
+  if (face === 'win') return GOLD;
+  if (face === 'lose') return SILVER;
+  return '#aab4c0';
+}
+
+function getCoinLabel(face: 'win' | 'lose' | 'neutral'): string {
+  if (face === 'win') return '2×';
+  if (face === 'lose') return '0';
+  return '?';
+}
+
+function StatusContent({
+  result, flipsUsed, currentWin, textMuted,
+}: Readonly<{ result: 'win' | 'lose' | null; flipsUsed: number; currentWin: number; textMuted: string }>) {
+  const { t } = useTranslation();
+  if (result === 'lose') {
+    return (
+      <View style={{ alignItems: 'center', gap: 7 }}>
+        <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#ef4444' }}>
+          {t('slotMachine.double.lost')}
+        </Text>
+        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: textMuted }}>
+          {t('slotMachine.double.tapToClose')}
+        </Text>
+      </View>
+    );
+  }
+  if (result === 'win' && flipsUsed >= MAX_FLIPS) {
+    return (
+      <View style={{ alignItems: 'center', gap: 7 }}>
+        <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#22c55e' }}>
+          {t('slotMachine.double.won', { win: currentWin })}
+        </Text>
+        <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: textMuted }}>
+          {t('slotMachine.double.maxFlipsReached')}
+        </Text>
+      </View>
+    );
+  }
+  if (result === 'win') {
+    return (
+      <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#22c55e' }}>
+        {t('slotMachine.double.won', { win: currentWin })}
+      </Text>
+    );
+  }
+  return (
+    <View style={{ alignItems: 'center', gap: 7 }}>
+      <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: textMuted }}>
+        {t('slotMachine.double.pressToFlip')}
+      </Text>
+      <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: textMuted }}>
+        {t('slotMachine.double.closeHint')}
+      </Text>
+    </View>
+  );
+}
+
 export default function DoubleOrNothingOverlay({
   visible, flipsUsed, currentWin, result, flipping, flipDuration, onClose,
-}: Props) {
+}: Readonly<Props>) {
   const { t } = useTranslation();
   const c = useColors();
 
@@ -54,12 +113,29 @@ export default function DoubleOrNothingOverlay({
     bounceLoopRef.current = null;
   }
 
+  function runFlipCycle(startTime: number, totalMs: number) {
+    if (!animRunning.current) return;
+    const progress = Math.min((Date.now() - startTime) / totalMs, 1);
+    const halfMs = HALF_CYCLE_MIN_MS + (HALF_CYCLE_MAX_MS - HALF_CYCLE_MIN_MS) * progress;
+
+    const anim = Animated.sequence([
+      Animated.timing(coinScale, { toValue: 0, duration: halfMs, easing: Easing.linear, useNativeDriver: true }),
+      Animated.timing(coinScale, { toValue: 1, duration: halfMs, easing: Easing.linear, useNativeDriver: true }),
+    ]);
+    currentFlipRef.current = anim;
+    anim.start(({ finished }) => {
+      if (finished && animRunning.current) {
+        setCoinFace((f) => (f === 'win' ? 'lose' : 'win'));
+        runFlipCycle(startTime, totalMs);
+      }
+    });
+  }
+
   function startFlipAnimation(totalMs: number) {
     animRunning.current = true;
     const startTime = Date.now();
     setCoinFace('win');
 
-    // Bounce loop — independent of flip cycle
     bounceLoopRef.current = Animated.loop(
       Animated.sequence([
         Animated.timing(coinBounce, { toValue: -16, duration: 220, easing: Easing.out(Easing.quad), useNativeDriver: true }),
@@ -67,26 +143,7 @@ export default function DoubleOrNothingOverlay({
       ]),
     );
     bounceLoopRef.current.start();
-
-    function doFlipCycle() {
-      if (!animRunning.current) return;
-      const progress = Math.min((Date.now() - startTime) / totalMs, 1);
-      const halfMs = HALF_CYCLE_MIN_MS + (HALF_CYCLE_MAX_MS - HALF_CYCLE_MIN_MS) * progress;
-
-      const anim = Animated.sequence([
-        Animated.timing(coinScale, { toValue: 0, duration: halfMs, easing: Easing.linear, useNativeDriver: true }),
-        Animated.timing(coinScale, { toValue: 1, duration: halfMs, easing: Easing.linear, useNativeDriver: true }),
-      ]);
-      currentFlipRef.current = anim;
-      anim.start(({ finished }) => {
-        if (finished && animRunning.current) {
-          setCoinFace((f) => (f === 'win' ? 'lose' : 'win'));
-          doFlipCycle();
-        }
-      });
-    }
-
-    doFlipCycle();
+    runFlipCycle(startTime, totalMs);
   }
 
   useEffect(() => {
@@ -120,8 +177,8 @@ export default function DoubleOrNothingOverlay({
     else setCoinFace('neutral');
   }, [result]);
 
-  const coinColor = coinFace === 'win' ? GOLD : coinFace === 'lose' ? SILVER : '#aab4c0';
-  const coinLabel = coinFace === 'win' ? '2×' : coinFace === 'lose' ? '0' : '?';
+  const coinColor = getCoinColor(coinFace);
+  const coinLabel = getCoinLabel(coinFace);
 
   if (!visible) return null;
 
@@ -191,7 +248,7 @@ export default function DoubleOrNothingOverlay({
           <View style={{ flexDirection: 'row', gap: Math.round(18 * scale) }}>
             {Array.from({ length: MAX_FLIPS }, (_, i) => (
               <View
-                key={i}
+                key={`dot-${i}`}
                 style={{
                   width: dotSize, height: dotSize, borderRadius: dotSize / 2,
                   backgroundColor: i < flipsUsed ? c.primaryFg : 'transparent',
@@ -202,38 +259,7 @@ export default function DoubleOrNothingOverlay({
           </View>
 
           {/* Status */}
-          {result === 'lose' ? (
-            <View style={{ alignItems: 'center', gap: 7 }}>
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#ef4444' }}>
-                {t('slotMachine.double.lost')}
-              </Text>
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: c.textMuted }}>
-                {t('slotMachine.double.tapToClose')}
-              </Text>
-            </View>
-          ) : result === 'win' && flipsUsed >= MAX_FLIPS ? (
-            <View style={{ alignItems: 'center', gap: 7 }}>
-              <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#22c55e' }}>
-                {t('slotMachine.double.won', { win: currentWin })}
-              </Text>
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 12, color: c.textMuted }}>
-                {t('slotMachine.double.maxFlipsReached')}
-              </Text>
-            </View>
-          ) : result === 'win' ? (
-            <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 14, color: '#22c55e' }}>
-              {t('slotMachine.double.won', { win: currentWin })}
-            </Text>
-          ) : (
-            <View style={{ alignItems: 'center', gap: 7 }}>
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: c.textMuted }}>
-                {t('slotMachine.double.pressToFlip')}
-              </Text>
-              <Text style={{ fontFamily: 'DMSans_400Regular', fontSize: 13, color: c.textMuted }}>
-                {t('slotMachine.double.closeHint')}
-              </Text>
-            </View>
-          )}
+          <StatusContent result={result} flipsUsed={flipsUsed} currentWin={currentWin} textMuted={c.textMuted} />
         </View>
       </TouchableOpacity>
     </TouchableOpacity>

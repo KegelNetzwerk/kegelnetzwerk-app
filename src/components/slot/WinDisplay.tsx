@@ -20,7 +20,7 @@ interface WinDisplayProps {
   featureWinTotal?: number;
 }
 
-export default function WinDisplay({ win, isSpinning, winningLines, showWin, isFeature, featureWinTotal }: WinDisplayProps) {
+export default function WinDisplay({ win, isSpinning, winningLines, showWin, isFeature, featureWinTotal }: Readonly<WinDisplayProps>) {
   const c = useColors();
   const [displayed, setDisplayed] = useState(0);
   const scale = useSharedValue(1);

@@ -12,10 +12,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Heart, Dices } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
 import { useColors } from '../../src/hooks/useColors';
 import { fetchFinanceSummary } from '../../src/api/finance';
 import { postDonate } from '../../src/api/donations';

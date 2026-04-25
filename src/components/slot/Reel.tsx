@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { secureRandom } from '../../utils/random';
 import { View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -22,7 +23,7 @@ const SCROLL_DURATION = 100;
 const SCROLL_PAUSE = 20;
 
 function randomSymbol(): SymbolKey {
-  return SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)];
+  return SYMBOL_KEYS[Math.floor(secureRandom() * SYMBOL_KEYS.length)];
 }
 
 interface ReelProps {
@@ -51,7 +52,7 @@ export default function Reel({
   bookHighlight,
   stopDelay,
   onStopped,
-}: ReelProps) {
+}: Readonly<ReelProps>) {
   const c = useColors();
 
   // 4-cell vertical strip: indices [0,1,2] are visible, [3] is hidden below the clip.
@@ -263,7 +264,7 @@ export default function Reel({
             const isBook = row < 3 && sym === 'book' && !!bookHighlight && !isSpinning;
             return (
               <View
-                key={row}
+                key={`cell-${row}`}
                 style={{
                   height: cellHeight,
                   justifyContent: 'center',

@@ -40,7 +40,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function SlotGuideModal({ visible, onClose }: Props) {
+export default function SlotGuideModal({ visible, onClose }: Readonly<Props>) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const c = useColors();
@@ -114,9 +114,9 @@ export default function SlotGuideModal({ visible, onClose }: Props) {
               ))}
             </View>
             <View style={{ gap: 8 }}>
-              {SCATTER_GROUPS.map((group, groupIdx) => (
+              {SCATTER_GROUPS.map((group) => (
                 <View
-                  key={groupIdx}
+                  key={group[0]}
                   style={{ backgroundColor: c.surface, borderRadius: 8, borderWidth: 1, borderColor: c.divider, overflow: 'hidden' }}
                 >
                   {group.map((key, rowIdx) => {

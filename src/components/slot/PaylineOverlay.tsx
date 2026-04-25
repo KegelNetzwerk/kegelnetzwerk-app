@@ -48,7 +48,7 @@ interface Props {
   showCircles?: boolean;
 }
 
-export default function PaylineOverlay({ winningLines, cellHeight, visible, showCircles = false }: Props) {
+export default function PaylineOverlay({ winningLines, cellHeight, visible, showCircles = false }: Readonly<Props>) {
   const [containerWidth, setContainerWidth] = useState(0);
 
   const paylineWins = winningLines.filter((w) => w.lineIndex >= 0);
@@ -61,7 +61,9 @@ export default function PaylineOverlay({ winningLines, cellHeight, visible, show
   const xCenter = (reelIndex: number) =>
     REEL_PADDING + reelIndex * (reelWidth + REEL_GAP) + reelWidth / 2;
   const yCenter = (row: number, lineIndex: number) => {
-    const offset = lineIndex >= 7 ? 12 : lineIndex >= 5 ? 6 : 0;
+    let offset = 0;
+    if (lineIndex >= 7) offset = 12;
+    else if (lineIndex >= 5) offset = 6;
     return REEL_PADDING + row * cellHeight + cellHeight / 2 + offset;
   };
 

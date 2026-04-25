@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { secureRandom } from '../utils/random';
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import type { AudioPlayer } from 'expo-audio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -54,8 +55,8 @@ export function useSlotSounds() {
 
     AsyncStorage.getItem(VOLUME_KEY).then((stored) => {
       if (cancelled) return;
-      const v = stored !== null ? parseFloat(stored) : 1;
-      const initial = isNaN(v) ? 1 : v;
+      const v = stored !== null ? Number.parseFloat(stored) : 1;
+      const initial = Number.isNaN(v) ? 1 : v;
       setVolumeState(initial);
       volumeRef.current = initial;
 
@@ -117,7 +118,7 @@ export function useSlotSounds() {
 
       // Seek to a random position so the loop never sounds like it restarted
       const dur = player.duration;
-      const seekPos = dur > 0 ? Math.random() * dur : 0;
+      const seekPos = dur > 0 ? secureRandom() * dur : 0;
       await player.seekTo(seekPos);
 
       // Start silent then fade in over FADE_STEPS × FADE_STEP_MS ms

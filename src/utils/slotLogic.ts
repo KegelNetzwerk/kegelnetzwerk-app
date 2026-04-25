@@ -41,7 +41,6 @@ export interface WinningLine {
 const HIGH_VALUE_SYMBOLS = new Set<SymbolKey>(['pin', 'trophy', 'target', 'joker']);
 
 import { SCATTER_PAYOUTS } from '../config/scatterPayouts';
-export { SCATTER_PAYOUTS };
 
 export function evaluatePayline(
   reels: SymbolKey[][],
@@ -79,7 +78,7 @@ export function calculateExpandingSymbolScatterWin(
   activeLines: number,
 ): WinningLine | null {
   const scatterReels = reels
-    .map((reel, i) => (reel.some((s) => s === expandingSymbol) ? i : -1))
+    .map((reel, i) => (reel.includes(expandingSymbol) ? i : -1))
     .filter((i) => i !== -1);
   const count = scatterReels.length;
   const minCount = HIGH_VALUE_SYMBOLS.has(expandingSymbol) ? 2 : 3;

@@ -35,7 +35,7 @@ const SYMBOL_NAMES: Record<SymbolKey, string> = {
   dice:   'Erdbeere',
 };
 
-export default function PayTable({ collapsible = true }: PayTableProps) {
+export default function PayTable({ collapsible = true }: Readonly<PayTableProps>) {
   const c = useColors();
   const [open, setOpen] = useState(false);
   const height = useSharedValue(0);
@@ -68,11 +68,11 @@ export default function PayTable({ collapsible = true }: PayTableProps) {
           </View>
 
           <View style={{ gap: 8 }}>
-            {GROUPS.map((group, groupIdx) => {
+            {GROUPS.map((group) => {
               const isWildGroup = group.includes('book');
               return (
                 <View
-                  key={groupIdx}
+                  key={group[0]}
                   style={{
                     backgroundColor: isWildGroup ? c.primaryFg + '12' : c.surface,
                     borderRadius: 8,
@@ -104,7 +104,7 @@ export default function PayTable({ collapsible = true }: PayTableProps) {
                         </View>
                         {sym.payouts.map((p, i) => (
                           <Text
-                            key={i}
+                            key={`payout-${i}`}
                             style={{
                               flex: 1,
                               fontFamily: 'DMSans_600SemiBold',

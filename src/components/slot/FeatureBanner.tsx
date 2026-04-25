@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { secureRandom } from '../../utils/random';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -19,7 +20,7 @@ interface FeatureTriggerModalProps {
 const CYCLE_DURATION = 3000;
 const CYCLE_INTERVAL = 120;
 
-export function FeatureTriggerModal({ visible, expandingSymbol, onDismiss }: FeatureTriggerModalProps) {
+export function FeatureTriggerModal({ visible, expandingSymbol, onDismiss }: Readonly<FeatureTriggerModalProps>) {
   const c = useColors();
   const glow = useSharedValue(1);
   const [displayedSymbol, setDisplayedSymbol] = useState<SymbolKey | null>(null);
@@ -43,7 +44,7 @@ export function FeatureTriggerModal({ visible, expandingSymbol, onDismiss }: Fea
     );
 
     const intervalId = setInterval(() => {
-      setDisplayedSymbol(SYMBOL_KEYS[Math.floor(Math.random() * SYMBOL_KEYS.length)]);
+      setDisplayedSymbol(SYMBOL_KEYS[Math.floor(secureRandom() * SYMBOL_KEYS.length)]);
     }, CYCLE_INTERVAL);
 
     const timeoutId = setTimeout(() => {
@@ -136,7 +137,7 @@ interface FeatureSummaryModalProps {
   onDismiss: () => void;
 }
 
-export function FeatureSummaryModal({ visible, totalWon, onDismiss }: FeatureSummaryModalProps) {
+export function FeatureSummaryModal({ visible, totalWon, onDismiss }: Readonly<FeatureSummaryModalProps>) {
   const c = useColors();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
@@ -181,7 +182,7 @@ interface FeatureStatusBarProps {
   expandingSymbol: SymbolKey | null;
 }
 
-export function FeatureStatusBar({ spinsLeft, expandingSymbol }: FeatureStatusBarProps) {
+export function FeatureStatusBar({ spinsLeft, expandingSymbol }: Readonly<FeatureStatusBarProps>) {
   const c = useColors();
   return (
     <View

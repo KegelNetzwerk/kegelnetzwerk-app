@@ -4,7 +4,6 @@ import {
   countScatters,
   isFeatureTriggered,
   getWinningCells,
-  PAYLINES,
   type SymbolKey,
 } from '../utils/slotLogic';
 

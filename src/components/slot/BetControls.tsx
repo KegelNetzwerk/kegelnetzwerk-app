@@ -22,7 +22,7 @@ export default function BetControls({
   isFeature,
   onLinesChange,
   onBetChange,
-}: BetControlsProps) {
+}: Readonly<BetControlsProps>) {
   const c = useColors();
 
   return (
