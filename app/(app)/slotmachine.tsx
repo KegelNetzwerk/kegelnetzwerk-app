@@ -42,7 +42,7 @@ export default function SlotMachineScreen() {
 
   useEffect(() => {
     fetchFinanceSummary()
-      .then((d) => setBalance(d.kncBalance))
+      .then((d) => setBalance(d.kncBalance ?? 0))
       .catch(() => setBalance(0));
   }, []);
 
@@ -237,7 +237,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
   }, [coinFlipping, donResult, donFlips, sounds]);
 
   const isFeature = slot.featureSpinsLeft > 0;
-  const insufficientBalance = !isFeature && (Number.isNaN(slot.kncBalance) || slot.kncBalance < slot.totalBet);
+  const insufficientBalance = !isFeature && (slot.kncBalance == null || Number.isNaN(slot.kncBalance) || slot.kncBalance < slot.totalBet);
   const spinDisabled = !slot.canSpin || insufficientBalance;
 
   const [highlightEnabled, setHighlightEnabled] = useState(false);
@@ -329,9 +329,10 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
       } else if (slot.lastWin > 0) {
         sounds.play('win_small');
       }
-      // No win, no feature, no expansion — nothing left to animate, re-enable immediately
+      // No win, no feature, no expansion — nothing left to animate, re-enable immediately.
+      // Skip if balance is NaN (spin failed due to comms error — screen remount will restore balance).
       if (!hasWin && !hasFeature && !hasExpansion) {
-        slot.readySpin();
+        if (!Number.isNaN(slot.kncBalance)) slot.readySpin();
         if (featureSummaryRef.current) setSummaryVisible(true);
       }
     }, 2500 + extraWait));
@@ -477,7 +478,7 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
               {t('slotMachine.balance')}
             </Text>
             <Text style={{ fontFamily: 'DMSans_700Bold', fontSize: 16, color: c.text }}>
-              {displayedBalance}{' '}<Text style={{ color: K_COLOR }}>K</Text>
+              {(displayedBalance == null || Number.isNaN(displayedBalance)) ? 0 : displayedBalance}{' '}<Text style={{ color: K_COLOR }}>K</Text>
             </Text>
           </View>
 

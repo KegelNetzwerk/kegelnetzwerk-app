@@ -211,7 +211,7 @@ export function useSlot(initialKncBalance: number): SlotState {
       }
     } catch {
       setError('api_error');
-      setCanSpin(true); // re-enable immediately on error; success path is handled by screen after animations
+      setKncBalance(NaN); // balance unknown — button stays disabled until screen remounts with a fresh balance
     } finally {
       setIsSpinning(false);
     }
