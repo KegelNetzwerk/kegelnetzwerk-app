@@ -237,7 +237,8 @@ function SlotGame({ initialBalance }: { initialBalance: number }) {
   }, [coinFlipping, donResult, donFlips, sounds]);
 
   const isFeature = slot.featureSpinsLeft > 0;
-  const spinDisabled = !slot.canSpin;
+  const insufficientBalance = !isFeature && (Number.isNaN(slot.kncBalance) || slot.kncBalance < slot.totalBet);
+  const spinDisabled = !slot.canSpin || insufficientBalance;
 
   const [highlightEnabled, setHighlightEnabled] = useState(false);
   const [showPaylinePreview, setShowPaylinePreview] = useState(false);
